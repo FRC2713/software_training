@@ -135,6 +135,75 @@
   color: var(--accent);
 }
 
+.blk-input-node {
+  border-style: dashed;
+  border-color: var(--accent-border);
+}
+
+/* ---- Multi-input blocks (compare / if / loop / call) --------------------- */
+
+.blk-multi {
+  padding: 0;
+  min-width: 104px;
+  align-items: stretch;
+  gap: 0;
+}
+
+.blk-title {
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 10px;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+}
+
+.blk-multi-shown {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.blk-row {
+  display: flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 12px;
+}
+
+.blk-row-label {
+  font-size: 12px;
+  color: var(--text);
+}
+
+/* ---- Function definition ("inside the block") view ----------------------- */
+
+.fn-def {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--code-bg);
+}
+
+.fn-def-label {
+  padding: 6px 12px;
+  font-size: 13px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+
+.fn-def-label strong {
+  font-family: var(--mono);
+  color: var(--text-h);
+}
+
+.fn-def-canvas {
+  height: 150px;
+}
+
 /* ---- React Flow theming -------------------------------------------------- */
 
 .react-flow__handle {

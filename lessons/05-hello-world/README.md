@@ -6,6 +6,12 @@ order: 5
 
 # What is a program?
 
+You've already been building programs — as flowcharts of blocks. Everything you
+did there carries over: doing steps in order (lesson 1), making decisions
+(lesson 2), repeating steps (lesson 3), and packaging steps into reusable pieces
+(lesson 4). From here on we write those same ideas as **text** instead of wiring
+boxes together. The concepts don't change; only the notation does.
+
 A **program** is just a list of instructions, written in a language a computer
 can follow exactly, step by step, in order.
 

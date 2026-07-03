@@ -15,7 +15,7 @@ A good way to picture this is a **flowchart** — boxes joined by arrows. Each b
 does one small thing, and the arrows show what feeds into what. The computer
 follows the arrows.
 
-The block editor on the right is exactly that: a little flowchart that does
+The block editor here is exactly that: a little flowchart that does
 math. Read it from left to right:
 
 - The **number** blocks hold values.
@@ -43,7 +43,7 @@ That waiting is why order matters, and it's the same reason the lines of a real
 program run top to bottom: later steps often depend on what earlier steps
 produced.
 
-Now make it your own. The number blocks on the right are **editable** this
+Now make it your own. The number blocks in the editor are **editable** this
 time — click into one and change its value. Before you press Run, try to predict
 the new answer in your head. Then run it and check whether the value flowing
 into the result block matches what you expected.

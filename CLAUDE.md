@@ -24,6 +24,10 @@ npm run preview # preview the production build
 
 There is no test suite currently configured.
 
+Adding or renaming a lesson folder changes what `import.meta.glob` matches in
+`site/src/lib/lessons.ts`; a running dev server won't pick up a brand-new lesson
+folder until it's restarted.
+
 ## Repository layout
 
 - `lessons/` — lesson content. One folder per lesson, each containing a single
@@ -42,7 +46,8 @@ There is no test suite currently configured.
     visual block editor (`BlockPlayground`). The fence body is a directive
     (`preset: <name>`), parsed by `blocksPreset` and stripped from the prose by
     `stripBlocksFence`; presets are defined in `site/src/lib/blockPresets.ts`.
-    Used by lesson 1 to teach step-by-step evaluation before any Python.
+    Lessons 1–4 are the pre-Python block series (arithmetic → conditionals →
+    loops → functions); Python starts at lesson 5.
 - `site/` — the React + TypeScript + Vite app. See `site/README.md` for the
   Vite/Oxlint template notes.
 
@@ -61,6 +66,15 @@ There is no test suite currently configured.
   calls since stdout/stderr redirection isn't safe to run in parallel across
   code blocks. Also simplifies Pyodide tracebacks down to just the student's
   own `<exec>` frames plus the final error message.
+- **Block editor** (`site/src/components/BlockPlayground.tsx` +
+  `site/src/lib/blockPresets.ts`): an xyflow dataflow graph of custom node types
+  (number/op/compare/if/loop/call/result/input). A pure `valueOf` evaluator
+  resolves each node's value with memoization and cycle guarding; `stepOrder`
+  gives a dependency-first walk that "Run step by step" animates. `call` nodes
+  evaluate a named sub-graph (`FunctionDef`) via `callFunction`, and those
+  functions also render as read-only "inside the block" mini-canvases. Node
+  types and the evaluator must stay in sync — adding a block type means handling
+  it in `valueOf`, `stepOrder`, `nodeTypes`, and `createNode`.
 - **Routing** (`site/src/App.tsx`): `HashRouter` with two routes —
   `/lesson/:slug` and `/lesson/:slug/:page` — both handled by `LessonView`.
   Hash routing is required because the site is static-hosted on GitHub Pages.

@@ -16,20 +16,23 @@ import {
   type NodeProps,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import { getPreset } from '../lib/blockPresets'
+import { createNode, getPreset, type FunctionDef, type ToolbarItem } from '../lib/blockPresets'
 import './BlockPlayground.css'
 
-// The block editor is a tiny visual programming language: number blocks hold
-// values, operation blocks (+, −, ×) combine two inputs into one output, and a
-// single result block shows the final answer. "Run step by step" walks the
-// graph in dependency order so a student can watch the computer evaluate one
-// block at a time — the whole point of lesson 1.
+// The block editor is a tiny visual programming language that grows across the
+// first four lessons: number/operation blocks (sequences), compare + if blocks
+// (conditionals), a repeat block that iterates (loops), and call blocks backed
+// by reusable sub-flowcharts (functions). "Run step by step" walks the graph in
+// dependency order so a student watches the computer evaluate one block at a
+// time — the point of the whole series.
 
 export type Op = 'add' | 'sub' | 'mul'
+export type Cmp = 'gt' | 'lt' | 'eq'
 
-// A value can be a real number, or '?' once we hit a block whose inputs aren't
-// all connected yet (so the student sees exactly where the flow breaks).
-type Value = number | '?'
+// A value can be a number, a boolean (from a compare block), or '?' once we hit
+// a block whose inputs aren't all connected yet — so the student sees exactly
+// where the flow breaks.
+type Value = number | boolean | '?'
 
 const OP_SYMBOL: Record<Op, string> = { add: '+', sub: '−', mul: '×' }
 const OP_APPLY: Record<Op, (a: number, b: number) => number> = {
@@ -37,26 +40,46 @@ const OP_APPLY: Record<Op, (a: number, b: number) => number> = {
   sub: (a, b) => a - b,
   mul: (a, b) => a * b,
 }
+const CMP_SYMBOL: Record<Cmp, string> = { gt: '>', lt: '<', eq: '=' }
+const CMP_APPLY: Record<Cmp, (a: number, b: number) => boolean> = {
+  gt: (a, b) => a > b,
+  lt: (a, b) => a < b,
+  eq: (a, b) => a === b,
+}
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+const isNum = (v: Value): v is number => typeof v === 'number'
+const fmt = (v: Value | null): string =>
+  v === null || v === '?' ? '?' : typeof v === 'boolean' ? (v ? 'true' : 'false') : String(v)
 
-// ---- Node data -------------------------------------------------------------
+// ---- Custom nodes ----------------------------------------------------------
 
 interface BaseData {
   active: boolean
   shown: Value | null // the value revealed during a step-by-step run
   [key: string]: unknown
 }
-export interface NumberData extends BaseData {
+interface NumberData extends BaseData {
   value: number
   editable: boolean
 }
-export interface OpData extends BaseData {
+interface InputData extends BaseData {
+  label: string
+  value: number
+}
+interface OpData extends BaseData {
   op: Op
 }
-export type ResultData = BaseData
-
-// ---- Custom nodes ----------------------------------------------------------
+interface CmpData extends BaseData {
+  cmp: Cmp
+}
+interface LoopData extends BaseData {
+  op: 'add' | 'mul'
+}
+interface CallData extends BaseData {
+  fn: string
+  label: string
+}
 
 // Editing a value invalidates every revealed result, so we wipe them all and
 // let the student re-run to see the new answer flow through.
@@ -90,31 +113,146 @@ function NumberNode({ id, data }: NodeProps<Node<NumberData>>) {
   )
 }
 
+// A function's parameter, shown symbolically (x) inside its definition view.
+function InputNode({ data }: NodeProps<Node<InputData>>) {
+  return (
+    <div className="blk blk-input-node">
+      <span className="blk-tag">input</span>
+      <span className="blk-value">{data.label}</span>
+      <Handle type="source" position={Position.Right} />
+    </div>
+  )
+}
+
 function OpNode({ data }: NodeProps<Node<OpData>>) {
   return (
     <div className={`blk blk-op${data.active ? ' blk-active' : ''}`}>
       <Handle type="target" id="a" position={Position.Left} style={{ top: '32%' }} />
       <Handle type="target" id="b" position={Position.Left} style={{ top: '68%' }} />
       <span className="blk-op-symbol">{OP_SYMBOL[data.op]}</span>
-      {data.shown !== null && <span className="blk-op-result">= {data.shown}</span>}
+      {data.shown !== null && <span className="blk-op-result">= {fmt(data.shown)}</span>}
       <Handle type="source" position={Position.Right} />
     </div>
   )
 }
 
-function ResultNode({ data }: NodeProps<Node<ResultData>>) {
+// Shared layout for the multi-input blocks (compare, if, loop, call): a title
+// row plus one labelled row per input, with left handles pinned to each row's
+// centre so the wires line up with their labels.
+const TITLE_H = 24
+const ROW_H = 22
+function MultiNode({
+  title,
+  rows,
+  shown,
+  active,
+}: {
+  title: string
+  rows: { id: string; label: string }[]
+  shown: Value | null
+  active: boolean
+}) {
   return (
-    <div className={`blk blk-result${data.active ? ' blk-active' : ''}`}>
-      <Handle type="target" position={Position.Left} />
-      <span className="blk-tag">result</span>
-      <span className="blk-result-value">{data.shown === null ? '?' : data.shown}</span>
+    <div className={`blk blk-multi${active ? ' blk-active' : ''}`}>
+      <div className="blk-title">
+        {title}
+        {shown !== null && <span className="blk-multi-shown">{fmt(shown)}</span>}
+      </div>
+      {rows.map((row, i) => (
+        <div className="blk-row" key={row.id}>
+          <Handle
+            type="target"
+            id={row.id}
+            position={Position.Left}
+            style={{ top: TITLE_H + ROW_H * i + ROW_H / 2 }}
+          />
+          <span className="blk-row-label">{row.label}</span>
+        </div>
+      ))}
+      <Handle type="source" position={Position.Right} style={{ top: TITLE_H + (ROW_H * rows.length) / 2 }} />
     </div>
   )
 }
 
-const nodeTypes = { number: NumberNode, op: OpNode, result: ResultNode }
+function CompareNode({ data }: NodeProps<Node<CmpData>>) {
+  return (
+    <MultiNode
+      title={CMP_SYMBOL[data.cmp]}
+      rows={[
+        { id: 'a', label: 'a' },
+        { id: 'b', label: 'b' },
+      ]}
+      shown={data.shown}
+      active={data.active}
+    />
+  )
+}
+
+function IfNode({ data }: NodeProps<Node<BaseData>>) {
+  return (
+    <MultiNode
+      title="if"
+      rows={[
+        { id: 'when', label: 'when' },
+        { id: 'yes', label: '✓ then' },
+        { id: 'no', label: '✗ else' },
+      ]}
+      shown={data.shown}
+      active={data.active}
+    />
+  )
+}
+
+function LoopNode({ data }: NodeProps<Node<LoopData>>) {
+  return (
+    <MultiNode
+      title={data.op === 'add' ? 'repeat +' : 'repeat ×'}
+      rows={[
+        { id: 'start', label: 'start' },
+        { id: 'count', label: 'times' },
+        { id: 'step', label: 'by' },
+      ]}
+      shown={data.shown}
+      active={data.active}
+    />
+  )
+}
+
+function CallNode({ data }: NodeProps<Node<CallData>>) {
+  return (
+    <MultiNode
+      title={data.label}
+      rows={[{ id: 'x', label: 'x' }]}
+      shown={data.shown}
+      active={data.active}
+    />
+  )
+}
+
+function ResultNode({ data }: NodeProps<Node<BaseData>>) {
+  return (
+    <div className={`blk blk-result${data.active ? ' blk-active' : ''}`}>
+      <Handle type="target" position={Position.Left} />
+      <span className="blk-tag">result</span>
+      <span className="blk-result-value">{fmt(data.shown)}</span>
+    </div>
+  )
+}
+
+const nodeTypes = {
+  number: NumberNode,
+  input: InputNode,
+  op: OpNode,
+  compare: CompareNode,
+  if: IfNode,
+  loop: LoopNode,
+  call: CallNode,
+  result: ResultNode,
+}
 
 // ---- Evaluation ------------------------------------------------------------
+
+type FnMap = Record<string, FunctionDef>
 
 function sourceOf(edges: Edge[], target: string, handle: string | null): string | undefined {
   return edges.find((e) => e.target === target && (e.targetHandle ?? null) === handle)?.source
@@ -126,6 +264,7 @@ function valueOf(
   id: string,
   nodes: Node[],
   edges: Edge[],
+  fns: FnMap,
   memo: Map<string, Value>,
   stack: Set<string>,
 ): Value {
@@ -135,18 +274,39 @@ function valueOf(
   stack.add(id)
 
   const node = nodes.find((n) => n.id === id)
+  const input = (handle: string | null): Value => {
+    const src = sourceOf(edges, id, handle)
+    return src ? valueOf(src, nodes, edges, fns, memo, stack) : '?'
+  }
+
   let result: Value = '?'
-  if (node?.type === 'number') {
+  if (node?.type === 'number' || node?.type === 'input') {
     result = (node.data as NumberData).value
   } else if (node?.type === 'op') {
-    const aId = sourceOf(edges, id, 'a')
-    const bId = sourceOf(edges, id, 'b')
-    const a = aId ? valueOf(aId, nodes, edges, memo, stack) : '?'
-    const b = bId ? valueOf(bId, nodes, edges, memo, stack) : '?'
-    result = a === '?' || b === '?' ? '?' : OP_APPLY[(node.data as OpData).op](a, b)
+    const a = input('a')
+    const b = input('b')
+    if (isNum(a) && isNum(b)) result = OP_APPLY[(node.data as OpData).op](a, b)
+  } else if (node?.type === 'compare') {
+    const a = input('a')
+    const b = input('b')
+    if (isNum(a) && isNum(b)) result = CMP_APPLY[(node.data as CmpData).cmp](a, b)
+  } else if (node?.type === 'if') {
+    const cond = input('when')
+    if (cond === true) result = input('yes')
+    else if (cond === false) result = input('no')
+  } else if (node?.type === 'loop') {
+    const start = input('start')
+    const count = input('count')
+    const step = input('step')
+    if (isNum(start) && isNum(count) && isNum(step)) {
+      result = runLoop((node.data as LoopData).op, start, count, step)
+    }
+  } else if (node?.type === 'call') {
+    const x = input('x')
+    const fn = fns[(node.data as CallData).fn]
+    if (isNum(x) && fn) result = callFunction(fn, x, fns)
   } else if (node?.type === 'result') {
-    const src = sourceOf(edges, id, null)
-    result = src ? valueOf(src, nodes, edges, memo, stack) : '?'
+    result = input(null)
   }
 
   stack.delete(id)
@@ -154,7 +314,25 @@ function valueOf(
   return result
 }
 
-// Dependency-first ordering of the op/result blocks, so the animation reveals
+function runLoop(operation: 'add' | 'mul', start: number, count: number, step: number): number {
+  let acc = start
+  const iterations = Math.max(0, Math.min(Math.round(count), 1000))
+  for (let i = 0; i < iterations; i++) acc = operation === 'add' ? acc + step : acc * step
+  return acc
+}
+
+// Run a function's inner flowchart with `arg` plugged into its input node.
+function callFunction(fn: FunctionDef, arg: number, fns: FnMap): Value {
+  const nodes = fn.nodes.map((n) =>
+    n.type === 'input' ? { ...n, data: { ...n.data, value: arg } } : n,
+  )
+  const out = fn.nodes.find((n) => n.type === 'result')
+  return out ? valueOf(out.id, nodes, fn.edges, fns, new Map(), new Set()) : '?'
+}
+
+const COMPUTED = new Set(['op', 'compare', 'if', 'loop', 'call', 'result'])
+
+// Dependency-first ordering of the computed blocks, so the animation reveals
 // inputs before the blocks that consume them.
 function stepOrder(nodes: Node[], edges: Edge[]): string[] {
   const order: string[] = []
@@ -163,19 +341,56 @@ function stepOrder(nodes: Node[], edges: Edge[]): string[] {
     if (seen.has(id)) return
     seen.add(id)
     for (const e of edges.filter((e) => e.target === id)) visit(e.source)
-    const type = nodes.find((n) => n.id === id)?.type
-    if (type === 'op' || type === 'result') order.push(id)
+    if (COMPUTED.has(nodes.find((n) => n.id === id)?.type ?? '')) order.push(id)
   }
   const result = nodes.find((n) => n.type === 'result')
   if (result) visit(result.id)
-  for (const n of nodes) if (n.type === 'op') visit(n.id)
+  for (const n of nodes) if (COMPUTED.has(n.type ?? '')) visit(n.id)
   return order
+}
+
+// ---- Read-only "inside the block" view (lesson 4) --------------------------
+
+function FunctionDefView({ fn }: { fn: FunctionDef }) {
+  return (
+    <div className="fn-def">
+      <div className="fn-def-label">
+        Inside <strong>{fn.label}</strong>
+      </div>
+      <div className="fn-def-canvas">
+        <ReactFlowProvider>
+          <ReactFlow
+            nodes={fn.nodes}
+            edges={fn.edges}
+            nodeTypes={nodeTypes}
+            fitView
+            fitViewOptions={{ padding: 0.15 }}
+            nodesDraggable={false}
+            nodesConnectable={false}
+            elementsSelectable={false}
+            panOnDrag={false}
+            zoomOnScroll={false}
+            zoomOnPinch={false}
+            zoomOnDoubleClick={false}
+            colorMode="system"
+            proOptions={{ hideAttribution: true }}
+          >
+            <Background gap={16} />
+          </ReactFlow>
+        </ReactFlowProvider>
+      </div>
+    </div>
+  )
 }
 
 // ---- Playground ------------------------------------------------------------
 
 function Playground({ preset }: { preset: string }) {
   const config = useMemo(() => getPreset(preset), [preset])
+  const fns = useMemo<FnMap>(
+    () => Object.fromEntries((config.functions ?? []).map((f) => [f.name, f])),
+    [config],
+  )
   // Clone the preset so React Flow's in-place edits (dragging, connecting) never
   // touch the shared module-level constants — Reset relies on them staying
   // pristine to rebuild the starting graph.
@@ -203,24 +418,20 @@ function Playground({ preset }: { preset: string }) {
   )
 
   const addNode = useCallback(
-    (type: 'number' | 'op', op?: Op) => {
+    (item: ToolbarItem) => {
       const id = `n${nextId.current++}`
       const offset = nextId.current * 8
-      const data =
-        type === 'number'
-          ? { value: 0, editable: true, active: false, shown: null }
-          : { op: op!, active: false, shown: null }
       setNodes((nds) => [
         ...clearShownValues(nds),
-        { id, type, position: { x: 40 + offset, y: 40 + offset }, data } as Node,
+        createNode(item, id, { x: 40 + offset, y: 40 + offset }),
       ])
     },
     [setNodes],
   )
 
   // Reset means "start over": rebuild the preset's original blocks and wiring
-  // (undoing any the student added, moved, or edited), not just clear the
-  // last run's revealed values.
+  // (undoing any the student added, moved, or edited), not just clear the last
+  // run's revealed values.
   const reset = useCallback(() => {
     runToken.current++
     setRunning(false)
@@ -228,6 +439,12 @@ function Playground({ preset }: { preset: string }) {
     setNodes(structuredClone(config.nodes))
     setEdges(structuredClone(config.edges))
   }, [config, setEdges, setNodes])
+
+  const setShown = useCallback(
+    (id: string, value: Value) =>
+      setNodes((nds) => nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, shown: value } } : n))),
+    [setNodes],
+  )
 
   const run = useCallback(async () => {
     const token = ++runToken.current
@@ -240,15 +457,54 @@ function Playground({ preset }: { preset: string }) {
     const order = stepOrder(nodes, edges)
 
     for (const id of order) {
-      await sleep(750)
+      await sleep(700)
       if (token !== runToken.current) return
-      const value = valueOf(id, nodes, edges, memo, stack)
-      setNodes((nds) =>
-        nds.map((n) =>
-          n.id === id ? { ...n, data: { ...n.data, active: true, shown: value } } : { ...n, data: { ...n.data, active: false } },
-        ),
-      )
-      setEdges((eds) => eds.map((e) => ({ ...e, animated: e.target === id })))
+      const node = nodes.find((n) => n.id === id)
+      if (!node) continue
+
+      // Highlight this block and light up the wires feeding it. For an if-block
+      // only the condition wire and the branch actually taken light up, so the
+      // student sees the choice being made.
+      setNodes((nds) => nds.map((n) => ({ ...n, data: { ...n.data, active: n.id === id } })))
+      let live = (e: Edge) => e.target === id
+      if (node.type === 'if') {
+        const condSrc = sourceOf(edges, id, 'when')
+        const cond = condSrc ? valueOf(condSrc, nodes, edges, fns, memo, stack) : '?'
+        const taken = cond === true ? 'yes' : cond === false ? 'no' : null
+        live = (e) => e.target === id && (e.targetHandle === 'when' || e.targetHandle === taken)
+      }
+      setEdges((eds) => eds.map((e) => ({ ...e, animated: live(e) })))
+
+      if (node.type === 'loop') {
+        const at = (h: string) => {
+          const src = sourceOf(edges, id, h)
+          const v = src ? valueOf(src, nodes, edges, fns, memo, stack) : '?'
+          return isNum(v) ? v : null
+        }
+        const start = at('start')
+        const count = at('count')
+        const step = at('step')
+        if (start === null || count === null || step === null) {
+          setShown(id, '?')
+          memo.set(id, '?')
+        } else {
+          const operation = (node.data as LoopData).op
+          let acc = start
+          setShown(id, acc)
+          const iterations = Math.max(0, Math.min(Math.round(count), 12))
+          for (let i = 0; i < iterations; i++) {
+            await sleep(420)
+            if (token !== runToken.current) return
+            acc = operation === 'add' ? acc + step : acc * step
+            setShown(id, acc)
+          }
+          const exact = runLoop(operation, start, count, step)
+          if (exact !== acc) setShown(id, exact)
+          memo.set(id, exact)
+        }
+      } else {
+        setShown(id, valueOf(id, nodes, edges, fns, memo, stack))
+      }
     }
 
     await sleep(600)
@@ -256,24 +512,18 @@ function Playground({ preset }: { preset: string }) {
     setNodes((nds) => nds.map((n) => ({ ...n, data: { ...n.data, active: false } })))
     setEdges((eds) => eds.map((e) => ({ ...e, animated: false })))
     setRunning(false)
-  }, [nodes, edges, setEdges, setNodes])
+  }, [nodes, edges, fns, setEdges, setNodes, setShown])
 
   return (
     <div className="block-playground">
-      {config.toolbar && (
+      {config.functions?.map((fn) => <FunctionDefView key={fn.name} fn={fn} />)}
+      {config.toolbar.length > 0 && (
         <div className="block-toolbar">
-          <button type="button" onClick={() => addNode('number')}>
-            number
-          </button>
-          <button type="button" onClick={() => addNode('op', 'add')}>
-            +
-          </button>
-          <button type="button" onClick={() => addNode('op', 'sub')}>
-            −
-          </button>
-          <button type="button" onClick={() => addNode('op', 'mul')}>
-            ×
-          </button>
+          {config.toolbar.map((item) => (
+            <button key={item.kind} type="button" onClick={() => addNode(item)}>
+              {item.label}
+            </button>
+          ))}
         </div>
       )}
       <div className="block-canvas">

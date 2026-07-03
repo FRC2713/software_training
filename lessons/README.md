@@ -44,13 +44,17 @@ it's the exact content the [training site](../site) renders, page by page.
   there that's meant to be run; use ` ```text ` or plain prose for
   output samples or pseudocode.
 - **` ```blocks ` fences swap the Python playground for the visual block
-  editor** (drag-and-drop math flowcharts). The fence body is a directive, not
+  editor** (drag-and-drop flowcharts). The fence body is a directive, not
   content — it names a starter graph, e.g. `preset: sequence`, and never renders
-  in the prose. The available presets live in
-  [`site/src/lib/blockPresets.ts`](../site/src/lib/blockPresets.ts):
-  `sequence` (fixed, watch-only), `edit-values` (editable numbers), and
-  `build` (blank canvas with an add-a-block toolbar). A page has one playground:
-  a ` ```blocks ` fence takes precedence over any ` ```python ` on the page.
+  in the prose. Every preset lives in
+  [`site/src/lib/blockPresets.ts`](../site/src/lib/blockPresets.ts); they come in
+  a `-demo` / `-edit` / `-build` trio per concept (watch-only → editable →
+  free-build with a toolbar): `sequence`/`edit-values`/`build` (lesson 1,
+  arithmetic), `cond-*` (lesson 2, compare + if), `loop-*` (lesson 3, repeat),
+  `fn-*` (lesson 4, reusable call blocks with an "inside the block" view). A page
+  has one playground: a ` ```blocks ` fence takes precedence over any ` ```python `
+  on the page. To add a new concept, add a preset (and any new block type) rather
+  than inventing markdown syntax.
 - Keep the `goal` to one sentence. It's shown on the lesson card and at the top
   of the lesson — it should tell a student what they'll be able to do
   afterwards, not just what topic it covers.
