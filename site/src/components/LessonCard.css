@@ -1,0 +1,38 @@
+.lesson-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease;
+}
+
+.lesson-card:hover {
+  border-color: var(--accent-border);
+}
+
+.lesson-card-number {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.lesson-card-body h2 {
+  margin: 0 0 4px;
+  font-size: 18px;
+}
+
+.lesson-card-body p {
+  margin: 0;
+  font-size: 15px;
+}

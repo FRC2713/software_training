@@ -1,0 +1,41 @@
+.page-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 32px 0 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.page-nav button {
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text-h);
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-weight: 600;
+}
+
+.page-nav button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.page-nav-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.page-nav-dot {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--accent-border);
+  background: none;
+}
+
+.page-nav-dot-active {
+  background: var(--accent);
+}

@@ -1,0 +1,154 @@
+.block-playground {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.block-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.block-toolbar button {
+  min-width: 40px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+.block-toolbar button:hover {
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+
+.block-canvas {
+  height: 440px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--code-bg);
+}
+
+.block-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.block-run {
+  border: 1px solid var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--accent);
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-weight: 600;
+}
+
+.block-run:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.block-reset {
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text-h);
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-weight: 600;
+}
+
+/* ---- Blocks (nodes) ------------------------------------------------------ */
+
+.blk {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text-h);
+  font-family: var(--mono);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* The block the evaluator is currently computing, highlighted in team red. */
+.blk-active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.blk-tag {
+  font-family: var(--sans);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.blk-value {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.blk-input {
+  width: 64px;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--code-bg);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 18px;
+  text-align: center;
+}
+
+.blk-op {
+  min-width: 58px;
+}
+
+.blk-op-symbol {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.blk-op-result {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.blk-result {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.blk-result-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* ---- React Flow theming -------------------------------------------------- */
+
+.react-flow__handle {
+  width: 9px;
+  height: 9px;
+  background: var(--accent);
+  border: none;
+}
+
+.react-flow__edge-path {
+  stroke: var(--text);
+  stroke-width: 1.75;
+}
+
+.react-flow__edge.animated .react-flow__edge-path {
+  stroke: var(--accent);
+}
