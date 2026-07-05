@@ -6,6 +6,8 @@ import { blocksPreset, firstPythonSnippet, getLesson, nextLesson, stripBlocksFen
 import { PythonRunner } from '@/components/PythonRunner'
 import { CodeBlock } from '@/components/CodeBlock'
 import { BlockPlayground } from '@/components/BlockPlayground'
+import { StatePlayground } from '@/components/StatePlayground'
+import { isStatePreset } from '@/lib/statePresets'
 import { PageNav } from '@/components/PageNav'
 
 const PLACEHOLDER_CODE = '# Nothing to run on this page yet.\n# Try writing some Python of your own!'
@@ -78,7 +80,12 @@ export function LessonView() {
           </ReactMarkdown>
         </article>
         <div className="w-full min-w-0 flex-1 lg:sticky lg:top-20 lg:min-w-[320px]">
-          {preset ? (
+          {preset && isStatePreset(preset) ? (
+            <>
+              <h2 className="mb-3 text-base font-semibold text-primary">▶ State machine</h2>
+              <StatePlayground key={`${pageIndex}-${preset}`} preset={preset} />
+            </>
+          ) : preset ? (
             <>
               <h2 className="mb-3 text-base font-semibold text-primary">▶ Block editor</h2>
               <BlockPlayground key={`${pageIndex}-${preset}`} preset={preset} />

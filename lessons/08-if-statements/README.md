@@ -7,7 +7,7 @@ section: "Python Fundamentals"
 
 # The if block, in text
 
-Remember the **if** block from lesson 2? It asked a true/false question and then
+Remember the **if** block from [lesson 2](#/lesson/02-conditionals)? It asked a true/false question and then
 took one path or the other, always throwing one branch away. Python writes that
 same idea with the word **`if`**:
 
@@ -34,7 +34,7 @@ day" line always prints.
 
 # Both paths: else
 
-Lesson 2's `if` block always had *two* branches — a `✓ then` and a `✗ else`.
+[Lesson 2's](#/lesson/02-conditionals) `if` block always had *two* branches — a `✓ then` and a `✗ else`.
 Python spells the second one **`else`**:
 
 ```python
@@ -47,12 +47,12 @@ else:
 
 Exactly one of those two blocks runs, every time. If the question is true, you
 get the first; otherwise you get the second. The other is skipped — "the road
-not taken" from lesson 2, in text form.
+not taken" from [lesson 2](#/lesson/02-conditionals), in text form.
 
 One thing to watch closely: that's `>=` ("greater than or equal to"), and the
 "is it equal?" test is `==` with **two** equals signs. A single `=` means
-"store a value" (lesson 6), so Python uses `==` to *ask* about equality. Mixing
-them up is the code version of the `>` vs `≥` bug lesson 2 warned about.
+"store a value" ([lesson 6](#/lesson/06-variables)), so Python uses `==` to *ask* about equality. Mixing
+them up is the code version of the `>` vs `≥` bug [lesson 2](#/lesson/02-conditionals) warned about.
 
 Change `score` to `6`, then `5`, and run each time. Convince yourself `>= 6`
 lets a `6` pass but a `5` doesn't.
@@ -78,7 +78,7 @@ Python checks each question **top to bottom** and takes the **first** one that's
 true — then skips all the rest. That order matters: a score of `95` is also `>=
 80`, but because `>= 90` is checked first and wins, you never reach the B line.
 This is the same "inputs before the things that use them, one step at a time"
-discipline from lesson 1.
+discipline from [lesson 1](#/lesson/01-flowcharts).
 
 Run it, then change `score` to `85`, `72`, and `40` and run each time to see a
 different branch win. Then your challenge: build a program that sets a number in

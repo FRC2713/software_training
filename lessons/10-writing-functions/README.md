@@ -7,7 +7,7 @@ section: "Python Fundamentals"
 
 # Define a block of your own
 
-Lesson 4 gave you reusable blocks — a **double** block with a little flowchart
+[Lesson 4](#/lesson/04-functions) gave you reusable blocks — a **double** block with a little flowchart
 hidden inside, that you could drop in wherever you needed it. Now you'll build
 one yourself. In Python you create a reusable block with **`def`** (short for
 "define"):
@@ -30,11 +30,11 @@ Read it piece by piece:
 
 Defining a function doesn't run it; it just teaches Python the block exists. It
 only does its work when you *call* it. Run this, then change `5` and run again —
-same block, different input, just like lesson 4.
+same block, different input, just like [lesson 4](#/lesson/04-functions).
 
 # Define once, use many times
 
-The reason functions are worth it, same as lesson 4: **build it once, use it as
+The reason functions are worth it, same as [lesson 4](#/lesson/04-functions): **build it once, use it as
 often as you like.** Each call runs the same inner steps with whatever input you
 give it.
 
@@ -49,8 +49,8 @@ print(double(3) + double(4))
 
 The one `def` gets used four times over. That last line is worth pausing on:
 Python works out `double(3)` (→ `6`) and `double(4)` (→ `8`) **first**, then adds
-them to get `14` — inputs before the things that use them, the rule from the very
-first lesson.
+them to get `14` — inputs before the things that use them, the rule from [the very
+first lesson](#/lesson/01-flowcharts).
 
 The `x` is called a **parameter** — a placeholder that gets filled in with
 whatever value you pass when you call. `double(3)` fills `x` with `3` for that one
@@ -68,7 +68,7 @@ print(add(2, 3))
 
 # Order matters (again)
 
-Lesson 4 ended with the big idea that **order matters**: `add 1` then `double`
+[Lesson 4](#/lesson/04-functions) ended with the big idea that **order matters**: `add 1` then `double`
 gave a different answer than `double` then `add 1`. Let's prove it in code with
 two functions of your own:
 
@@ -86,7 +86,7 @@ print(add_one(double(4)))
 Trace the first line from the inside out: `add_one(4)` is `5`, then `double(5)`
 is `10`. The second line: `double(4)` is `8`, then `add_one(8)` is `9`. Same two
 blocks, same starting number, **different order, different answer** — exactly the
-lesson-4 result, now in text.
+[lesson-4](#/lesson/04-functions) result, now in text.
 
 Run it and confirm you get `10` then `9`.
 

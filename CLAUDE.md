@@ -46,8 +46,14 @@ folder until it's restarted.
     visual block editor (`BlockPlayground`). The fence body is a directive
     (`preset: <name>`), parsed by `blocksPreset` and stripped from the prose by
     `stripBlocksFence`; presets are defined in `site/src/lib/blockPresets.ts`.
+    Preset names defined in `site/src/lib/statePresets.ts` (the `sm-*` trio)
+    render the state-machine playground (`StatePlayground`) instead — same
+    fence, different renderer, chosen by `isStatePreset`.
     Lessons 1–4 are the pre-Python block series (arithmetic → conditionals →
-    loops → functions); Python starts at lesson 5.
+    loops → functions); Python starts at lesson 5; state machines start at
+    lesson 14.
+  - `lessons/parked/` holds withdrawn drafts. The site's glob only matches
+    `lessons/*/README.md`, so anything nested a level deeper never renders.
 - `site/` — the React + TypeScript + Vite app. See `site/README.md` for the
   Vite/Oxlint template notes.
 
@@ -75,6 +81,14 @@ folder until it's restarted.
   functions also render as read-only "inside the block" mini-canvases. Node
   types and the evaluator must stay in sync — adding a block type means handling
   it in `valueOf`, `stepOrder`, `nodeTypes`, and `createNode`.
+- **State-machine playground** (`site/src/components/StatePlayground.tsx` +
+  `site/src/lib/statePresets.ts`): a sibling to the block editor for the state
+  machine lessons (14+). Instead of evaluating a dataflow graph, the student
+  *drives* the machine: it sits in one active state and follows an
+  event-labelled transition when the matching event button is pressed;
+  unmatched events are reported as ignored. Presets come in the same
+  demo/edit/build arc (`sm-demo`, `sm-edit`, `sm-build`), with `buildable`
+  presets adding a toolbar to place states and draw labelled transitions.
 - **Routing** (`site/src/App.tsx`): `HashRouter` with two routes —
   `/lesson/:slug` and `/lesson/:slug/:page` — both handled by `LessonView`.
   Hash routing is required because the site is static-hosted on GitHub Pages.

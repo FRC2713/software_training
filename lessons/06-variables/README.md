@@ -7,7 +7,7 @@ section: "Python Fundamentals"
 
 # A name for a value
 
-Back in the very first lesson, every **number block** held a value, and arrows
+Back in [the very first lesson](#/lesson/01-flowcharts), every **number block** held a value, and arrows
 carried that value forward to the blocks that needed it. In Python we do the
 same thing with a **variable**: a name that stands for a value.
 
@@ -73,7 +73,7 @@ Read those last two carefully. `score = 10` throws away the old `0` and stores
 "gets set to," not "equals": the computer works out the right side first
 (`10 + 5 = 15`), then stores that back into `score`. This "take the value, change
 it, put it back" pattern is exactly the running total the **repeat** block kept
-in lesson 3 — a value that updates itself, one step at a time.
+in [lesson 3](#/lesson/03-loops) — a value that updates itself, one step at a time.
 
 Your turn: add a line that gives a `10` penalty (subtract, don't add), then
 print the score again. Predict the final number before you run it.

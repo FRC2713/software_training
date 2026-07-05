@@ -7,7 +7,7 @@ section: "Python Fundamentals"
 
 # Repeat, in text
 
-In lesson 3 the **repeat** block did a step over and over so you didn't have to
+In [lesson 3](#/lesson/03-loops) the **repeat** block did a step over and over so you didn't have to
 copy it out by hand. Python's version is the **`for` loop**:
 
 ```python
@@ -33,9 +33,9 @@ every pass, free of charge.
 
 # A running total
 
-The real power of lesson 3's repeat block was the **running total** — a value it
+The real power of [lesson 3's](#/lesson/03-loops) repeat block was the **running total** — a value it
 remembered and updated each time around. You build that yourself in a `for` loop
-by combining it with a variable (lesson 6):
+by combining it with a variable ([lesson 6](#/lesson/06-variables)):
 
 ```python
 total = 0

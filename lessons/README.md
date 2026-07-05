@@ -59,6 +59,17 @@ it's the exact content the [training site](../site) renders, page by page.
   has one playground: a ` ```blocks ` fence takes precedence over any ` ```python `
   on the page. To add a new concept, add a preset (and any new block type) rather
   than inventing markdown syntax.
+- **`sm-*` presets render the state-machine playground instead** — same
+  ` ```blocks ` fence, but preset names defined in
+  [`site/src/lib/statePresets.ts`](../site/src/lib/statePresets.ts) are routed to
+  `StatePlayground` (a drivable state diagram with event buttons) rather than the
+  dataflow block editor. They follow the same demo → edit → build arc:
+  `sm-demo` (traffic light, lesson 14), `sm-edit` (game-piece handler), and
+  `sm-build` (wire up a climber yourself).
 - Keep the `goal` to one sentence. It's shown on the lesson card and at the top
   of the lesson — it should tell a student what they'll be able to do
   afterwards, not just what topic it covers.
+- **`parked/` is invisible to the site.** The glob only matches
+  `lessons/*/README.md`, so anything nested one level deeper doesn't render.
+  Drafts we've pulled from the curriculum but want to keep live in
+  [`parked/`](parked/).

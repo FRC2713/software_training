@@ -55,7 +55,7 @@ print("Next year you will be", age + 1)
 ```
 
 Now `int(age)` turns the text `"24"` into the number `24`, we store it back
-(that reassignment trick from lesson 6), and the math works. Run it and confirm.
+(that reassignment trick from [lesson 6](#/lesson/06-variables)), and the math works. Run it and confirm.
 
 Conversion goes the other way too. `str(...)` turns a number *into* text, which
 you need when you want to glue a number onto a string:

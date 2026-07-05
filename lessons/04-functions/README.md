@@ -58,7 +58,7 @@ Your challenge: starting from the number `4`, build a program whose result is
 **Order matters** — and this is the whole lesson. `4` fed through *add 1 then
 double* gives `(4 + 1) × 2 = 10`. But *double then add 1* gives
 `4 × 2 + 1 = 9`. Same two blocks, different order, different answer — just like
-the very first lesson, where the computer had to do the inner step before the
+[the very first lesson](#/lesson/01-flowcharts), where the computer had to do the inner step before the
 outer one.
 
 Wire a block's output into the next block's `x` input to chain them, then send
