@@ -1,4 +1,4 @@
-import { lessons } from '@/lib/lessons'
+import { lessons, lessonSections } from '@/lib/lessons'
 import { LessonCard } from '@/components/LessonCard'
 
 export function LessonIndex() {
@@ -11,9 +11,18 @@ export function LessonIndex() {
           hands-on — build and run things right in the browser.
         </p>
       </header>
-      <div className="flex flex-col gap-3">
-        {lessons.map((lesson, i) => (
-          <LessonCard key={lesson.slug} lesson={lesson} index={i} />
+      <div className="flex flex-col gap-10">
+        {lessonSections.map((section) => (
+          <section key={section.title}>
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {section.title}
+            </h2>
+            <div className="flex flex-col gap-3">
+              {section.lessons.map((lesson) => (
+                <LessonCard key={lesson.slug} lesson={lesson} index={lessons.indexOf(lesson)} />
+              ))}
+            </div>
+          </section>
         ))}
       </div>
     </div>

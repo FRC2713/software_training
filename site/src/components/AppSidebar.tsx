@@ -11,7 +11,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/components/ui/sidebar'
-import { lessons } from '@/lib/lessons'
+import { lessons, lessonSections } from '@/lib/lessons'
 
 // The lesson titles already read "Lesson N: ..."; the sidebar shows its own
 // number badge, so strip the redundant prefix from the label.
@@ -27,7 +27,6 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Lessons</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -35,25 +34,34 @@ export function AppSidebar() {
                   <NavLink to="/">All lessons</NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              {lessons.map((lesson, i) => {
-                const to = `/lesson/${lesson.slug}`
-                const active = pathname === to || pathname.startsWith(`${to}/`)
-                return (
-                  <SidebarMenuItem key={lesson.slug}>
-                    <SidebarMenuButton asChild isActive={active}>
-                      <NavLink to={to}>
-                        <span className="w-5 shrink-0 text-right font-medium tabular-nums text-primary">
-                          {i + 1}
-                        </span>
-                        <span className="truncate">{shortTitle(lesson.title)}</span>
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        {lessonSections.map((section) => (
+          <SidebarGroup key={section.title}>
+            <SidebarGroupLabel>{section.title}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {section.lessons.map((lesson) => {
+                  const to = `/lesson/${lesson.slug}`
+                  const active = pathname === to || pathname.startsWith(`${to}/`)
+                  return (
+                    <SidebarMenuItem key={lesson.slug}>
+                      <SidebarMenuButton asChild isActive={active}>
+                        <NavLink to={to}>
+                          <span className="w-5 shrink-0 text-right font-medium tabular-nums text-primary">
+                            {lessons.indexOf(lesson) + 1}
+                          </span>
+                          <span className="truncate">{shortTitle(lesson.title)}</span>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
       <SidebarRail />
     </Sidebar>

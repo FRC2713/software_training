@@ -4,15 +4,27 @@ import type { Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { blocksPreset, firstPythonSnippet, getLesson, nextLesson, stripBlocksFence } from '@/lib/lessons'
 import { PythonRunner } from '@/components/PythonRunner'
+import { CodeBlock } from '@/components/CodeBlock'
 import { BlockPlayground } from '@/components/BlockPlayground'
 import { PageNav } from '@/components/PageNav'
 
 const PLACEHOLDER_CODE = '# Nothing to run on this page yet.\n# Try writing some Python of your own!'
 
-// The prose column shows code as plain, static text - the runnable version of
-// it lives in the playground panel instead, so there's one interactive copy.
+// Fenced code blocks in the prose render read-only through CodeMirror (same
+// syntax highlighting + line numbers as the playground); the runnable copy of
+// the first snippet still lives in the playground panel. Inline `code` stays as
+// a plain styled element. `pre` is a pass-through so CodeBlock owns its own
+// container instead of nesting inside a prose <pre>.
 const markdownComponents: Components = {
-  code: ({ className, children }) => <code className={className}>{children}</code>,
+  pre: ({ children }) => <>{children}</>,
+  code: ({ className, children }) => {
+    const language = /language-(\w+)/.exec(className ?? '')?.[1]
+    const text = String(children ?? '')
+    if (!language && !text.includes('\n')) {
+      return <code className={className}>{children}</code>
+    }
+    return <CodeBlock code={text.replace(/\n$/, '')} language={language} />
+  },
 }
 
 // Tailwind Typography, retuned to the FRC palette: brand-red links, no backtick

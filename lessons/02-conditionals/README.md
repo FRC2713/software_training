@@ -2,6 +2,7 @@
 title: "Lesson 2: Making decisions"
 goal: "Use a condition to make a program choose between two paths."
 order: 2
+section: "Programming with Blocks"
 ---
 
 # When programs choose

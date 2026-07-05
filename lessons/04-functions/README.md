@@ -2,6 +2,7 @@
 title: "Lesson 4: Reusable blocks"
 goal: "Package a flowchart into a named block you can reuse instead of rebuilding it."
 order: 4
+section: "Programming with Blocks"
 ---
 
 # A block with a flowchart inside

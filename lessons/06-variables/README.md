@@ -2,6 +2,7 @@
 title: "Lesson 6: Naming things"
 goal: "Store a value under a name so you can reuse it and change it in one place."
 order: 6
+section: "Python Fundamentals"
 ---
 
 # A name for a value

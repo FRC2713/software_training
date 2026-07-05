@@ -2,6 +2,7 @@
 title: "Lesson 7: Numbers and text"
 goal: "Tell the two basic kinds of data apart, and convert between them."
 order: 7
+section: "Python Fundamentals"
 ---
 
 # Numbers are not text

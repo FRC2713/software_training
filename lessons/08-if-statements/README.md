@@ -2,6 +2,7 @@
 title: "Lesson 8: Decisions in code"
 goal: "Use if, elif, and else to make a program choose between paths."
 order: 8
+section: "Python Fundamentals"
 ---
 
 # The if block, in text

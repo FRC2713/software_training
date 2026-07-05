@@ -14,6 +14,7 @@ it's the exact content the [training site](../site) renders, page by page.
    title: "Lesson 2: Variables"
    goal: "Explain what a variable is and why programs need them."
    order: 2
+   section: "Python Fundamentals"
    ---
 
    # A heading starts a new page
@@ -35,7 +36,10 @@ it's the exact content the [training site](../site) renders, page by page.
 ### Rules the site relies on
 
 - **Frontmatter is required**: `title`, `goal`, and `order` (a number controlling
-  where the lesson sits in the lesson list).
+  where the lesson sits in the lesson list). `section` is optional — lessons
+  sharing a `section` value are grouped together (under that heading) in the
+  index and sidebar, with sections ordered by their first lesson; lessons
+  without one fall under a default "Lessons" group.
 - **Every top-level `#` heading starts a new page.** Don't use `#` for anything
   except a page break — use `##` and smaller for in-page structure.
 - **` ```python ` code fences are live**, not decoration. Students can edit and

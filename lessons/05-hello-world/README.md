@@ -2,6 +2,7 @@
 title: "Lesson 5: Hello, World!"
 goal: "Explain what a program actually is, then write and run your first one."
 order: 5
+section: "Python Fundamentals"
 ---
 
 # What is a program?

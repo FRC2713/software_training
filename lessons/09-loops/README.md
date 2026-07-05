@@ -2,6 +2,7 @@
 title: "Lesson 9: Loops in code"
 goal: "Repeat steps in Python with for and while instead of copying lines."
 order: 9
+section: "Python Fundamentals"
 ---
 
 # Repeat, in text

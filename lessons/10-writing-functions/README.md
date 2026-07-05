@@ -2,6 +2,7 @@
 title: "Lesson 10: Writing your own functions"
 goal: "Package steps into a named function with def and hand back a result with return."
 order: 10
+section: "Python Fundamentals"
 ---
 
 # Define a block of your own

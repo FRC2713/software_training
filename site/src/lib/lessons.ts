@@ -8,8 +8,18 @@ export interface Lesson {
   title: string
   goal: string
   order: number
+  section: string
   pages: LessonPage[]
 }
+
+export interface LessonSection {
+  title: string
+  lessons: Lesson[]
+}
+
+// Lessons without an explicit `section` fall into this bucket so they still
+// render somewhere rather than silently disappearing from grouped views.
+const UNSECTIONED = 'Lessons'
 
 // Every lesson's README.md doubles as its GitHub-facing docs and the site's
 // content source - see lessons/README.md for the authoring convention.
@@ -75,10 +85,21 @@ export const lessons: Lesson[] = Object.entries(rawLessonFiles)
       title: data.title ?? slugFromPath(path),
       goal: data.goal ?? '',
       order: Number(data.order ?? 0),
+      section: data.section || UNSECTIONED,
       pages: splitIntoPages(content),
     }
   })
   .sort((a, b) => a.order - b.order)
+
+// Lessons grouped into sections, with section order determined by the first
+// lesson (by `order`) that names each section. Both the index and the sidebar
+// read from this so the grouping stays in one place.
+export const lessonSections: LessonSection[] = lessons.reduce<LessonSection[]>((acc, lesson) => {
+  const existing = acc.find((s) => s.title === lesson.section)
+  if (existing) existing.lessons.push(lesson)
+  else acc.push({ title: lesson.section, lessons: [lesson] })
+  return acc
+}, [])
 
 export function getLesson(slug: string): Lesson | undefined {
   return lessons.find((lesson) => lesson.slug === slug)

@@ -1,5 +1,9 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import CodeMirror, { EditorView } from '@uiw/react-codemirror'
+import { python } from '@codemirror/lang-python'
+import { oneDark } from '@codemirror/theme-one-dark'
 import { getPythonRuntimeStatus, runPython } from '@/lib/pythonRuntime'
+import { editorTheme, usePrefersDark } from '@/lib/editorTheme'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -8,6 +12,9 @@ export function PythonRunner({ initialCode }: { initialCode: string }) {
   const [output, setOutput] = useState<string | null>(null)
   const [ok, setOk] = useState(true)
   const [running, setRunning] = useState(false)
+  const dark = usePrefersDark()
+
+  const extensions = useMemo(() => [python(), editorTheme, EditorView.lineWrapping], [])
 
   const handleRun = async () => {
     const label = getPythonRuntimeStatus() === 'ready' ? 'Running…' : 'Loading Python…'
@@ -21,12 +28,19 @@ export function PythonRunner({ initialCode }: { initialCode: string }) {
 
   return (
     <div className="my-4 overflow-hidden rounded-lg border bg-muted">
-      <textarea
-        className="block w-full resize-y bg-muted px-3.5 py-3 font-mono text-[15px] leading-relaxed text-foreground outline-none"
+      <CodeMirror
         value={code}
-        onChange={(e) => setCode(e.target.value)}
-        spellCheck={false}
-        rows={Math.max(2, code.split('\n').length)}
+        onChange={setCode}
+        extensions={extensions}
+        theme={dark ? oneDark : 'light'}
+        basicSetup={{
+          lineNumbers: true,
+          foldGutter: false,
+          highlightActiveLine: true,
+          highlightActiveLineGutter: true,
+          autocompletion: false,
+        }}
+        className="text-[15px]"
       />
       <div className="flex justify-end border-t px-2.5 py-2">
         <Button
