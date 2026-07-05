@@ -59,8 +59,9 @@ Your turn. Build a flowchart that outputs **the smaller of two numbers** and
 check it against a few inputs.
 
 **How:** you have a toolbar with number blocks, three compare blocks (`>`, `<`,
-`=`), and an `if` block. Drag from a block's right dot to an input dot to wire
-things up. Remember the `if` block needs three wires: `when` (a true/false
+`=`), and an `if` block. Drag from a block's bottom dot to an input dot on top
+of another to wire things up. Remember the `if` block needs three wires: `when`
+(a true/false
 value), `✓ then`, and `✗ else`.
 
 Two ways to get the *smaller* number — see if you can find both:

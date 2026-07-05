@@ -16,12 +16,12 @@ does one small thing, and the arrows show what feeds into what. The computer
 follows the arrows.
 
 The block editor here is exactly that: a little flowchart that does
-math. Read it from left to right:
+math. Read it from top to bottom, the same way you read code:
 
 - The **number** blocks hold values.
-- The **+** and **×** blocks each take *two* inputs (the arrows coming into
-  their left side) and produce *one* output.
-- The **result** block shows the final answer.
+- The **+** and **×** blocks each take *two* inputs (the arrows coming in from
+  the blocks above them) and produce *one* output.
+- The **result** block at the bottom shows the final answer.
 
 Press **▶ Run step by step** and watch. The computer can't multiply until it
 knows what `3 + 4` is, so it works out the inner block first, then feeds that
@@ -66,8 +66,8 @@ blocks and a result block, and a toolbar for adding more.
 
 - Click a toolbar button — **number**, **+**, **−**, or **×** — to drop a new
   block onto the canvas. Drag blocks around to arrange them.
-- **Connect blocks by dragging** from the little dot on the right of one block
-  to a dot on the left of another. An operation block has *two* left dots
+- **Connect blocks by dragging** from the little dot on the bottom of one block
+  to a dot on the top of another. An operation block has *two* dots on top
   because it needs two inputs; the result block has one.
 - Press **▶ Run step by step** to watch your machine evaluate. **Reset** clears
   the shown values so you can run it again.
