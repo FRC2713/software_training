@@ -1,4 +1,16 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@plugin '@tailwindcss/typography';
+
+/*
+ * Dark mode follows the OS setting — there is no manual toggle — so we don't
+ * redefine the shadcn `dark` variant (leaving it as Tailwind's default
+ * prefers-color-scheme media query) and flip every token in the media block
+ * below. Semantic tokens are layered on top of the legacy FRC palette, which
+ * BlockPlayground.css and the markdown prose still read directly.
+ */
 :root {
+  /* Legacy brand palette — single source of truth for the FRC colors. */
   --text: #55535a;
   --text-h: #000000;
   --bg: #fff;
@@ -13,19 +25,36 @@
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* shadcn semantic tokens, mapped onto the palette above. `--ui-accent` is
+     shadcn's neutral hover surface — deliberately distinct from the legacy
+     `--accent` (the brand red) so the two never collide. */
+  --radius: 0.625rem;
+  --background: var(--bg);
+  --foreground: var(--text-h);
+  --card: var(--bg);
+  --card-foreground: var(--text-h);
+  --popover: var(--bg);
+  --popover-foreground: var(--text-h);
+  --primary: var(--accent);
+  --primary-foreground: #ffffff;
+  --secondary: var(--code-bg);
+  --secondary-foreground: var(--text-h);
+  --muted: var(--code-bg);
+  --muted-foreground: var(--text);
+  --ui-accent: var(--code-bg);
+  --ui-accent-foreground: var(--text-h);
+  --destructive: var(--err);
+  --input: var(--border);
+  --ring: var(--accent);
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  --sidebar: var(--bg);
+  --sidebar-foreground: var(--text);
+  --sidebar-primary: var(--accent);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--accent-bg);
+  --sidebar-accent-foreground: var(--accent);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--accent);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -40,53 +69,77 @@
     --accent-border: rgba(224, 71, 95, 0.5);
     --ok: #3fb950;
     --err: #f16a6a;
+
+    --sidebar: #171717;
   }
 }
 
-* {
-  box-sizing: border-box;
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --font-sans: var(--sans);
+  --font-mono: var(--mono);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--ui-accent);
+  --color-accent-foreground: var(--ui-accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: #ffffff;
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 }
 
-body {
-  margin: 0;
-}
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
 
-#root {
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-}
+  html {
+    color-scheme: light dark;
+  }
 
-h1, h2, h3 {
-  font-family: var(--sans);
-  font-weight: 600;
-  color: var(--text-h);
-  line-height: 130%;
-}
+  body {
+    margin: 0;
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font: 18px / 145% var(--font-sans);
+    letter-spacing: 0.18px;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-a {
-  color: var(--accent);
-}
+  #root {
+    min-height: 100svh;
+  }
 
-p, li {
-  line-height: 155%;
-}
-
-code {
-  font-family: var(--mono);
-  font-size: 0.9em;
-  border-radius: 4px;
-  padding: 0.15em 0.4em;
-  background: var(--code-bg);
-  color: var(--text-h);
-}
-
-pre code {
-  padding: 0;
-  background: none;
-}
-
-button {
-  font: inherit;
-  cursor: pointer;
+  @media (max-width: 1024px) {
+    body {
+      font-size: 16px;
+    }
+  }
 }

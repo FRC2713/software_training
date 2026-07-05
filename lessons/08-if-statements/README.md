@@ -62,7 +62,7 @@ Sometimes there are more than two outcomes. `elif` (short for "else if") lets yo
 ask another question when the previous one was false:
 
 ```python
-score = int(input("Enter a score out of 100: "))
+score = 95
 if score >= 90:
     print("Grade: A")
 elif score >= 80:
@@ -79,6 +79,7 @@ true — then skips all the rest. That order matters: a score of `95` is also `>
 This is the same "inputs before the things that use them, one step at a time"
 discipline from lesson 1.
 
-Run it a few times with different scores. Then your challenge: build a program
-that asks for a number and prints whether it's `"negative"`, `"zero"`, or
-`"positive"` — three paths, so you'll need an `if`, an `elif`, and an `else`.
+Run it, then change `score` to `85`, `72`, and `40` and run each time to see a
+different branch win. Then your challenge: build a program that sets a number in
+a variable and prints whether it's `"negative"`, `"zero"`, or `"positive"` —
+three paths, so you'll need an `if`, an `elif`, and an `else`.

@@ -2,11 +2,10 @@ import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import type { Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { blocksPreset, firstPythonSnippet, getLesson, nextLesson, stripBlocksFence } from '../lib/lessons'
-import { PythonRunner } from '../components/PythonRunner'
-import { BlockPlayground } from '../components/BlockPlayground'
-import { PageNav } from '../components/PageNav'
-import './LessonView.css'
+import { blocksPreset, firstPythonSnippet, getLesson, nextLesson, stripBlocksFence } from '@/lib/lessons'
+import { PythonRunner } from '@/components/PythonRunner'
+import { BlockPlayground } from '@/components/BlockPlayground'
+import { PageNav } from '@/components/PageNav'
 
 const PLACEHOLDER_CODE = '# Nothing to run on this page yet.\n# Try writing some Python of your own!'
 
@@ -15,6 +14,18 @@ const PLACEHOLDER_CODE = '# Nothing to run on this page yet.\n# Try writing some
 const markdownComponents: Components = {
   code: ({ className, children }) => <code className={className}>{children}</code>,
 }
+
+// Tailwind Typography, retuned to the FRC palette: brand-red links, no backtick
+// pseudo-elements on inline code, and code blocks on the muted surface.
+const PROSE_CLASSES = [
+  'prose dark:prose-invert max-w-none',
+  'prose-headings:font-semibold prose-headings:text-foreground',
+  'prose-a:text-primary prose-a:no-underline hover:prose-a:underline',
+  'prose-code:rounded prose-code:bg-[var(--code-bg)] prose-code:px-1.5 prose-code:py-0.5',
+  'prose-code:font-normal prose-code:text-foreground',
+  'prose-code:before:content-none prose-code:after:content-none',
+  'prose-pre:border prose-pre:border-border prose-pre:bg-[var(--code-bg)] prose-pre:text-foreground',
+].join(' ')
 
 export function LessonView() {
   const { slug, page } = useParams()
@@ -39,30 +50,30 @@ export function LessonView() {
   const next = onLastPage ? nextLesson(lesson.slug) : undefined
 
   return (
-    <div className="lesson-view">
-      <div className="lesson-view-header">
-        <Link className="lesson-view-back" to="/">
+    <div className="mx-auto w-full max-w-[1240px] px-5 pt-8 pb-20">
+      <div className="mb-6">
+        <Link className="mb-5 inline-block text-sm text-primary no-underline hover:underline" to="/">
           ← All lessons
         </Link>
-        <p className="lesson-view-goal">
+        <p className="rounded-lg bg-primary/10 px-4 py-3 text-[15px] text-foreground">
           <strong>Goal:</strong> {lesson.goal}
         </p>
       </div>
-      <div className="lesson-view-split">
-        <article key={pageIndex} className="lesson-view-page">
+      <div className="flex flex-col items-start gap-8 lg:flex-row">
+        <article key={pageIndex} className={`min-w-0 flex-1 ${PROSE_CLASSES}`}>
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
             {prose}
           </ReactMarkdown>
         </article>
-        <div className="lesson-view-playground">
+        <div className="w-full min-w-0 flex-1 lg:sticky lg:top-20 lg:min-w-[320px]">
           {preset ? (
             <>
-              <h2 className="lesson-view-playground-title">▶ Block editor</h2>
+              <h2 className="mb-3 text-base font-semibold text-primary">▶ Block editor</h2>
               <BlockPlayground key={`${pageIndex}-${preset}`} preset={preset} />
             </>
           ) : (
             <>
-              <h2 className="lesson-view-playground-title">▶ Playground</h2>
+              <h2 className="mb-3 text-base font-semibold text-primary">▶ Playground</h2>
               <PythonRunner key={pageIndex} initialCode={playgroundCode} />
             </>
           )}
@@ -77,14 +88,24 @@ export function LessonView() {
       />
       {onLastPage &&
         (next ? (
-          <Link className="lesson-view-next" to={`/lesson/${next.slug}`}>
-            <span className="lesson-view-next-label">Next lesson</span>
-            <span className="lesson-view-next-title">{next.title} →</span>
+          <Link
+            className="mt-6 flex flex-col gap-1 rounded-xl bg-primary/10 px-5 py-4 no-underline transition-[filter] hover:brightness-105"
+            to={`/lesson/${next.slug}`}
+          >
+            <span className="text-xs font-semibold uppercase tracking-wide text-primary">
+              Next lesson
+            </span>
+            <span className="text-lg font-semibold text-foreground">{next.title} →</span>
           </Link>
         ) : (
-          <Link className="lesson-view-next" to="/">
-            <span className="lesson-view-next-label">You're all done</span>
-            <span className="lesson-view-next-title">Back to all lessons →</span>
+          <Link
+            className="mt-6 flex flex-col gap-1 rounded-xl bg-primary/10 px-5 py-4 no-underline transition-[filter] hover:brightness-105"
+            to="/"
+          >
+            <span className="text-xs font-semibold uppercase tracking-wide text-primary">
+              You're all done
+            </span>
+            <span className="text-lg font-semibold text-foreground">Back to all lessons →</span>
           </Link>
         ))}
     </div>
