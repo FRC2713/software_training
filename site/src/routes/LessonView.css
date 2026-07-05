@@ -64,6 +64,35 @@
   color: var(--accent);
 }
 
+.lesson-view-next {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 24px;
+  padding: 16px 20px;
+  border-radius: 10px;
+  background: var(--accent-bg);
+  color: var(--text-h);
+  text-decoration: none;
+  transition: filter 0.15s ease;
+}
+
+.lesson-view-next:hover {
+  filter: brightness(1.05);
+}
+
+.lesson-view-next-label {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+.lesson-view-next-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
 @media (max-width: 860px) {
   .lesson-view-split {
     flex-direction: column;

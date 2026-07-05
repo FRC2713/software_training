@@ -110,17 +110,18 @@ export function createNode(item: ToolbarItem, id: string, position: { x: number;
 
 // ---- Lesson 1: sequences ---------------------------------------------------
 
-// (3 + 4) × 2 = 14 — a fixed graph the student can only watch evaluate.
+// (3 + 4) × 2 = 14 — a fixed graph the student can only watch evaluate. Laid
+// out top-to-bottom: inputs up top, operations below, result at the bottom.
 const sequence: BlockPreset = {
   connectable: false,
   toolbar: [],
   nodes: [
     num('a', 3, 0, 0),
-    num('b', 4, 0, 90),
-    op('plus', 'add', 200, 25),
-    num('c', 2, 200, 150),
-    op('times', 'mul', 400, 70),
-    result('out', 620, 80),
+    num('b', 4, 160, 0),
+    op('plus', 'add', 70, 140),
+    num('c', 2, 250, 140),
+    op('times', 'mul', 150, 290),
+    result('out', 150, 430),
   ],
   edges: [
     wire('a', 'plus', 'a'),
@@ -137,11 +138,11 @@ const editValues: BlockPreset = {
   toolbar: [],
   nodes: [
     num('a', 5, 0, 0, true),
-    num('b', 3, 0, 90, true),
-    op('plus', 'add', 200, 25),
-    num('c', 2, 200, 150, true),
-    op('times', 'mul', 400, 70),
-    result('out', 620, 80),
+    num('b', 3, 160, 0, true),
+    op('plus', 'add', 70, 140),
+    num('c', 2, 250, 140, true),
+    op('times', 'mul', 150, 290),
+    result('out', 150, 430),
   ],
   edges: [
     wire('a', 'plus', 'a'),
@@ -160,7 +161,7 @@ const build: BlockPreset = {
     { kind: 'sub', label: '−' },
     { kind: 'mul', label: '×' },
   ],
-  nodes: [num('a', 6, 0, 0, true), num('b', 4, 0, 120, true), result('out', 420, 60)],
+  nodes: [num('a', 6, 0, 0, true), num('b', 4, 170, 0, true), result('out', 85, 220)],
   edges: [],
 }
 
@@ -172,10 +173,10 @@ const condDemo: BlockPreset = {
   toolbar: [],
   nodes: [
     num('a', 7, 0, 0),
-    num('b', 4, 0, 150),
-    compare('cmp', 'gt', 180, 30),
-    ifBlock('pick', 360, 20),
-    result('out', 560, 60),
+    num('b', 4, 220, 0),
+    compare('cmp', 'gt', 60, 150),
+    ifBlock('pick', 120, 300),
+    result('out', 140, 460),
   ],
   edges: [
     wire('a', 'cmp', 'a'),
@@ -192,10 +193,10 @@ const condEdit: BlockPreset = {
   toolbar: [],
   nodes: [
     num('a', 7, 0, 0, true),
-    num('b', 4, 0, 150, true),
-    compare('cmp', 'gt', 180, 30),
-    ifBlock('pick', 360, 20),
-    result('out', 560, 60),
+    num('b', 4, 220, 0, true),
+    compare('cmp', 'gt', 60, 150),
+    ifBlock('pick', 120, 300),
+    result('out', 140, 460),
   ],
   edges: [
     wire('a', 'cmp', 'a'),
@@ -216,7 +217,7 @@ const condBuild: BlockPreset = {
     { kind: 'eq', label: '=' },
     { kind: 'if', label: 'if' },
   ],
-  nodes: [num('a', 5, 0, 0, true), num('b', 8, 0, 150, true), result('out', 480, 70)],
+  nodes: [num('a', 5, 0, 0, true), num('b', 8, 180, 0, true), result('out', 90, 260)],
   edges: [],
 }
 
@@ -229,10 +230,10 @@ const loopDemo: BlockPreset = {
   toolbar: [],
   nodes: [
     num('start', 0, 0, 0),
-    num('count', 5, 0, 90),
-    num('step', 3, 0, 180),
-    loop('rep', 'add', 220, 40),
-    result('out', 440, 70),
+    num('count', 5, 150, 0),
+    num('step', 3, 300, 0),
+    loop('rep', 'add', 110, 160),
+    result('out', 130, 310),
   ],
   edges: [
     wire('start', 'rep', 'start'),
@@ -248,10 +249,10 @@ const loopEdit: BlockPreset = {
   toolbar: [],
   nodes: [
     num('start', 1, 0, 0, true),
-    num('count', 4, 0, 90, true),
-    num('step', 2, 0, 180, true),
-    loop('rep', 'mul', 220, 40),
-    result('out', 440, 70),
+    num('count', 4, 150, 0, true),
+    num('step', 2, 300, 0, true),
+    loop('rep', 'mul', 110, 160),
+    result('out', 130, 310),
   ],
   edges: [
     wire('start', 'rep', 'start'),
@@ -270,9 +271,9 @@ const loopBuild: BlockPreset = {
   ],
   nodes: [
     num('start', 1, 0, 0, true),
-    num('count', 5, 0, 90, true),
-    num('step', 2, 0, 180, true),
-    result('out', 480, 80),
+    num('count', 5, 150, 0, true),
+    num('step', 2, 300, 0, true),
+    result('out', 130, 220),
   ],
   edges: [],
 }
@@ -283,7 +284,7 @@ const loopBuild: BlockPreset = {
 const doubleFn: FunctionDef = {
   name: 'double',
   label: 'double(x) = x × 2',
-  nodes: [input('x', 'x', 0, 20), num('two', 2, 0, 130), op('m', 'mul', 190, 55), result('o', 360, 65)],
+  nodes: [input('x', 'x', 0, 0), num('two', 2, 140, 0), op('m', 'mul', 50, 130), result('o', 60, 260)],
   edges: [wire('x', 'm', 'a'), wire('two', 'm', 'b'), wire('m', 'o')],
 }
 
@@ -291,7 +292,7 @@ const doubleFn: FunctionDef = {
 const addOneFn: FunctionDef = {
   name: 'addOne',
   label: 'add 1 (x) = x + 1',
-  nodes: [input('x', 'x', 0, 20), num('one', 1, 0, 130), op('a', 'add', 190, 55), result('o', 360, 65)],
+  nodes: [input('x', 'x', 0, 0), num('one', 1, 140, 0), op('a', 'add', 50, 130), result('o', 60, 260)],
   edges: [wire('x', 'a', 'a'), wire('one', 'a', 'b'), wire('a', 'o')],
 }
 
@@ -299,7 +300,7 @@ const fnDemo: BlockPreset = {
   connectable: false,
   toolbar: [],
   functions: [doubleFn],
-  nodes: [num('n', 5, 0, 40), call('c1', 'double', 'double', 200, 40), result('out', 400, 50)],
+  nodes: [num('n', 5, 20, 0), call('c1', 'double', 'double', 0, 150), result('out', 20, 300)],
   edges: [wire('n', 'c1', 'x'), wire('c1', 'out')],
 }
 
@@ -309,10 +310,10 @@ const fnChain: BlockPreset = {
   toolbar: [],
   functions: [doubleFn],
   nodes: [
-    num('n', 3, 0, 40, true),
-    call('c1', 'double', 'double', 180, 40),
-    call('c2', 'double', 'double', 360, 40),
-    result('out', 540, 50),
+    num('n', 3, 20, 0, true),
+    call('c1', 'double', 'double', 0, 150),
+    call('c2', 'double', 'double', 0, 300),
+    result('out', 20, 450),
   ],
   edges: [wire('n', 'c1', 'x'), wire('c1', 'c2', 'x'), wire('c2', 'out')],
 }
@@ -325,7 +326,7 @@ const fnBuild: BlockPreset = {
     { kind: 'call:double', label: 'double' },
   ],
   functions: [addOneFn, doubleFn],
-  nodes: [num('n', 4, 0, 40, true), result('out', 520, 50)],
+  nodes: [num('n', 4, 20, 0, true), result('out', 20, 240)],
   edges: [],
 }
 

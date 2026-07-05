@@ -84,6 +84,12 @@ export function getLesson(slug: string): Lesson | undefined {
   return lessons.find((lesson) => lesson.slug === slug)
 }
 
+// The lesson that follows `slug` in `order`, or undefined if it's the last one.
+export function nextLesson(slug: string): Lesson | undefined {
+  const index = lessons.findIndex((lesson) => lesson.slug === slug)
+  return index === -1 ? undefined : lessons[index + 1]
+}
+
 // Drives the playground panel: a page's first ```python fence is what gets
 // loaded into it. Pages can still show other code samples in their prose;
 // only this one is treated as "the" runnable snippet for the page.

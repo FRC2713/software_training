@@ -108,7 +108,7 @@ function NumberNode({ id, data }: NodeProps<Node<NumberData>>) {
       ) : (
         <span className="blk-value">{data.value}</span>
       )}
-      <Handle type="source" position={Position.Right} />
+      <Handle type="source" position={Position.Bottom} />
     </div>
   )
 }
@@ -119,7 +119,7 @@ function InputNode({ data }: NodeProps<Node<InputData>>) {
     <div className="blk blk-input-node">
       <span className="blk-tag">input</span>
       <span className="blk-value">{data.label}</span>
-      <Handle type="source" position={Position.Right} />
+      <Handle type="source" position={Position.Bottom} />
     </div>
   )
 }
@@ -127,20 +127,18 @@ function InputNode({ data }: NodeProps<Node<InputData>>) {
 function OpNode({ data }: NodeProps<Node<OpData>>) {
   return (
     <div className={`blk blk-op${data.active ? ' blk-active' : ''}`}>
-      <Handle type="target" id="a" position={Position.Left} style={{ top: '32%' }} />
-      <Handle type="target" id="b" position={Position.Left} style={{ top: '68%' }} />
+      <Handle type="target" id="a" position={Position.Top} style={{ left: '30%' }} />
+      <Handle type="target" id="b" position={Position.Top} style={{ left: '70%' }} />
       <span className="blk-op-symbol">{OP_SYMBOL[data.op]}</span>
       {data.shown !== null && <span className="blk-op-result">= {fmt(data.shown)}</span>}
-      <Handle type="source" position={Position.Right} />
+      <Handle type="source" position={Position.Bottom} />
     </div>
   )
 }
 
-// Shared layout for the multi-input blocks (compare, if, loop, call): a title
-// row plus one labelled row per input, with left handles pinned to each row's
-// centre so the wires line up with their labels.
-const TITLE_H = 24
-const ROW_H = 22
+// Shared layout for the multi-input blocks (compare, if, loop, call): the
+// labelled inputs sit across the top, each with a handle above it, and the
+// operator's title sits below — so the graph reads top-to-bottom like code.
 function MultiNode({
   title,
   rows,
@@ -154,22 +152,24 @@ function MultiNode({
 }) {
   return (
     <div className={`blk blk-multi${active ? ' blk-active' : ''}`}>
+      <div className="blk-inputs">
+        {rows.map((row, i) => (
+          <div className="blk-cell" key={row.id}>
+            <Handle
+              type="target"
+              id={row.id}
+              position={Position.Top}
+              style={{ left: `${((i + 0.5) / rows.length) * 100}%` }}
+            />
+            <span className="blk-row-label">{row.label}</span>
+          </div>
+        ))}
+      </div>
       <div className="blk-title">
         {title}
         {shown !== null && <span className="blk-multi-shown">{fmt(shown)}</span>}
       </div>
-      {rows.map((row, i) => (
-        <div className="blk-row" key={row.id}>
-          <Handle
-            type="target"
-            id={row.id}
-            position={Position.Left}
-            style={{ top: TITLE_H + ROW_H * i + ROW_H / 2 }}
-          />
-          <span className="blk-row-label">{row.label}</span>
-        </div>
-      ))}
-      <Handle type="source" position={Position.Right} style={{ top: TITLE_H + (ROW_H * rows.length) / 2 }} />
+      <Handle type="source" position={Position.Bottom} />
     </div>
   )
 }
@@ -232,7 +232,7 @@ function CallNode({ data }: NodeProps<Node<CallData>>) {
 function ResultNode({ data }: NodeProps<Node<BaseData>>) {
   return (
     <div className={`blk blk-result${data.active ? ' blk-active' : ''}`}>
-      <Handle type="target" position={Position.Left} />
+      <Handle type="target" position={Position.Top} />
       <span className="blk-tag">result</span>
       <span className="blk-result-value">{fmt(data.shown)}</span>
     </div>

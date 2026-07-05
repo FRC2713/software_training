@@ -2,7 +2,7 @@ import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import type { Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { blocksPreset, firstPythonSnippet, getLesson, stripBlocksFence } from '../lib/lessons'
+import { blocksPreset, firstPythonSnippet, getLesson, nextLesson, stripBlocksFence } from '../lib/lessons'
 import { PythonRunner } from '../components/PythonRunner'
 import { BlockPlayground } from '../components/BlockPlayground'
 import { PageNav } from '../components/PageNav'
@@ -34,6 +34,9 @@ export function LessonView() {
   const playgroundCode = firstPythonSnippet(currentPage.markdown) ?? PLACEHOLDER_CODE
 
   const goTo = (index: number) => navigate(`/lesson/${lesson.slug}/${index + 1}`)
+
+  const onLastPage = pageIndex === pageCount - 1
+  const next = onLastPage ? nextLesson(lesson.slug) : undefined
 
   return (
     <div className="lesson-view">
@@ -72,6 +75,18 @@ export function LessonView() {
         onNext={() => goTo(pageIndex + 1)}
         onJump={goTo}
       />
+      {onLastPage &&
+        (next ? (
+          <Link className="lesson-view-next" to={`/lesson/${next.slug}`}>
+            <span className="lesson-view-next-label">Next lesson</span>
+            <span className="lesson-view-next-title">{next.title} →</span>
+          </Link>
+        ) : (
+          <Link className="lesson-view-next" to="/">
+            <span className="lesson-view-next-label">You're all done</span>
+            <span className="lesson-view-next-title">Back to all lessons →</span>
+          </Link>
+        ))}
     </div>
   )
 }
