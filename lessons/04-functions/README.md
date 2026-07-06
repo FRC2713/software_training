@@ -8,7 +8,7 @@ section: "Programming with Blocks"
 # A block with a flowchart inside
 
 Look at the top of the block editor. There's a block called **double**,
-and it has its own little flowchart *inside* it: an input `x`, a `× 2`, and an
+and it has its own little flowchart *inside* it: an input `n`, a `× 2`, and an
 output. That's a **function** — a small program you've wrapped up and given a
 name.
 
@@ -49,7 +49,7 @@ preset: fn-chain
 # Build with reusable blocks
 
 Now you have **two** reusable blocks in the toolbar: **add 1** (which does
-`x + 1`) and **double** (which does `x × 2`). You can see both inner flowcharts
+`n + 1`) and **double** (which does `n × 2`). You can see both inner flowcharts
 at the top of the panel.
 
 Your challenge: starting from the number `4`, build a program whose result is
@@ -61,7 +61,7 @@ double* gives `(4 + 1) × 2 = 10`. But *double then add 1* gives
 [the very first lesson](#/lesson/01-flowcharts), where the computer had to do the inner step before the
 outer one.
 
-Wire a block's output into the next block's `x` input to chain them, then send
+Wire a block's output into the next block's `n` input to chain them, then send
 the last block into the result. Run it step by step and confirm you land on
 `10`. Then see what *double then add 1* gives you instead.
 

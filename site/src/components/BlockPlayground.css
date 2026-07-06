@@ -140,7 +140,7 @@
   border-color: var(--accent-border);
 }
 
-/* ---- Multi-input blocks (compare / if / loop / call) --------------------- */
+/* ---- Multi-input blocks (if / call) --------------------------------------- */
 
 .blk-multi {
   padding: 0;
@@ -188,6 +188,52 @@
 .blk-row-label {
   font-size: 12px;
   color: var(--text);
+}
+
+/* The if-block's two output rails — only one is energized ("live") per run. */
+.blk-outputs {
+  display: flex;
+  align-items: stretch;
+  border-top: 1px solid var(--border);
+}
+
+.blk-out-live {
+  background: var(--accent-bg);
+}
+
+.blk-out-live .blk-row-label {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* ---- Loop block: start/step are edited right on the block ---------------- */
+
+.blk-loop {
+  padding: 0;
+  min-width: 130px;
+  align-items: stretch;
+  gap: 0;
+}
+
+.blk-loop-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--border);
+}
+
+.blk-input-sm {
+  width: 44px;
+  padding: 3px 4px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--code-bg);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 14px;
+  text-align: center;
 }
 
 /* ---- Function definition ("inside the block") view ----------------------- */

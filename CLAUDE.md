@@ -87,13 +87,38 @@ folder until it's restarted.
   a warm-up compile during loading absorbs javac's slow first invocation.
 - **Block editor** (`site/src/components/BlockPlayground.tsx` +
   `site/src/lib/blockPresets.ts`): an xyflow dataflow graph of custom node types
-  (number/op/compare/if/loop/call/result/input). A pure `valueOf` evaluator
-  resolves each node's value with memoization and cycle guarding; `stepOrder`
-  gives a dependency-first walk that "Run step by step" animates. `call` nodes
-  evaluate a named sub-graph (`FunctionDef`) via `callFunction`, and those
-  functions also render as read-only "inside the block" mini-canvases. Node
-  types and the evaluator must stay in sync — adding a block type means handling
-  it in `valueOf`, `stepOrder`, `nodeTypes`, and `createNode`.
+  (number/op/if/outlet/loop/call/result/input). A pure `valueOf` evaluator
+  resolves each node's value **per output handle** (memoized on `id:handle`)
+  with cycle guarding; `stepOrder` gives a dependency-first walk that "Run step
+  by step" animates. `call` nodes evaluate a named sub-graph (`FunctionDef`) via
+  `callFunction`, and those functions also render as read-only "inside the
+  block" mini-canvases. Node types and the evaluator must stay in sync — adding
+  a block type means handling it in `valueOf`, `stepOrder`, `nodeTypes`, and
+  `createNode`.
+  - The **if** block is lesson 2's conditional: it absorbs what used to be a
+    separate "compare" block (two operands `a`/`b` plus an operator `>`/`<`/
+    `=`/`≠`) and has **two named output handles**, `'true'` and `'false'`,
+    instead of one. Exactly one is "energized" per evaluation (resolves to
+    `true`); the other resolves to `'?'` — a hardware-switch metaphor, not a
+    value selector.
+  - Any node can be wired from an if-block's rail into an input handle named
+    `'gate'`; a generic check at the top of `valueOf` forces that node's result
+    to `'?'` unless its gate resolves to `true`. The **outlet** node
+    (`gate` + `value` in, one value out) is the only block that currently
+    exposes this, used to attach a plain number to a rail so it only "shows
+    through" when its rail is live.
+  - Because a rail's outlet is a separate node from whatever feeds the
+    if-block's `a`/`b`, two branches can legitimately converge on the same
+    downstream target (e.g. both outlets wired to `result`). `resolveInput`
+    handles this by trying every edge into a handle and returning the first
+    non-`'?'` value; `onConnect` only enforces "one wire per handle" for named
+    handles, deliberately allowing multiple wires into a node's anonymous
+    default target handle (only `result` uses it).
+  - The **loop** block takes just one wired input (`times`); its `start` and
+    `step` are edited directly on the block itself (`LoopNode`'s own inline
+    number fields), not wired in — the loop's internal logic lives inside the
+    block, matching the mentor-facing metaphor of "a block with its own logic
+    that repeats N times and outputs a number."
 - **State-machine playground** (`site/src/components/StatePlayground.tsx` +
   `site/src/lib/statePresets.ts`): a sibling to the block editor for the state
   machine lessons (14+). Instead of evaluating a dataflow graph, the student
