@@ -14,19 +14,19 @@ it's the exact content the [training site](../site) renders, page by page.
    title: "Lesson 2: Variables"
    goal: "Explain what a variable is and why programs need them."
    order: 2
-   section: "Python Fundamentals"
+   section: "Java Fundamentals"
    ---
 
    # A heading starts a new page
    Content for the first page a student sees.
 
    # Another heading, another page
-   More content. Code fences tagged \`python\` are rendered as a live,
+   More content. Code fences tagged \`java\` are rendered as a live,
    editable, runnable code block instead of plain text:
 
-   ​```python
-   name = "Ada"
-   print("Hello,", name)
+   ​```java
+   String name = "Ada";
+   System.out.println("Hello, " + name);
    ​```
 
    # One more page
@@ -42,12 +42,20 @@ it's the exact content the [training site](../site) renders, page by page.
   without one fall under a default "Lessons" group.
 - **Every top-level `#` heading starts a new page.** Don't use `#` for anything
   except a page break — use `##` and smaller for in-page structure.
-- **` ```python ` code fences are live**, not decoration. Students can edit and
-  run them right on the page (via [Pyodide](https://pyodide.org), a real Python
-  interpreter compiled to WebAssembly — no server involved). Only put code
-  there that's meant to be run; use ` ```text ` or plain prose for
-  output samples or pseudocode.
-- **` ```blocks ` fences swap the Python playground for the visual block
+- **` ```java ` code fences are live**, not decoration. Students can edit and
+  run them right on the page (compiled with a real javac and executed via
+  [CheerpJ](https://cheerpj.com), a JVM compiled to WebAssembly — no server
+  involved). Only put code there that's meant to be run; use ` ```text ` or
+  plain prose for output samples or pseudocode.
+- **The playground wraps bare statements in a program shell.** A snippet with
+  no `class`/`enum` declaration is compiled inside
+  `import java.util.*; public class Main { public static void main(...) { … } }`,
+  so early lessons can run `System.out.println("hi");` directly (and use
+  `ArrayList`/`HashMap` before imports are taught). A snippet that declares its
+  own class or enum runs **as written** — the class containing `main` is the
+  one executed. Lessons 5–9 rely on wrap mode; lesson 10 reveals the shell and
+  everything from there uses full files.
+- **` ```blocks ` fences swap the Java playground for the visual block
   editor** (drag-and-drop flowcharts). The fence body is a directive, not
   content — it names a starter graph, e.g. `preset: sequence`, and never renders
   in the prose. Every preset lives in
@@ -56,7 +64,7 @@ it's the exact content the [training site](../site) renders, page by page.
   free-build with a toolbar): `sequence`/`edit-values`/`build` (lesson 1,
   arithmetic), `cond-*` (lesson 2, compare + if), `loop-*` (lesson 3, repeat),
   `fn-*` (lesson 4, reusable call blocks with an "inside the block" view). A page
-  has one playground: a ` ```blocks ` fence takes precedence over any ` ```python `
+  has one playground: a ` ```blocks ` fence takes precedence over any ` ```java `
   on the page. To add a new concept, add a preset (and any new block type) rather
   than inventing markdown syntax.
 - **`sm-*` presets render the state-machine playground instead** — same

@@ -5,10 +5,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this is
 
 Software training suite for FRC 2713 — an onboarding curriculum teaching new
-students Python fundamentals. Content lives in `lessons/`; a React + Vite app
-in `site/` renders it as an interactive site (live Python execution via
-Pyodide/WebAssembly, no server). Deployed to GitHub Pages on every push to
-`main` via `.github/workflows/deploy-pages.yml`.
+students Java fundamentals (the language FRC robot code is written in).
+Content lives in `lessons/`; a React + Vite app in `site/` renders it as an
+interactive site (live Java compile+run via CheerpJ/WebAssembly, no server).
+Deployed to GitHub Pages on every push to `main` via
+`.github/workflows/deploy-pages.yml`.
 
 ## Commands
 
@@ -39,18 +40,23 @@ folder until it's restarted.
     smaller (`##`, `###`) stays within the current page. This is not a
     markdown convention, it's what `splitIntoPages` in `site/src/lib/lessons.ts`
     literally parses on.
-  - ` ```python ` fences are live/runnable, not decoration — only the first one
-    per page becomes "the" runnable snippet (`firstPythonSnippet`). Use
+  - ` ```java ` fences are live/runnable, not decoration — only the first one
+    per page becomes "the" runnable snippet (`firstJavaSnippet`). Use
     ` ```text ` for output samples or pseudocode that shouldn't be executable.
-  - ` ```blocks ` fences replace the Python playground with the xyflow-based
+    Snippets without a `class`/`enum` declaration are auto-wrapped in a
+    `Main`-class shell (with `import java.util.*;`) by the runtime; snippets
+    that declare a class run as written (see `prepareSource` in
+    `site/src/lib/javaRuntime.ts` and the authoring notes in
+    `lessons/README.md`).
+  - ` ```blocks ` fences replace the Java playground with the xyflow-based
     visual block editor (`BlockPlayground`). The fence body is a directive
     (`preset: <name>`), parsed by `blocksPreset` and stripped from the prose by
     `stripBlocksFence`; presets are defined in `site/src/lib/blockPresets.ts`.
     Preset names defined in `site/src/lib/statePresets.ts` (the `sm-*` trio)
     render the state-machine playground (`StatePlayground`) instead — same
     fence, different renderer, chosen by `isStatePreset`.
-    Lessons 1–4 are the pre-Python block series (arithmetic → conditionals →
-    loops → functions); Python starts at lesson 5; state machines start at
+    Lessons 1–4 are the pre-Java block series (arithmetic → conditionals →
+    loops → functions); Java starts at lesson 5; state machines start at
     lesson 14.
   - `lessons/parked/` holds withdrawn drafts. The site's glob only matches
     `lessons/*/README.md`, so anything nested a level deeper never renders.
@@ -66,12 +72,19 @@ folder until it's restarted.
   heading. This is the single source of truth for how lesson content becomes
   site data; both `LessonIndex` and `LessonView` read from `lessons`/`getLesson`
   here.
-- **Python execution** (`site/src/lib/pythonRuntime.ts`): the only file that
-  knows Pyodide exists. Loads Pyodide lazily from a jsDelivr CDN on first run
-  (not bundled), caches the single instance, and queues concurrent `runPython`
-  calls since stdout/stderr redirection isn't safe to run in parallel across
-  code blocks. Also simplifies Pyodide tracebacks down to just the student's
-  own `<exec>` frames plus the final error message.
+- **Java execution** (`site/src/lib/javaRuntime.ts`): the only file that knows
+  CheerpJ exists. Lazily injects CheerpJ 4.3's `loader.js` from the
+  cjrtnc.leaningtech.com CDN on first run (free Community License requires
+  loading from their CDN; not bundled), then compiles each snippet with a real
+  javac (`com.sun.tools.javac.Main` from the OpenJDK 8 `tools.jar` vendored in
+  `site/public/`) and runs the resulting class — all inside the in-browser JVM.
+  Bare-statement snippets are auto-wrapped in a `Main` shell (`prepareSource`),
+  and compile diagnostics are rewritten to the student's own line numbers.
+  Runtime stack traces have no line numbers under CheerpJ (`Unknown Source`)
+  and the JVM exits 0 even on uncaught exceptions, so run failures are detected
+  by scanning output for `Exception in thread `/`Error: `. Concurrent runs are
+  queued (console capture is global state via a hidden `#console` element), and
+  a warm-up compile during loading absorbs javac's slow first invocation.
 - **Block editor** (`site/src/components/BlockPlayground.tsx` +
   `site/src/lib/blockPresets.ts`): an xyflow dataflow graph of custom node types
   (number/op/compare/if/loop/call/result/input). A pure `valueOf` evaluator
@@ -93,5 +106,5 @@ folder until it's restarted.
   `/lesson/:slug` and `/lesson/:slug/:page` — both handled by `LessonView`.
   Hash routing is required because the site is static-hosted on GitHub Pages.
 - **Components**: `LessonCard` (index listing), `PageNav` (in-lesson page
-  navigation), `PythonRunner` (the editable/runnable code block UI backed by
-  `pythonRuntime.ts`).
+  navigation), `JavaRunner` (the editable/runnable code block UI backed by
+  `javaRuntime.ts`).
