@@ -180,3 +180,8 @@ export function runJava(code: string): Promise<RunOutcome> {
   runQueue = result.catch(() => {})
   return result
 }
+
+// Dev-only hook so lesson snippets can be batch-tested from the console.
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  ;(window as unknown as { __runJava: typeof runJava }).__runJava = runJava
+}
