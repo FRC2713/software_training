@@ -57,7 +57,7 @@ folder until it's restarted.
     fence, different renderer, chosen by `isStatePreset`.
     Lessons 1–4 are the pre-Java block series (arithmetic → conditionals →
     loops → functions); Java starts at lesson 5; state machines start at
-    lesson 15.
+    lesson 17.
   - `lessons/parked/` holds withdrawn drafts. The site's glob only matches
     `lessons/*/README.md`, so anything nested a level deeper never renders.
 - `site/` — the React + TypeScript + Vite app. See `site/README.md` for the
@@ -95,21 +95,31 @@ folder until it's restarted.
   block" mini-canvases. Node types and the evaluator must stay in sync — adding
   a block type means handling it in `valueOf`, `stepOrder`, `nodeTypes`, and
   `createNode`.
-  - The **if** block is lesson 2's conditional: it absorbs what used to be a
-    separate "compare" block (two operands `a`/`b` plus an operator `>`/`<`/
-    `=`/`≠`) and has **two named output handles**, `'true'` and `'false'`,
-    instead of one. Exactly one is "energized" per evaluation (resolves to
-    `true`); the other resolves to `'?'` — a hardware-switch metaphor, not a
-    value selector.
-  - Any node can be wired from an if-block's rail into an input handle named
+  - The **if** block is lesson 2's conditional, rendered as a classic
+    flowchart **decision diamond** (a rotated-square `.blk-diamond`, not
+    clip-path, so borders/glow work). It takes two operands `a`/`b` plus an
+    operator (`>`/`<`/`=`/`≠`) and has **two named output handles**, `'true'`
+    (exits left) and `'false'` (exits right); edges from those handles are
+    auto-labelled `true`/`false` (in `wire()` and `onConnect`). Exactly one
+    handle resolves to `true` per evaluation; the other resolves to `'?'` —
+    it's a branch the program didn't take, not a value selector.
+  - Any node can be wired from a diamond's arrow into an input handle named
     `'gate'`; a generic check at the top of `valueOf` forces that node's result
     to `'?'` unless its gate resolves to `true`. The **outlet** node
-    (`gate` + `value` in, one value out) is the only block that currently
-    exposes this, used to attach a plain number to a rail so it only "shows
-    through" when its rail is live.
-  - Because a rail's outlet is a separate node from whatever feeds the
-    if-block's `a`/`b`, two branches can legitimately converge on the same
-    downstream target (e.g. both outlets wired to `result`). `resolveInput`
+    (`gate` + `value` in, one value out; student-facing name **"answer"**, its
+    gate row labelled "when" — the type string stays `'outlet'`) is the only
+    block that currently exposes this: it's "the step that runs on this
+    branch", producing its value only on the path taken.
+  - **"Run step by step" is branch-aware**: when a diamond's condition
+    evaluates to a boolean, every node gated from its untaken handle gets
+    `data.skipped` (dimmed via `.blk-skipped`/`.edge-skipped`), is excluded
+    from activation, and its wires never animate; edges in general only
+    animate when their source resolves to a real value (non-`'?'`). The skip
+    rule is deliberately local — only nodes gated *directly* from the dead
+    arrow — anything further downstream just resolves `'?'` as usual.
+  - Because a branch's answer block is a separate node from whatever feeds the
+    diamond's `a`/`b`, two branches can legitimately converge on the same
+    downstream target (e.g. both answers wired to `result`). `resolveInput`
     handles this by trying every edge into a handle and returning the first
     non-`'?'` value; `onConnect` only enforces "one wire per handle" for named
     handles, deliberately allowing multiple wires into a node's anonymous

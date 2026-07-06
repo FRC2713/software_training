@@ -92,7 +92,7 @@ function prepareSource(code: string): PreparedSource {
   const declarations = [...withoutComments.matchAll(/\b(?:class|enum)\s+(\w+)/g)]
   if (declarations.length > 0) {
     // Run the class that owns main(): the last type declared before the main
-    // method (snippets can hold several classes, e.g. lesson 19). The public
+    // method (snippets can hold several classes, e.g. lesson 21). The public
     // class must also match the filename, and in our lessons that is always
     // the class with main. A snippet with no main still compiles for feedback.
     const mainIndex = withoutComments.search(/\bstatic\s+void\s+main\b/)

@@ -78,6 +78,6 @@ System.out.println("Battery: " + voltage + " volts");
 ```
 
 Your turn: start with the text `"9"`, convert it with `Integer.parseInt`, and
-print that number **doubled**. If you see `99` instead of `18`, you've just
+print that number **plus 5**. If you see `95` instead of `14`, you've just
 met the glue-instead-of-add bug from the top of this page — look at where the
 conversion happens.

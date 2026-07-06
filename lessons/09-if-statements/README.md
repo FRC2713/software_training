@@ -5,11 +5,11 @@ order: 9
 section: "Java Fundamentals"
 ---
 
-# The if block, in text
+# The decision diamond, in text
 
-Remember the **if** block from [lesson 2](#/lesson/02-conditionals)? It asked a true/false question and then
-took one path or the other, always throwing one branch away. Java writes that
-same idea with the word **`if`**:
+Remember the **decision diamond** from [lesson 2](#/lesson/02-conditionals)? It asked a true/false question and then
+took one path or the other, skipping the branch it didn't take. Java writes
+that same idea with the word **`if`**:
 
 ```java
 int temperature = 5;
@@ -22,20 +22,20 @@ System.out.println("Have a good day.");
 Three things to notice:
 
 - **The question** goes in parentheses: `(temperature < 10)` — a comparison
-  that works out to `true` or `false`, just like the compare block.
-- **The curly braces `{ }`** wrap the `✓ then` branch — everything between
+  that works out to `true` or `false`, just like the question in the diamond.
+- **The curly braces `{ }`** wrap the `true` branch — everything between
   them runs *only* when the question is true. (The indentation is for human
   eyes; Java only cares about the braces.)
 - **The last line** runs no matter what, because it's outside the braces — not
   part of the `if`.
 
-The braces replace the arrows you used to drag into the `if` block. Run it,
+The braces replace the arrows leaving the diamond. Run it,
 then change `temperature` to `20` and run again — the jacket line vanishes,
 but the "good day" line always prints.
 
 # Both paths: else
 
-[Lesson 2's](#/lesson/02-conditionals) `if` block always had *two* branches — a `✓ then` and a `✗ else`.
+[Lesson 2's](#/lesson/02-conditionals) diamond always had *two* arrows — a `true` arrow and a `false` arrow.
 Java spells the second one **`else`**:
 
 ```java

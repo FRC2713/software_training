@@ -1,7 +1,7 @@
 ---
-title: "Lesson 13: Maps"
+title: "Lesson 14: Maps"
 goal: "Store values under names you choose instead of numbered positions, and look them up by those names."
-order: 13
+order: 14
 section: "Data Structures"
 ---
 
@@ -27,7 +27,7 @@ System.out.println(motorSpeeds.get("intake"));
 
 The type `HashMap<String, Double>` names both halves: keys are `String`s,
 values are `Double`s (that's `double` from [lesson 8](#/lesson/08-numbers-and-text), dressed up so it can
-live in a collection — same idea as `ArrayList<Integer>` in [lesson 12](#/lesson/12-arrays)).
+live in a collection — same idea as `ArrayList<Integer>` in [lesson 13](#/lesson/13-arraylists)).
 `motorSpeeds.get("shooter")` hands back `1.0`. It reads like plain English, and
 you never have to remember which position is which. A map is perfect for
 **robot configuration**: settings filed under names you'll recognize six

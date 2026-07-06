@@ -20,18 +20,19 @@ import { createNode, getPreset, type FunctionDef, type ToolbarItem } from '../li
 import './BlockPlayground.css'
 
 // The block editor is a tiny visual programming language that grows across the
-// first four lessons: number/operation blocks (sequences), compare + if blocks
-// (conditionals), a repeat block that iterates (loops), and call blocks backed
-// by reusable sub-flowcharts (functions). "Run step by step" walks the graph in
-// dependency order so a student watches the computer evaluate one block at a
-// time — the point of the whole series.
+// first four lessons: number/operation blocks (sequences), a decision diamond
+// that branches (conditionals), a repeat block that iterates (loops), and call
+// blocks backed by reusable sub-flowcharts (functions). "Run step by step"
+// walks the graph in dependency order so a student watches the computer
+// evaluate one block at a time — and skips the blocks on an if-branch the
+// program didn't take, like code that never runs.
 
 export type Op = 'add' | 'sub' | 'mul'
 export type Cmp = 'gt' | 'lt' | 'eq' | 'neq'
 
-// A value can be a number, a boolean (from an if-block's switch), or '?' once
-// we hit a block whose inputs aren't all connected — or aren't powered — so
-// the student sees exactly where the flow breaks.
+// A value can be a number, a boolean (a decision diamond's answer), or '?'
+// once we hit a block whose inputs aren't all connected — or that sits on a
+// branch the program didn't take — so the student sees where the flow breaks.
 type Value = number | boolean | '?'
 
 const OP_SYMBOL: Record<Op, string> = { add: '+', sub: '−', mul: '×' }
@@ -58,6 +59,7 @@ const fmt = (v: Value | null): string =>
 interface BaseData {
   active: boolean
   shown: Value | null // the value revealed during a step-by-step run
+  skipped?: boolean // set during a run on blocks along an untaken if-branch
   [key: string]: unknown
 }
 interface NumberData extends BaseData {
@@ -71,8 +73,9 @@ interface InputData extends BaseData {
 interface OpData extends BaseData {
   op: Op
 }
-// The if-block is a switch: it takes two operands and an operator, and
-// energizes exactly one of its two output rails ('true' or 'false').
+// The if-block is a decision diamond: it asks a yes/no question about its two
+// operands, and the program follows exactly one of its two arrows out
+// ('true' or 'false').
 interface IfData extends BaseData {
   cmp: Cmp
 }
@@ -91,11 +94,18 @@ interface CallData extends BaseData {
 // Editing a value invalidates every revealed result, so we wipe them all and
 // let the student re-run to see the new answer flow through.
 function clearShownValues(nodes: Node[]): Node[] {
-  return nodes.map((n) => ({ ...n, data: { ...n.data, shown: null, active: false } }))
+  return nodes.map((n) => ({ ...n, data: { ...n.data, shown: null, active: false, skipped: false } }))
+}
+
+// Wires carry run styling too (animation on live wires, dimming on a skipped
+// branch), so whatever invalidates the nodes' revealed values must also strip
+// the edges back to neutral.
+function clearEdgeRunState(edges: Edge[]): Edge[] {
+  return edges.map((e) => ({ ...e, animated: false, className: undefined }))
 }
 
 function NumberNode({ id, data }: NodeProps<Node<NumberData>>) {
-  const { setNodes } = useReactFlow()
+  const { setNodes, setEdges } = useReactFlow()
   return (
     <div className={`blk blk-number${data.active ? ' blk-active' : ''}`}>
       <span className="blk-tag">number</span>
@@ -104,13 +114,14 @@ function NumberNode({ id, data }: NodeProps<Node<NumberData>>) {
           className="nodrag blk-input"
           type="number"
           value={data.value}
-          onChange={(e) =>
+          onChange={(e) => {
+            setEdges(clearEdgeRunState)
             setNodes((nodes) =>
               clearShownValues(nodes).map((n) =>
                 n.id === id ? { ...n, data: { ...n.data, value: Number(e.target.value) } } : n,
               ),
             )
-          }
+          }}
         />
       ) : (
         <span className="blk-value">{data.value}</span>
@@ -143,29 +154,24 @@ function OpNode({ data }: NodeProps<Node<OpData>>) {
   )
 }
 
-// Shared layout for the multi-input blocks (if, loop, call): the labelled
-// inputs sit across the top, each with a handle above it, and the operator's
-// title sits below — so the graph reads top-to-bottom like code. `outputs`
-// swaps the usual single anonymous bottom handle for two named, labelled ones
-// (used by the if-block's two output rails); `liveOutput` marks which of them
-// is currently energized so the student can see the branch actually taken.
+// Shared layout for the multi-input blocks (outlet, call): the labelled
+// inputs sit across the top, each with a handle above it, and the block's
+// title sits below — so the graph reads top-to-bottom like code.
 function MultiNode({
   title,
   rows,
-  outputs,
-  liveOutput,
   shown,
   active,
+  skipped,
 }: {
   title: string
   rows: { id: string; label: string }[]
-  outputs?: { id: string; label: string }[]
-  liveOutput?: string | null
   shown: Value | null
   active: boolean
+  skipped?: boolean
 }) {
   return (
-    <div className={`blk blk-multi${active ? ' blk-active' : ''}`}>
+    <div className={`blk blk-multi${active ? ' blk-active' : ''}${skipped ? ' blk-skipped' : ''}`}>
       <div className="blk-inputs">
         {rows.map((row, i) => (
           <div className="blk-cell" key={row.id}>
@@ -183,75 +189,55 @@ function MultiNode({
         {title}
         {shown !== null && <span className="blk-multi-shown">{fmt(shown)}</span>}
       </div>
-      {outputs ? (
-        <div className="blk-outputs">
-          {outputs.map((out, i) => (
-            <div
-              className={`blk-cell${liveOutput === out.id ? ' blk-out-live' : ''}`}
-              key={out.id}
-            >
-              <span className="blk-row-label">{out.label}</span>
-              <Handle
-                type="source"
-                id={out.id}
-                position={Position.Bottom}
-                style={{ left: `${((i + 0.5) / outputs.length) * 100}%` }}
-              />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <Handle type="source" position={Position.Bottom} />
-      )}
+      <Handle type="source" position={Position.Bottom} />
     </div>
   )
 }
 
-// The if-block: a switch. It takes two operands and an operator (absorbing
-// what used to be a separate "compare" block) and energizes exactly one of
-// its two output rails — nothing flows down the other one. Downstream blocks
-// wired to a rail's "gate" input only produce a value while their rail is hot.
+// The if-block: a classic flowchart decision diamond. It asks a yes/no
+// question about its two operands, and the program follows exactly one of the
+// two arrows leaving it — 'true' out the left point, 'false' out the right.
+// Blocks gated from the arrow not taken get skipped, like code that never runs.
 function IfNode({ data }: NodeProps<Node<IfData>>) {
-  const live = data.shown === true ? 'true' : data.shown === false ? 'false' : null
   return (
-    <MultiNode
-      title={`if a ${CMP_SYMBOL[data.cmp]} b`}
-      rows={[
-        { id: 'a', label: 'a' },
-        { id: 'b', label: 'b' },
-      ]}
-      outputs={[
-        { id: 'true', label: '✓ true' },
-        { id: 'false', label: '✗ false' },
-      ]}
-      liveOutput={live}
-      shown={null}
-      active={data.active}
-    />
+    <div className={`blk-diamond${data.active ? ' blk-active' : ''}`}>
+      <Handle type="target" id="a" position={Position.Top} style={{ left: '38%' }} />
+      <Handle type="target" id="b" position={Position.Top} style={{ left: '62%' }} />
+      <div className="blk-diamond-shape" />
+      <div className="blk-diamond-label">
+        <span className="blk-diamond-question">a {CMP_SYMBOL[data.cmp]} b ?</span>
+        {data.shown !== null && <span className="blk-diamond-outcome">→ {fmt(data.shown)}</span>}
+      </div>
+      <Handle type="source" id="true" position={Position.Left} style={{ top: '50%' }} />
+      <Handle type="source" id="false" position={Position.Right} style={{ top: '50%' }} />
+    </div>
   )
 }
 
-// A pass-through: it only lets its wired `value` through while its `gate`
-// input is powered (wired from one of an if-block's rails). Otherwise it
-// reads '?' — the untaken branch, made visible.
+// The "answer" block: the step that runs on one branch of a decision. It
+// produces its wired `value` only when its `gate` input ("when", wired from a
+// diamond's arrow) is on the path the program took. On the untaken branch it
+// gets skipped — code that never runs, made visible.
 function OutletNode({ data }: NodeProps<Node<BaseData>>) {
   return (
     <MultiNode
-      title="⏚"
+      title="answer"
       rows={[
-        { id: 'gate', label: 'power' },
+        { id: 'gate', label: 'when' },
         { id: 'value', label: 'value' },
       ]}
       shown={data.shown}
       active={data.active}
+      skipped={data.skipped}
     />
   )
 }
 
 function LoopNode({ id, data }: NodeProps<Node<LoopData>>) {
-  const { setNodes } = useReactFlow()
+  const { setNodes, setEdges } = useReactFlow()
   const setField = (field: 'start' | 'step') => (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value)
+    setEdges(clearEdgeRunState)
     setNodes((nodes) =>
       clearShownValues(nodes).map((n) => (n.id === id ? { ...n, data: { ...n.data, [field]: value } } : n)),
     )
@@ -323,7 +309,7 @@ const nodeTypes = {
 type FnMap = Record<string, FunctionDef>
 
 // All edges wired into a given (node, handle) target — usually one, but a
-// convergence point downstream of an if-block's two rails (like `result`)
+// convergence point downstream of a diamond's two branches (like `result`)
 // legitimately has two, only one of which is ever live at a time.
 function edgesInto(edges: Edge[], target: string, handle: string | null): Edge[] {
   return edges.filter((e) => e.target === target && (e.targetHandle ?? null) === handle)
@@ -350,8 +336,8 @@ function resolveInput(
 }
 
 // Resolve a node's value at a given output handle (most node types have only
-// one, unnamed output; the if-block has two — 'true' and 'false' — which
-// carry different values depending on which rail is energized).
+// one, unnamed output; the if-block has two — 'true' and 'false' — and only
+// the one on the branch the program takes resolves to a value).
 function valueOf(
   id: string,
   outHandle: string | null,
@@ -370,8 +356,9 @@ function valueOf(
   const node = nodes.find((n) => n.id === id)
   const input = (handle: string | null): Value => resolveInput(id, handle, nodes, edges, fns, memo, stack)
 
-  // Any block can be wired from an if-block's rail into its 'gate' input —
-  // it only produces a value while that rail is energized (i.e. `true`).
+  // Any block can be wired from a decision diamond's arrow into its 'gate'
+  // input — it only produces a value while its arrow is the branch the
+  // program took (i.e. resolves `true`).
   let result: Value = '?'
   const gated = edgesInto(edges, id, 'gate').length > 0
   if (gated && input('gate') !== true) {
@@ -500,17 +487,25 @@ function Playground({ preset }: { preset: string }) {
       setNodes(clearShownValues)
       // Each named input handle accepts a single wire — drop any existing one
       // first. The anonymous target handle (only `result` uses it) is the one
-      // place two wires legitimately converge: the if-block's two rails, each
-      // ending in an outlet, both feeding the same result.
+      // place two wires legitimately converge: the diamond's two branches,
+      // each ending in an answer block, both feeding the same result.
+      // Arrows drawn from a diamond's true/false handles get labelled, same
+      // as the preset-defined ones.
+      const labelled =
+        params.sourceHandle === 'true' || params.sourceHandle === 'false'
+          ? { ...params, label: params.sourceHandle }
+          : params
       setEdges((eds) =>
         addEdge(
-          params,
-          params.targetHandle == null
-            ? eds
-            : eds.filter(
-                (e) =>
-                  !(e.target === params.target && (e.targetHandle ?? null) === (params.targetHandle ?? null)),
-              ),
+          labelled,
+          clearEdgeRunState(
+            params.targetHandle == null
+              ? eds
+              : eds.filter(
+                  (e) =>
+                    !(e.target === params.target && (e.targetHandle ?? null) === (params.targetHandle ?? null)),
+                ),
+          ),
         ),
       )
     },
@@ -521,12 +516,13 @@ function Playground({ preset }: { preset: string }) {
     (item: ToolbarItem) => {
       const id = `n${nextId.current++}`
       const offset = nextId.current * 8
+      setEdges(clearEdgeRunState)
       setNodes((nds) => [
         ...clearShownValues(nds),
         createNode(item, id, { x: 40 + offset, y: 40 + offset }),
       ])
     },
-    [setNodes],
+    [setNodes, setEdges],
   )
 
   // Reset means "start over": rebuild the preset's original blocks and wiring
@@ -550,26 +546,31 @@ function Playground({ preset }: { preset: string }) {
     const token = ++runToken.current
     setRunning(true)
     setNodes(clearShownValues)
-    setEdges((eds) => eds.map((e) => ({ ...e, animated: false })))
+    setEdges(clearEdgeRunState)
 
     const memo = new Map<string, Value>()
     const stack = new Set<string>()
     const order = stepOrder(nodes, edges)
+    // Blocks on an if-branch the program didn't take. Each diamond marks its
+    // dead arrow's targets as it evaluates (stepOrder guarantees the diamond
+    // runs before anything gated on it), and the loop skips them outright —
+    // like lines of code the program never reaches.
+    const skippedIds = new Set<string>()
 
     for (const id of order) {
+      if (skippedIds.has(id)) continue
       await sleep(700)
       if (token !== runToken.current) return
       const node = nodes.find((n) => n.id === id)
       if (!node) continue
 
-      // Highlight this block and light up the wires feeding it. A wire into a
-      // 'gate' input only lights up if it's actually energized — so the
-      // untaken branch of an if-block stays visibly dark, not just unused.
+      // Highlight this block and light up the wires feeding it — but only
+      // wires that actually carry a value. A wire from an untaken branch
+      // resolves '?' and stays dark, so the road not taken never lights up.
       setNodes((nds) => nds.map((n) => ({ ...n, data: { ...n.data, active: n.id === id } })))
       const live = (e: Edge) =>
         e.target === id &&
-        (e.targetHandle !== 'gate' ||
-          valueOf(e.source, e.sourceHandle ?? null, nodes, edges, fns, memo, stack) === true)
+        valueOf(e.source, e.sourceHandle ?? null, nodes, edges, fns, memo, stack) !== '?'
       setEdges((eds) => eds.map((e) => ({ ...e, animated: live(e) })))
 
       if (node.type === 'loop') {
@@ -596,6 +597,31 @@ function Playground({ preset }: { preset: string }) {
         const trueVal = valueOf(id, 'true', nodes, edges, fns, memo, stack)
         const cond = trueVal === true ? true : valueOf(id, 'false', nodes, edges, fns, memo, stack) === true ? false : '?'
         setShown(id, cond)
+        // The decision made, the branch not taken dies: every block gated
+        // from the dead arrow is skipped — dimmed, never activated, its
+        // wires never lit. (An unanswerable question — cond '?' — skips
+        // nothing: that's a broken graph, not an untaken branch.)
+        if (typeof cond === 'boolean') {
+          const dead = cond ? 'false' : 'true'
+          const deadTargets = new Set(
+            edges
+              .filter((e) => e.source === id && e.sourceHandle === dead && e.targetHandle === 'gate')
+              .map((e) => e.target),
+          )
+          if (deadTargets.size > 0) {
+            for (const t of deadTargets) skippedIds.add(t)
+            setNodes((nds) =>
+              nds.map((n) => (deadTargets.has(n.id) ? { ...n, data: { ...n.data, skipped: true } } : n)),
+            )
+            setEdges((eds) =>
+              eds.map((e) =>
+                deadTargets.has(e.source) || deadTargets.has(e.target)
+                  ? { ...e, className: 'edge-skipped' }
+                  : e,
+              ),
+            )
+          }
+        }
       } else {
         setShown(id, valueOf(id, null, nodes, edges, fns, memo, stack))
       }

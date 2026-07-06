@@ -45,8 +45,8 @@ const op = (id: string, operation: 'add' | 'sub' | 'mul', x: number, y: number):
   data: { op: operation, active: false, shown: null },
 })
 
-// The if-block is a switch: two operands and an operator go in, and exactly
-// one of its two output rails ('true'/'false') is energized.
+// The if-block is a decision diamond: two operands and an operator go in, and
+// the program follows exactly one of its two arrows out ('true'/'false').
 const ifBlock = (id: string, cmp: 'gt' | 'lt' | 'eq' | 'neq', x: number, y: number): Node => ({
   id,
   type: 'if',
@@ -54,8 +54,9 @@ const ifBlock = (id: string, cmp: 'gt' | 'lt' | 'eq' | 'neq', x: number, y: numb
   data: { cmp, active: false, shown: null },
 })
 
-// A pass-through: only lets its wired `value` through while its `gate` input
-// (wired from an if-block's rail) is energized.
+// The "answer" block: the step that runs on one branch of a decision. It
+// produces its wired `value` only when its `gate` input ("when", wired from a
+// diamond's arrow) is on the path the program took.
 const outlet = (id: string, x: number, y: number): Node => ({
   id,
   type: 'outlet',
@@ -100,12 +101,15 @@ const result = (id: string, x: number, y: number): Node => ({
   data: { active: false, shown: null },
 })
 
+// Arrows leaving a decision diamond's true/false handles get labelled, so the
+// graph reads like a textbook flowchart branch.
 const wire = (source: string, target: string, targetHandle?: string, sourceHandle?: string): Edge => ({
   id: `${source}-${sourceHandle ?? 'out'}-${target}-${targetHandle ?? 'in'}`,
   source,
   target,
   targetHandle,
   sourceHandle,
+  ...(sourceHandle === 'true' || sourceHandle === 'false' ? { label: sourceHandle } : {}),
 })
 
 const IF_CMP: Record<string, 'gt' | 'lt' | 'eq' | 'neq'> = {
@@ -188,20 +192,20 @@ const build: BlockPreset = {
 
 // ---- Lesson 2: conditionals ------------------------------------------------
 
-// "the larger of two numbers": the if-block is a switch. a > b energizes its
-// true rail; otherwise its false rail. Each rail feeds an outlet wired to the
-// matching number — an outlet only passes its value through while its rail
-// is hot, so only one of the two ever reaches the result.
+// "the larger of two numbers": the diamond asks a > b, and the program follows
+// exactly one of its two arrows — true down-left, false down-right. Each arrow
+// leads to an "answer" block wired to the matching number; the answer on the
+// untaken branch is skipped, so only one value ever reaches the result.
 const condDemo: BlockPreset = {
   connectable: false,
   toolbar: [],
   nodes: [
-    num('a', 7, 0, 0),
-    num('b', 4, 220, 0),
-    ifBlock('sw', 'gt', 90, 160),
-    outlet('outTrue', 10, 340),
-    outlet('outFalse', 220, 340),
-    result('out', 120, 500),
+    num('a', 7, 20, 0),
+    num('b', 4, 300, 0),
+    ifBlock('sw', 'gt', 145, 120),
+    outlet('outTrue', 0, 320),
+    outlet('outFalse', 320, 320),
+    result('out', 165, 490),
   ],
   edges: [
     wire('a', 'sw', 'a'),
@@ -219,12 +223,12 @@ const condEdit: BlockPreset = {
   connectable: false,
   toolbar: [],
   nodes: [
-    num('a', 7, 0, 0, true),
-    num('b', 4, 220, 0, true),
-    ifBlock('sw', 'gt', 90, 160),
-    outlet('outTrue', 10, 340),
-    outlet('outFalse', 220, 340),
-    result('out', 120, 500),
+    num('a', 7, 20, 0, true),
+    num('b', 4, 300, 0, true),
+    ifBlock('sw', 'gt', 145, 120),
+    outlet('outTrue', 0, 320),
+    outlet('outFalse', 320, 320),
+    result('out', 165, 490),
   ],
   edges: [
     wire('a', 'sw', 'a'),
@@ -246,9 +250,9 @@ const condBuild: BlockPreset = {
     { kind: 'ifLt', label: 'if <' },
     { kind: 'ifEq', label: 'if =' },
     { kind: 'ifNeq', label: 'if ≠' },
-    { kind: 'outlet', label: 'outlet' },
+    { kind: 'outlet', label: 'answer' },
   ],
-  nodes: [num('a', 5, 0, 0, true), num('b', 8, 200, 0, true), result('out', 100, 340)],
+  nodes: [num('a', 5, 0, 0, true), num('b', 8, 260, 0, true), result('out', 130, 440)],
   edges: [],
 }
 

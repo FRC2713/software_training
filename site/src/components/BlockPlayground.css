@@ -190,20 +190,71 @@
   color: var(--text);
 }
 
-/* The if-block's two output rails — only one is energized ("live") per run. */
-.blk-outputs {
+/* ---- Decision diamond (if block) ------------------------------------------ */
+
+/* Classic flowchart diamond, built from a rotated square so the border and
+   the active glow render normally (clip-path would swallow both). Handles and
+   the label sit on the unrotated wrapper. */
+.blk-diamond {
+  position: relative;
+  width: 148px;
+  height: 104px;
+  font-family: var(--mono);
+  color: var(--text-h);
+}
+
+.blk-diamond-shape {
+  position: absolute;
+  inset: 15% 26%;
+  transform: rotate(45deg) scaleY(0.72);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.blk-diamond.blk-active .blk-diamond-shape {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.blk-diamond-label {
+  position: absolute;
+  inset: 0;
   display: flex;
-  align-items: stretch;
-  border-top: 1px solid var(--border);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  pointer-events: none;
 }
 
-.blk-out-live {
-  background: var(--accent-bg);
-}
-
-.blk-out-live .blk-row-label {
-  color: var(--accent);
+.blk-diamond-question {
+  font-size: 14px;
   font-weight: 700;
+}
+
+.blk-diamond-outcome {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* ---- Skipped branch: the road not taken, rendered like code that never ran */
+
+.blk-skipped {
+  opacity: 0.45;
+  border-style: dashed;
+}
+
+.react-flow__edge.edge-skipped .react-flow__edge-path {
+  opacity: 0.35;
+  stroke-dasharray: 5 4;
+}
+
+.react-flow__edge.edge-skipped .react-flow__edge-textwrapper {
+  opacity: 0.4;
 }
 
 /* ---- Loop block: start/step are edited right on the block ---------------- */
@@ -277,4 +328,15 @@
 
 .react-flow__edge.animated .react-flow__edge-path {
   stroke: var(--accent);
+}
+
+/* true/false labels on the arrows leaving a decision diamond */
+.react-flow__edge-text {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text);
+}
+
+.react-flow__edge-textbg {
+  fill: var(--code-bg);
 }

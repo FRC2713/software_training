@@ -96,21 +96,9 @@ System.out.println("Total points: " + total);
 Same pattern as always — declare a total *before* the loop, update it *inside*.
 
 One thing an array **can't** do is grow: it's created with a fixed number of
-slots and keeps them forever. When you need a group that grows and shrinks,
-Java has `ArrayList`:
-
-```java
-ArrayList<Integer> scores = new ArrayList<>();
-scores.add(10);
-scores.add(25);
-scores.add(15);
-System.out.println(scores);
-```
-
-`.add(...)` sticks a new value on the end, and the list just gets bigger. You'll
-see `ArrayList` (and its relatives) all over real robot code alongside plain
-arrays. For now, arrays are the concept to nail down — a fixed row of numbered
-slots.
+slots and keeps them forever. [Next lesson](#/lesson/13-arraylists) covers
+`ArrayList`, Java's group that grows and shrinks — but nail down arrays first:
+a fixed row of numbered slots.
 
 Your turn: make an array of five sensor `readings`, then loop through and print
 only the ones **above 20** (you'll need an `if` inside the `for` — [lesson 9](#/lesson/09-if-statements)

@@ -1,7 +1,7 @@
 ---
-title: "Lesson 18: Organizing a state machine"
+title: "Lesson 20: Organizing a state machine"
 goal: "Make a machine safe and tidy with an enum for the states, enter actions, and a class to hold it all together."
-order: 18
+order: 20
 section: "State Machines"
 ---
 
@@ -52,7 +52,7 @@ Two details worth noticing:
   states" is now enforced by the compiler.
 - Enums are compared with `==` — the one place text-like values get to use it
   safely, because there's exactly one `HandlerState.LOADED` in the whole
-  program. (Strings still need `.equals`, as [lesson 14](#/lesson/14-booleans) warned.)
+  program. (Strings still need `.equals`, as [lesson 16](#/lesson/16-booleans) warned.)
 
 This is exactly how real FRC robot code names its states, so everything from
 here on is the real-world shape.

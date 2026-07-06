@@ -1,7 +1,7 @@
 ---
-title: "Lesson 14: true, false, and combining conditions"
+title: "Lesson 16: true, false, and combining conditions"
 goal: "Treat yes/no answers as real values and combine them with &&, ||, and ! to make safe decisions."
-order: 14
+order: 16
 section: "Java Fundamentals"
 ---
 

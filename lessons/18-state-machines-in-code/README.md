@@ -1,13 +1,13 @@
 ---
-title: "Lesson 16: State machines in code"
+title: "Lesson 18: State machines in code"
 goal: "Turn the state diagram from last lesson into Java — a state variable, transitions, and the loop that drives them."
-order: 16
+order: 18
 section: "State Machines"
 ---
 
 # The current state is just a variable
 
-[Last lesson](#/lesson/15-state-machines) you drove state machines as diagrams: a machine sits in one state and
+[Last lesson](#/lesson/17-state-machines) you drove state machines as diagrams: a machine sits in one state and
 moves along an arrow when an event happens. Now we write that in Java — and the
 first piece is something you already know cold. **The current state is just a
 variable.**
@@ -24,10 +24,10 @@ if (state.equals("red")) {
 }
 ```
 
-That's the traffic light from [lesson 15](#/lesson/15-state-machines). One variable, `state`, holds which state
+That's the traffic light from [lesson 17](#/lesson/17-state-machines). One variable, `state`, holds which state
 the machine is in right now; an `if/else if` ([lesson 9](#/lesson/09-if-statements)) picks the behavior for
 that state. The glowing box in the diagram *is* this variable — nothing more.
-(The states are text, so we ask with `.equals`, the habit from [lesson 14](#/lesson/14-booleans).)
+(The states are text, so we ask with `.equals`, the habit from [lesson 16](#/lesson/16-booleans).)
 
 Run it, then change `state` to `"green"` and run again. Same code, different
 state, different behavior. Notice you can only be in one state at a time,
