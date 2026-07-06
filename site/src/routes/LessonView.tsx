@@ -2,15 +2,15 @@ import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import type { Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { blocksPreset, firstPythonSnippet, getLesson, nextLesson, stripBlocksFence } from '@/lib/lessons'
-import { PythonRunner } from '@/components/PythonRunner'
+import { blocksPreset, firstJavaSnippet, getLesson, nextLesson, stripBlocksFence } from '@/lib/lessons'
+import { JavaRunner } from '@/components/JavaRunner'
 import { CodeBlock } from '@/components/CodeBlock'
 import { BlockPlayground } from '@/components/BlockPlayground'
 import { StatePlayground } from '@/components/StatePlayground'
 import { isStatePreset } from '@/lib/statePresets'
 import { PageNav } from '@/components/PageNav'
 
-const PLACEHOLDER_CODE = '# Nothing to run on this page yet.\n# Try writing some Python of your own!'
+const PLACEHOLDER_CODE = '// Nothing to run on this page yet.\n// Try writing some Java of your own!'
 
 // Fenced code blocks in the prose render read-only through CodeMirror (same
 // syntax highlighting + line numbers as the playground); the runnable copy of
@@ -56,7 +56,7 @@ export function LessonView() {
   const currentPage = lesson.pages[pageIndex]
   const preset = blocksPreset(currentPage.markdown)
   const prose = preset ? stripBlocksFence(currentPage.markdown) : currentPage.markdown
-  const playgroundCode = firstPythonSnippet(currentPage.markdown) ?? PLACEHOLDER_CODE
+  const playgroundCode = firstJavaSnippet(currentPage.markdown) ?? PLACEHOLDER_CODE
 
   const goTo = (index: number) => navigate(`/lesson/${lesson.slug}/${index + 1}`)
 
@@ -93,7 +93,7 @@ export function LessonView() {
           ) : (
             <>
               <h2 className="mb-3 text-base font-semibold text-primary">▶ Playground</h2>
-              <PythonRunner key={pageIndex} initialCode={playgroundCode} />
+              <JavaRunner key={pageIndex} initialCode={playgroundCode} />
             </>
           )}
         </div>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { EditorView } from '@uiw/react-codemirror'
 
 // Shared CodeMirror styling + dark-mode detection, used by both the runnable
-// playground (PythonRunner) and the read-only prose examples (CodeBlock) so the
+// playground (JavaRunner) and the read-only prose examples (CodeBlock) so the
 // two always look identical.
 
 export function usePrefersDark() {

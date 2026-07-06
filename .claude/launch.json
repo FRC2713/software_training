@@ -2,6 +2,12 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "cheerpj-spike",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["--yes", "serve", "-l", "8377", "/private/tmp/claude-501/-Users-ty-Documents-code-software-training/8f70a107-2f50-4d00-a1f5-533050e20df3/scratchpad/spike"],
+      "port": 8377
+    },
+    {
       "name": "site-dev",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--prefix", "site"],

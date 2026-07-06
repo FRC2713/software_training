@@ -111,15 +111,15 @@ export function nextLesson(slug: string): Lesson | undefined {
   return index === -1 ? undefined : lessons[index + 1]
 }
 
-// Drives the playground panel: a page's first ```python fence is what gets
+// Drives the playground panel: a page's first ```java fence is what gets
 // loaded into it. Pages can still show other code samples in their prose;
 // only this one is treated as "the" runnable snippet for the page.
-export function firstPythonSnippet(markdown: string): string | null {
-  const match = /```python\r?\n([\s\S]*?)```/.exec(markdown)
+export function firstJavaSnippet(markdown: string): string | null {
+  const match = /```java\r?\n([\s\S]*?)```/.exec(markdown)
   return match ? match[1].trimEnd() : null
 }
 
-// A page can swap the Python playground for the visual block editor with a
+// A page can swap the Java playground for the visual block editor with a
 // ```blocks fence whose body names a preset (see lib/blockPresets.ts). The
 // fence is a directive, not content, so it never renders in the prose column.
 const BLOCKS_FENCE = /```blocks\r?\n([\s\S]*?)```/
