@@ -1,7 +1,7 @@
 ---
-title: "Lesson 14: State machines as diagrams"
+title: "Lesson 15: State machines as diagrams"
 goal: "See a machine that's always in exactly one state and moves between states when events happen — before writing a line of code."
-order: 14
+order: 15
 section: "State Machines"
 ---
 
@@ -84,5 +84,5 @@ everything can fall into), or a real mechanism from this year's robot. Sketch it
 states, decide what event moves between each, and wire it up.
 
 Everything you just did by hand — states, events, transitions, ignoring the
-events that don't apply — is exactly what we'll write in Java [next lesson](#/lesson/15-state-machines-in-code). The
+events that don't apply — is exactly what we'll write in Java [next lesson](#/lesson/16-state-machines-in-code). The
 diagram *is* the program; the code just spells it out.

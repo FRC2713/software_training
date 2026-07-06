@@ -1,13 +1,13 @@
 ---
-title: "Lesson 15: State machines in code"
+title: "Lesson 16: State machines in code"
 goal: "Turn the state diagram from last lesson into Java — a state variable, transitions, and the loop that drives them."
-order: 15
+order: 16
 section: "State Machines"
 ---
 
 # The current state is just a variable
 
-[Last lesson](#/lesson/14-state-machines) you drove state machines as diagrams: a machine sits in one state and
+[Last lesson](#/lesson/15-state-machines) you drove state machines as diagrams: a machine sits in one state and
 moves along an arrow when an event happens. Now we write that in Java — and the
 first piece is something you already know cold. **The current state is just a
 variable.**
@@ -24,10 +24,10 @@ if (state.equals("red")) {
 }
 ```
 
-That's the traffic light from [lesson 14](#/lesson/14-state-machines). One variable, `state`, holds which state
-the machine is in right now; an `if/else if` ([lesson 8](#/lesson/08-if-statements)) picks the behavior for
+That's the traffic light from [lesson 15](#/lesson/15-state-machines). One variable, `state`, holds which state
+the machine is in right now; an `if/else if` ([lesson 9](#/lesson/09-if-statements)) picks the behavior for
 that state. The glowing box in the diagram *is* this variable — nothing more.
-(The states are text, so we ask with `.equals`, the habit from [lesson 13](#/lesson/13-booleans).)
+(The states are text, so we ask with `.equals`, the habit from [lesson 14](#/lesson/14-booleans).)
 
 Run it, then change `state` to `"green"` and run again. Same code, different
 state, different behavior. Notice you can only be in one state at a time,
@@ -36,7 +36,7 @@ because a variable holds one value — exactly the rule the diagram enforced.
 # Moving between states
 
 A diagram's arrows said how to move. In code, a transition is just **changing
-the variable**. Let's package "what comes next" as a method ([lesson 10](#/lesson/10-writing-methods)) —
+the variable**. Let's package "what comes next" as a method ([lesson 11](#/lesson/11-writing-methods)) —
 and since methods live in the shell, from here on the snippets show the whole
 program:
 
@@ -65,7 +65,7 @@ public class Main {
 
 Each `state = nextState(state)` is one press of **timer done** from the
 diagram: it looks at where we are and hands back where we go. Run it and watch
-`red → green → yellow`. The reassignment trick from [lesson 6](#/lesson/06-variables) is doing the
+`red → green → yellow`. The reassignment trick from [lesson 7](#/lesson/07-variables) is doing the
 real work — the machine "moves" because we overwrite `state` with its next
 value.
 
@@ -73,7 +73,7 @@ value.
 
 Here's the idea the whole season rests on: a robot doesn't run its code once
 and stop. It runs the same update **over and over, many times a second**.
-That's a loop ([lesson 9](#/lesson/09-loops)) — and dropping our machine inside one makes it *go*:
+That's a loop ([lesson 10](#/lesson/10-loops)) — and dropping our machine inside one makes it *go*:
 
 ```java
 public class Main {

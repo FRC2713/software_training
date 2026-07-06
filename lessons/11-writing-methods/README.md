@@ -1,13 +1,13 @@
 ---
-title: "Lesson 10: Writing your own methods"
+title: "Lesson 11: Writing your own methods"
 goal: "Package steps into a named method and hand back a result with return."
-order: 10
+order: 11
 section: "Java Fundamentals"
 ---
 
 # The program shell, revealed
 
-Since [lesson 5](#/lesson/05-hello-world), the playground has been quietly wrapping your code in a small
+Since [lesson 6](#/lesson/06-hello-world), the playground has been quietly wrapping your code in a small
 "program shell." Time to see it, because the thing you're about to build — a
 reusable block of your own — has to live inside it. Here is what a complete
 Java program really looks like:
@@ -23,13 +23,13 @@ public class Main {
 Two layers, outside-in:
 
 - `public class Main { ... }` — every Java program is a **class**, a named
-  container for code. (Much more on classes in [lesson 17](#/lesson/17-organizing-a-machine).)
+  container for code. (Much more on classes in [lesson 18](#/lesson/18-organizing-a-machine).)
 - `public static void main(String[] args) { ... }` — the **main method**:
   the agreed-upon starting point. When a Java program runs, the computer finds
   `main` and follows its instructions top to bottom. Every line you've written
   so far was living here.
 
-Run it — it behaves exactly like lesson 5's one-liner, because it *is* that
+Run it — it behaves exactly like lesson 6's one-liner, because it *is* that
 program, shell and all. From now on, when a snippet shows the full shell, the
 playground runs it exactly as written; you're seeing the whole truth.
 

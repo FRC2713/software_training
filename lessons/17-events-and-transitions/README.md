@@ -1,7 +1,7 @@
 ---
-title: "Lesson 16: Events and transitions in code"
+title: "Lesson 17: Events and transitions in code"
 goal: "Drive a machine from events, and make each state ignore the events it has no transition for."
-order: 16
+order: 17
 section: "State Machines"
 ---
 
@@ -12,7 +12,7 @@ it. Real mechanisms wait for **specific events**: a button press, a sensor
 tripping, a shot finishing. So a transition depends on **two things**: which
 state you're in, *and* which event just happened.
 
-This is the game-piece handler you drove in [lesson 14](#/lesson/14-state-machines). Here's a single
+This is the game-piece handler you drove in [lesson 15](#/lesson/15-state-machines). Here's a single
 transition from it:
 
 ```java
@@ -26,7 +26,7 @@ if (state.equals("empty") && event.equals("button")) {
 System.out.println(state);
 ```
 
-The `&&` ([lesson 13](#/lesson/13-booleans)) is the key: the machine only moves when it's in `empty`
+The `&&` ([lesson 14](#/lesson/14-booleans)) is the key: the machine only moves when it's in `empty`
 **and** the driver's `button` event happened. Run it — `empty` becomes
 `intaking`. Change `event` to `"sensor"` and run again: nothing changes,
 because `empty` has no transition for `sensor`. That's the diagram's "ignore"
@@ -74,7 +74,7 @@ there.
 # Feeding it a stream of events
 
 A robot gets a new event every tick. We can simulate a whole match by putting
-events in an **array** ([lesson 11](#/lesson/11-arrays)) and running them through the machine one
+events in an **array** ([lesson 12](#/lesson/12-arrays)) and running them through the machine one
 at a time with a for-each loop:
 
 ```java
@@ -105,7 +105,7 @@ public class Main {
 
 Trace the output. That first `"done"` while `empty` does nothing — the machine
 shrugs it off — then the real sequence walks `empty → intaking → loaded →
-shooting → empty`. This is the loop from [last lesson](#/lesson/15-state-machines-in-code), now fed real events
+shooting → empty`. This is the loop from [last lesson](#/lesson/16-state-machines-in-code), now fed real events
 instead of a timer.
 
 Your turn: write the events array that takes the handler through **two full

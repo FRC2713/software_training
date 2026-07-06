@@ -1,7 +1,7 @@
 ---
-title: "Lesson 17: Organizing a state machine"
+title: "Lesson 18: Organizing a state machine"
 goal: "Make a machine safe and tidy with an enum for the states, enter actions, and a class to hold it all together."
-order: 17
+order: 18
 section: "State Machines"
 ---
 
@@ -52,7 +52,7 @@ Two details worth noticing:
   states" is now enforced by the compiler.
 - Enums are compared with `==` — the one place text-like values get to use it
   safely, because there's exactly one `HandlerState.LOADED` in the whole
-  program. (Strings still need `.equals`, as [lesson 13](#/lesson/13-booleans) warned.)
+  program. (Strings still need `.equals`, as [lesson 14](#/lesson/14-booleans) warned.)
 
 This is exactly how real FRC robot code names its states, so everything from
 here on is the real-world shape.
@@ -94,7 +94,7 @@ while you sit in `SHOOTING` — a distinction that matters a lot on a real robot
 
 Right now the state lives in a loose variable and the logic in loose methods.
 As machines grow, that gets hard to keep straight. You met the **class** in
-[lesson 10](#/lesson/10-writing-methods) as the shell every program lives in — but a class is really a
+[lesson 11](#/lesson/11-writing-methods) as the shell every program lives in — but a class is really a
 bundle of *data and the methods that work on it*. Perfect for a machine that
 owns a state and an update:
 

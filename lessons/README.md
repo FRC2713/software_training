@@ -53,7 +53,7 @@ it's the exact content the [training site](../site) renders, page by page.
   so early lessons can run `System.out.println("hi");` directly (and use
   `ArrayList`/`HashMap` before imports are taught). A snippet that declares its
   own class or enum runs **as written** — the class containing `main` is the
-  one executed. Lessons 5–9 rely on wrap mode; lesson 10 reveals the shell and
+  one executed. Lessons 6–10 rely on wrap mode; lesson 11 reveals the shell and
   everything from there uses full files.
 - **` ```blocks ` fences swap the Java playground for the visual block
   editor** (drag-and-drop flowcharts). The fence body is a directive, not
@@ -72,7 +72,7 @@ it's the exact content the [training site](../site) renders, page by page.
   [`site/src/lib/statePresets.ts`](../site/src/lib/statePresets.ts) are routed to
   `StatePlayground` (a drivable state diagram with event buttons) rather than the
   dataflow block editor. They follow the same demo → edit → build arc:
-  `sm-demo` (traffic light, lesson 14), `sm-edit` (game-piece handler), and
+  `sm-demo` (traffic light, lesson 15), `sm-edit` (game-piece handler), and
   `sm-build` (wire up a climber yourself).
 - Keep the `goal` to one sentence. It's shown on the lesson card and at the top
   of the lesson — it should tell a student what they'll be able to do

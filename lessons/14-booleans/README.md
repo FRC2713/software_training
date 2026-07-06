@@ -1,13 +1,13 @@
 ---
-title: "Lesson 13: true, false, and combining conditions"
+title: "Lesson 14: true, false, and combining conditions"
 goal: "Treat yes/no answers as real values and combine them with &&, ||, and ! to make safe decisions."
-order: 13
+order: 14
 section: "Java Fundamentals"
 ---
 
 # Yes and no are values too
 
-Back in [lesson 8](#/lesson/08-if-statements), an `if` asked a question like `score > 10` and acted on the
+Back in [lesson 9](#/lesson/09-if-statements), an `if` asked a question like `score > 10` and acted on the
 answer. That answer is a real value with a type of its own: a **`boolean`**,
 which is either `true` or `false` — the only two it can ever be. Every
 comparison *produces* one:

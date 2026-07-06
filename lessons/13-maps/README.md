@@ -1,8 +1,8 @@
 ---
-title: "Lesson 12: Maps"
+title: "Lesson 13: Maps"
 goal: "Store values under names you choose instead of numbered positions, and look them up by those names."
-order: 12
-section: "Java Fundamentals"
+order: 13
+section: "Data Structures"
 ---
 
 # Labels instead of positions
@@ -26,8 +26,8 @@ System.out.println(motorSpeeds.get("intake"));
 ```
 
 The type `HashMap<String, Double>` names both halves: keys are `String`s,
-values are `Double`s (that's `double` from [lesson 7](#/lesson/07-numbers-and-text), dressed up so it can
-live in a collection — same idea as `ArrayList<Integer>` in [lesson 11](#/lesson/11-arrays)).
+values are `Double`s (that's `double` from [lesson 8](#/lesson/08-numbers-and-text), dressed up so it can
+live in a collection — same idea as `ArrayList<Integer>` in [lesson 12](#/lesson/12-arrays)).
 `motorSpeeds.get("shooter")` hands back `1.0`. It reads like plain English, and
 you never have to remember which position is which. A map is perfect for
 **robot configuration**: settings filed under names you'll recognize six
@@ -82,7 +82,7 @@ That prints `true` then `false`. It's the safe way to look before you leap.
 
 # Looping over a map
 
-Like an array, a map can be walked with a for-each loop ([lesson 11](#/lesson/11-arrays)). Loop
+Like an array, a map can be walked with a for-each loop ([lesson 12](#/lesson/12-arrays)). Loop
 over its `keySet()` — the collection of every key — and use each key to fetch
 its value:
 

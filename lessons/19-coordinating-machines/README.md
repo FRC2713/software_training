@@ -1,7 +1,7 @@
 ---
-title: "Lesson 18: Coordinating machines"
+title: "Lesson 19: Coordinating machines"
 goal: "Run several small state machines in one loop and let them make decisions based on each other."
-order: 18
+order: 19
 section: "State Machines"
 ---
 
@@ -9,7 +9,7 @@ section: "State Machines"
 
 One giant state machine for a whole robot would be a tangle. Real robot code
 uses **several small machines** — one per mechanism — each an object
-([lesson 17](#/lesson/17-organizing-a-machine)) with its own state. Because a class remembers its own state
+([lesson 18](#/lesson/18-organizing-a-machine)) with its own state. Because a class remembers its own state
 field, you can make as many as you want and they don't interfere:
 
 ```java
@@ -55,7 +55,7 @@ and easy to reason about on its own — that's the point of splitting them up.
 
 (One shorthand to spot: `IntakeState state = IntakeState.CLEAR;` sets the
 field's starting value right where it's declared, so these little classes
-don't need a constructor. [Lesson 17's](#/lesson/17-organizing-a-machine) constructor form is what you'll
+don't need a constructor. [Lesson 18's](#/lesson/18-organizing-a-machine) constructor form is what you'll
 want when starting up takes real work.)
 
 # Machines that watch each other
@@ -92,7 +92,7 @@ public class Main {
 }
 ```
 
-The extra `&& intakeState == IntakeState.CLEAR` ([lesson 13](#/lesson/13-booleans) again) is a
+The extra `&& intakeState == IntakeState.CLEAR` ([lesson 14](#/lesson/14-booleans) again) is a
 **guard**: the shooter refuses to fire unless the intake reports it's out of
 the way. Run it — the first attempt is ignored because the intake was
 `HOLDING`; the second works. This cross-machine guard is how you keep two

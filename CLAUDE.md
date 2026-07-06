@@ -57,7 +57,7 @@ folder until it's restarted.
     fence, different renderer, chosen by `isStatePreset`.
     Lessons 1–4 are the pre-Java block series (arithmetic → conditionals →
     loops → functions); Java starts at lesson 5; state machines start at
-    lesson 14.
+    lesson 15.
   - `lessons/parked/` holds withdrawn drafts. The site's glob only matches
     `lessons/*/README.md`, so anything nested a level deeper never renders.
 - `site/` — the React + TypeScript + Vite app. See `site/README.md` for the

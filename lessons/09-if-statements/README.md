@@ -1,7 +1,7 @@
 ---
-title: "Lesson 8: Decisions in code"
+title: "Lesson 9: Decisions in code"
 goal: "Use if, else if, and else to make a program choose between paths."
-order: 8
+order: 9
 section: "Java Fundamentals"
 ---
 
@@ -53,7 +53,7 @@ not taken" from [lesson 2](#/lesson/02-conditionals), in text form.
 
 One thing to watch closely: that's `>=` ("greater than or equal to"), and the
 "is it equal?" test is `==` with **two** equals signs. A single `=` means
-"store a value" ([lesson 6](#/lesson/06-variables)), so Java uses `==` to *ask* about equality. Mixing
+"store a value" ([lesson 7](#/lesson/07-variables)), so Java uses `==` to *ask* about equality. Mixing
 them up is the code version of the `>` vs `≥` bug [lesson 2](#/lesson/02-conditionals) warned about.
 
 Change `score` to `6`, then `5`, and run each time. Convince yourself `>= 6`

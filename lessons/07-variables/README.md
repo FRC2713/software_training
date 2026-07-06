@@ -1,7 +1,7 @@
 ---
-title: "Lesson 6: Naming things"
+title: "Lesson 7: Naming things"
 goal: "Store a value under a typed name so you can reuse it and change it in one place."
-order: 6
+order: 7
 section: "Java Fundamentals"
 ---
 
@@ -24,7 +24,7 @@ the computer reaches in and uses that value.
 The word in front of the name — `String` — is the variable's **type**: what
 *kind* of value it holds. `String` means text. Java makes you say the type up
 front, and in exchange it will catch you the moment you try to put the wrong
-kind of value in — more on this in [lesson 7](#/lesson/07-numbers-and-text).
+kind of value in — more on this in [lesson 8](#/lesson/08-numbers-and-text).
 
 The `+` between `"Hello, "` and `name` **joins** text together into one string,
 so this program prints `Hello, Ada`.

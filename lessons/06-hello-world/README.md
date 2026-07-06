@@ -1,7 +1,7 @@
 ---
-title: "Lesson 5: Hello, World!"
+title: "Lesson 6: Hello, World!"
 goal: "Explain what a program actually is, then write and run your first one."
-order: 5
+order: 6
 section: "Java Fundamentals"
 ---
 
@@ -11,7 +11,9 @@ You've already been building programs — as flowcharts of blocks. Everything yo
 did there carries over: doing steps in order ([lesson 1](#/lesson/01-flowcharts)), making decisions
 ([lesson 2](#/lesson/02-conditionals)), repeating steps ([lesson 3](#/lesson/03-loops)), and packaging steps into reusable pieces
 ([lesson 4](#/lesson/04-functions)). From here on we write those same ideas as **text** instead of wiring
-boxes together. The concepts don't change; only the notation does.
+boxes together. The concepts don't change; only the notation does — and
+[last lesson](#/lesson/05-what-is-java) you already met that notation: braces,
+parentheses, commas, semicolons, quotes.
 
 A **program** is just a list of instructions, written in a language a computer
 can follow exactly, step by step, in order.
@@ -21,13 +23,9 @@ pan." A computer program is the same idea, except the "kitchen" is the
 computer's memory and screen, and the "chef" is the computer itself, which
 will follow your instructions *exactly* as written, including your mistakes.
 
-The language we'll use is called **Java** — the language FRC robot code is
-written in. The robot framework we use, **WPILib**, is a big library of Java
-code, so everything you learn here is exactly what you'll use to make a real
-robot move. Java is also one of the most widely used languages in the world,
-and the ideas it teaches — giving things names, making decisions, repeating
-steps, organizing instructions into reusable pieces — show up in every
-language.
+The robot framework we use, **WPILib**, is a big library of Java code, so
+everything you learn here is exactly what you'll use to make a real robot
+move.
 
 # Your first program
 
@@ -50,7 +48,7 @@ Two things to know about the playground before you press Run:
 - Java instructions normally live inside a small "program shell" of wrapper
   code. The playground writes that shell for you so you can focus on the
   instructions themselves — you'll learn to write the shell yourself in
-  [lesson 10](#/lesson/10-writing-methods).
+  [lesson 11](#/lesson/11-writing-methods).
 
 Press **Run** and watch the output panel below the code.
 
