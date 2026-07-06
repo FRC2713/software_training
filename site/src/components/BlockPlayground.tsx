@@ -27,11 +27,11 @@ import './BlockPlayground.css'
 // time — the point of the whole series.
 
 export type Op = 'add' | 'sub' | 'mul'
-export type Cmp = 'gt' | 'lt' | 'eq'
+export type Cmp = 'gt' | 'lt' | 'eq' | 'neq'
 
-// A value can be a number, a boolean (from a compare block), or '?' once we hit
-// a block whose inputs aren't all connected yet — so the student sees exactly
-// where the flow breaks.
+// A value can be a number, a boolean (from an if-block's switch), or '?' once
+// we hit a block whose inputs aren't all connected — or aren't powered — so
+// the student sees exactly where the flow breaks.
 type Value = number | boolean | '?'
 
 const OP_SYMBOL: Record<Op, string> = { add: '+', sub: '−', mul: '×' }
@@ -40,11 +40,12 @@ const OP_APPLY: Record<Op, (a: number, b: number) => number> = {
   sub: (a, b) => a - b,
   mul: (a, b) => a * b,
 }
-const CMP_SYMBOL: Record<Cmp, string> = { gt: '>', lt: '<', eq: '=' }
+const CMP_SYMBOL: Record<Cmp, string> = { gt: '>', lt: '<', eq: '=', neq: '≠' }
 const CMP_APPLY: Record<Cmp, (a: number, b: number) => boolean> = {
   gt: (a, b) => a > b,
   lt: (a, b) => a < b,
   eq: (a, b) => a === b,
+  neq: (a, b) => a !== b,
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -70,11 +71,17 @@ interface InputData extends BaseData {
 interface OpData extends BaseData {
   op: Op
 }
-interface CmpData extends BaseData {
+// The if-block is a switch: it takes two operands and an operator, and
+// energizes exactly one of its two output rails ('true' or 'false').
+interface IfData extends BaseData {
   cmp: Cmp
 }
+// The loop's own logic — start value and per-pass step — lives on the block
+// itself; the only thing wired in from outside is how many times to repeat.
 interface LoopData extends BaseData {
   op: 'add' | 'mul'
+  start: number
+  step: number
 }
 interface CallData extends BaseData {
   fn: string
@@ -136,17 +143,24 @@ function OpNode({ data }: NodeProps<Node<OpData>>) {
   )
 }
 
-// Shared layout for the multi-input blocks (compare, if, loop, call): the
-// labelled inputs sit across the top, each with a handle above it, and the
-// operator's title sits below — so the graph reads top-to-bottom like code.
+// Shared layout for the multi-input blocks (if, loop, call): the labelled
+// inputs sit across the top, each with a handle above it, and the operator's
+// title sits below — so the graph reads top-to-bottom like code. `outputs`
+// swaps the usual single anonymous bottom handle for two named, labelled ones
+// (used by the if-block's two output rails); `liveOutput` marks which of them
+// is currently energized so the student can see the branch actually taken.
 function MultiNode({
   title,
   rows,
+  outputs,
+  liveOutput,
   shown,
   active,
 }: {
   title: string
   rows: { id: string; label: string }[]
+  outputs?: { id: string; label: string }[]
+  liveOutput?: string | null
   shown: Value | null
   active: boolean
 }) {
@@ -169,33 +183,64 @@ function MultiNode({
         {title}
         {shown !== null && <span className="blk-multi-shown">{fmt(shown)}</span>}
       </div>
-      <Handle type="source" position={Position.Bottom} />
+      {outputs ? (
+        <div className="blk-outputs">
+          {outputs.map((out, i) => (
+            <div
+              className={`blk-cell${liveOutput === out.id ? ' blk-out-live' : ''}`}
+              key={out.id}
+            >
+              <span className="blk-row-label">{out.label}</span>
+              <Handle
+                type="source"
+                id={out.id}
+                position={Position.Bottom}
+                style={{ left: `${((i + 0.5) / outputs.length) * 100}%` }}
+              />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <Handle type="source" position={Position.Bottom} />
+      )}
     </div>
   )
 }
 
-function CompareNode({ data }: NodeProps<Node<CmpData>>) {
+// The if-block: a switch. It takes two operands and an operator (absorbing
+// what used to be a separate "compare" block) and energizes exactly one of
+// its two output rails — nothing flows down the other one. Downstream blocks
+// wired to a rail's "gate" input only produce a value while their rail is hot.
+function IfNode({ data }: NodeProps<Node<IfData>>) {
+  const live = data.shown === true ? 'true' : data.shown === false ? 'false' : null
   return (
     <MultiNode
-      title={CMP_SYMBOL[data.cmp]}
+      title={`if a ${CMP_SYMBOL[data.cmp]} b`}
       rows={[
         { id: 'a', label: 'a' },
         { id: 'b', label: 'b' },
       ]}
-      shown={data.shown}
+      outputs={[
+        { id: 'true', label: '✓ true' },
+        { id: 'false', label: '✗ false' },
+      ]}
+      liveOutput={live}
+      shown={null}
       active={data.active}
     />
   )
 }
 
-function IfNode({ data }: NodeProps<Node<BaseData>>) {
+// A pass-through: it only lets its wired `value` through while its `gate`
+// input is powered (wired from one of an if-block's rails). Otherwise it
+// reads '?' — the untaken branch, made visible.
+function OutletNode({ data }: NodeProps<Node<BaseData>>) {
   return (
     <MultiNode
-      title="if"
+      title="⏚"
       rows={[
-        { id: 'when', label: 'when' },
-        { id: 'yes', label: '✓ then' },
-        { id: 'no', label: '✗ else' },
+        { id: 'gate', label: 'power' },
+        { id: 'value', label: 'value' },
       ]}
       shown={data.shown}
       active={data.active}
@@ -203,18 +248,41 @@ function IfNode({ data }: NodeProps<Node<BaseData>>) {
   )
 }
 
-function LoopNode({ data }: NodeProps<Node<LoopData>>) {
+function LoopNode({ id, data }: NodeProps<Node<LoopData>>) {
+  const { setNodes } = useReactFlow()
+  const setField = (field: 'start' | 'step') => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Number(e.target.value)
+    setNodes((nodes) =>
+      clearShownValues(nodes).map((n) => (n.id === id ? { ...n, data: { ...n.data, [field]: value } } : n)),
+    )
+  }
   return (
-    <MultiNode
-      title={data.op === 'add' ? 'repeat +' : 'repeat ×'}
-      rows={[
-        { id: 'start', label: 'start' },
-        { id: 'count', label: 'times' },
-        { id: 'step', label: 'by' },
-      ]}
-      shown={data.shown}
-      active={data.active}
-    />
+    <div className={`blk blk-loop${data.active ? ' blk-active' : ''}`}>
+      <div className="blk-inputs">
+        <div className="blk-cell">
+          <Handle type="target" id="times" position={Position.Top} style={{ left: '50%' }} />
+          <span className="blk-row-label">times</span>
+        </div>
+      </div>
+      <div className="blk-title">repeat</div>
+      <div className="blk-loop-body">
+        <input
+          className="nodrag blk-input blk-input-sm"
+          type="number"
+          value={data.start}
+          onChange={setField('start')}
+        />
+        <span className="blk-op-symbol">{data.op === 'add' ? '+' : '×'}</span>
+        <input
+          className="nodrag blk-input blk-input-sm"
+          type="number"
+          value={data.step}
+          onChange={setField('step')}
+        />
+      </div>
+      {data.shown !== null && <span className="blk-multi-shown">{fmt(data.shown)}</span>}
+      <Handle type="source" position={Position.Bottom} />
+    </div>
   )
 }
 
@@ -222,7 +290,7 @@ function CallNode({ data }: NodeProps<Node<CallData>>) {
   return (
     <MultiNode
       title={data.label}
-      rows={[{ id: 'x', label: 'x' }]}
+      rows={[{ id: 'n', label: 'n' }]}
       shown={data.shown}
       active={data.active}
     />
@@ -243,8 +311,8 @@ const nodeTypes = {
   number: NumberNode,
   input: InputNode,
   op: OpNode,
-  compare: CompareNode,
   if: IfNode,
+  outlet: OutletNode,
   loop: LoopNode,
   call: CallNode,
   result: ResultNode,
@@ -254,63 +322,90 @@ const nodeTypes = {
 
 type FnMap = Record<string, FunctionDef>
 
-function sourceOf(edges: Edge[], target: string, handle: string | null): string | undefined {
-  return edges.find((e) => e.target === target && (e.targetHandle ?? null) === handle)?.source
+// All edges wired into a given (node, handle) target — usually one, but a
+// convergence point downstream of an if-block's two rails (like `result`)
+// legitimately has two, only one of which is ever live at a time.
+function edgesInto(edges: Edge[], target: string, handle: string | null): Edge[] {
+  return edges.filter((e) => e.target === target && (e.targetHandle ?? null) === handle)
 }
 
-// Resolve a node's value, memoized, guarding against cycles the student might
-// wire up by accident.
-function valueOf(
+// Resolve whatever's wired into (id, handle), memoized per node+output-handle
+// and guarding against cycles the student might wire up by accident. Returns
+// the first candidate that isn't '?' — the mechanism that lets two branches
+// converge on one downstream target without the dead branch winning.
+function resolveInput(
   id: string,
+  handle: string | null,
   nodes: Node[],
   edges: Edge[],
   fns: FnMap,
   memo: Map<string, Value>,
   stack: Set<string>,
 ): Value {
-  const cached = memo.get(id)
+  for (const e of edgesInto(edges, id, handle)) {
+    const v = valueOf(e.source, e.sourceHandle ?? null, nodes, edges, fns, memo, stack)
+    if (v !== '?') return v
+  }
+  return '?'
+}
+
+// Resolve a node's value at a given output handle (most node types have only
+// one, unnamed output; the if-block has two — 'true' and 'false' — which
+// carry different values depending on which rail is energized).
+function valueOf(
+  id: string,
+  outHandle: string | null,
+  nodes: Node[],
+  edges: Edge[],
+  fns: FnMap,
+  memo: Map<string, Value>,
+  stack: Set<string>,
+): Value {
+  const key = `${id}:${outHandle ?? ''}`
+  const cached = memo.get(key)
   if (cached !== undefined) return cached
-  if (stack.has(id)) return '?'
-  stack.add(id)
+  if (stack.has(key)) return '?'
+  stack.add(key)
 
   const node = nodes.find((n) => n.id === id)
-  const input = (handle: string | null): Value => {
-    const src = sourceOf(edges, id, handle)
-    return src ? valueOf(src, nodes, edges, fns, memo, stack) : '?'
-  }
+  const input = (handle: string | null): Value => resolveInput(id, handle, nodes, edges, fns, memo, stack)
 
+  // Any block can be wired from an if-block's rail into its 'gate' input —
+  // it only produces a value while that rail is energized (i.e. `true`).
   let result: Value = '?'
-  if (node?.type === 'number' || node?.type === 'input') {
+  const gated = edgesInto(edges, id, 'gate').length > 0
+  if (gated && input('gate') !== true) {
+    result = '?'
+  } else if (node?.type === 'number' || node?.type === 'input') {
     result = (node.data as NumberData).value
   } else if (node?.type === 'op') {
     const a = input('a')
     const b = input('b')
     if (isNum(a) && isNum(b)) result = OP_APPLY[(node.data as OpData).op](a, b)
-  } else if (node?.type === 'compare') {
+  } else if (node?.type === 'if') {
     const a = input('a')
     const b = input('b')
-    if (isNum(a) && isNum(b)) result = CMP_APPLY[(node.data as CmpData).cmp](a, b)
-  } else if (node?.type === 'if') {
-    const cond = input('when')
-    if (cond === true) result = input('yes')
-    else if (cond === false) result = input('no')
+    const cond = isNum(a) && isNum(b) ? CMP_APPLY[(node.data as IfData).cmp](a, b) : null
+    if (outHandle === 'true') result = cond === true ? true : '?'
+    else if (outHandle === 'false') result = cond === false ? true : '?'
+  } else if (node?.type === 'outlet') {
+    result = input('value')
   } else if (node?.type === 'loop') {
-    const start = input('start')
-    const count = input('count')
-    const step = input('step')
-    if (isNum(start) && isNum(count) && isNum(step)) {
-      result = runLoop((node.data as LoopData).op, start, count, step)
+    const times = input('times')
+    if (isNum(times)) {
+      const { op: loopOp, start, step } = node.data as LoopData
+      result = runLoop(loopOp, start, times, step)
     }
   } else if (node?.type === 'call') {
-    const x = input('x')
+    const n = input('n')
     const fn = fns[(node.data as CallData).fn]
-    if (isNum(x) && fn) result = callFunction(fn, x, fns)
+    if (isNum(n) && fn) result = callFunction(fn, n, fns)
   } else if (node?.type === 'result') {
     result = input(null)
   }
 
-  stack.delete(id)
-  memo.set(id, result)
+  stack.delete(key)
+  memo.set(key, result)
   return result
 }
 
@@ -327,10 +422,10 @@ function callFunction(fn: FunctionDef, arg: number, fns: FnMap): Value {
     n.type === 'input' ? { ...n, data: { ...n.data, value: arg } } : n,
   )
   const out = fn.nodes.find((n) => n.type === 'result')
-  return out ? valueOf(out.id, nodes, fn.edges, fns, new Map(), new Set()) : '?'
+  return out ? valueOf(out.id, null, nodes, fn.edges, fns, new Map(), new Set()) : '?'
 }
 
-const COMPUTED = new Set(['op', 'compare', 'if', 'loop', 'call', 'result'])
+const COMPUTED = new Set(['op', 'if', 'outlet', 'loop', 'call', 'result'])
 
 // Dependency-first ordering of the computed blocks, so the animation reveals
 // inputs before the blocks that consume them.
@@ -403,14 +498,19 @@ function Playground({ preset }: { preset: string }) {
   const onConnect = useCallback(
     (params: Connection) => {
       setNodes(clearShownValues)
-      // Each input handle accepts a single wire — drop any existing one first.
+      // Each named input handle accepts a single wire — drop any existing one
+      // first. The anonymous target handle (only `result` uses it) is the one
+      // place two wires legitimately converge: the if-block's two rails, each
+      // ending in an outlet, both feeding the same result.
       setEdges((eds) =>
         addEdge(
           params,
-          eds.filter(
-            (e) =>
-              !(e.target === params.target && (e.targetHandle ?? null) === (params.targetHandle ?? null)),
-          ),
+          params.targetHandle == null
+            ? eds
+            : eds.filter(
+                (e) =>
+                  !(e.target === params.target && (e.targetHandle ?? null) === (params.targetHandle ?? null)),
+              ),
         ),
       )
     },
@@ -462,48 +562,42 @@ function Playground({ preset }: { preset: string }) {
       const node = nodes.find((n) => n.id === id)
       if (!node) continue
 
-      // Highlight this block and light up the wires feeding it. For an if-block
-      // only the condition wire and the branch actually taken light up, so the
-      // student sees the choice being made.
+      // Highlight this block and light up the wires feeding it. A wire into a
+      // 'gate' input only lights up if it's actually energized — so the
+      // untaken branch of an if-block stays visibly dark, not just unused.
       setNodes((nds) => nds.map((n) => ({ ...n, data: { ...n.data, active: n.id === id } })))
-      let live = (e: Edge) => e.target === id
-      if (node.type === 'if') {
-        const condSrc = sourceOf(edges, id, 'when')
-        const cond = condSrc ? valueOf(condSrc, nodes, edges, fns, memo, stack) : '?'
-        const taken = cond === true ? 'yes' : cond === false ? 'no' : null
-        live = (e) => e.target === id && (e.targetHandle === 'when' || e.targetHandle === taken)
-      }
+      const live = (e: Edge) =>
+        e.target === id &&
+        (e.targetHandle !== 'gate' ||
+          valueOf(e.source, e.sourceHandle ?? null, nodes, edges, fns, memo, stack) === true)
       setEdges((eds) => eds.map((e) => ({ ...e, animated: live(e) })))
 
       if (node.type === 'loop') {
-        const at = (h: string) => {
-          const src = sourceOf(edges, id, h)
-          const v = src ? valueOf(src, nodes, edges, fns, memo, stack) : '?'
-          return isNum(v) ? v : null
-        }
-        const start = at('start')
-        const count = at('count')
-        const step = at('step')
-        if (start === null || count === null || step === null) {
+        const times = resolveInput(id, 'times', nodes, edges, fns, memo, stack)
+        const { op: loopOp, start, step } = node.data as LoopData
+        if (!isNum(times)) {
           setShown(id, '?')
-          memo.set(id, '?')
+          memo.set(`${id}:`, '?')
         } else {
-          const operation = (node.data as LoopData).op
           let acc = start
           setShown(id, acc)
-          const iterations = Math.max(0, Math.min(Math.round(count), 12))
+          const iterations = Math.max(0, Math.min(Math.round(times), 12))
           for (let i = 0; i < iterations; i++) {
             await sleep(420)
             if (token !== runToken.current) return
-            acc = operation === 'add' ? acc + step : acc * step
+            acc = loopOp === 'add' ? acc + step : acc * step
             setShown(id, acc)
           }
-          const exact = runLoop(operation, start, count, step)
+          const exact = runLoop(loopOp, start, times, step)
           if (exact !== acc) setShown(id, exact)
-          memo.set(id, exact)
+          memo.set(`${id}:`, exact)
         }
+      } else if (node.type === 'if') {
+        const trueVal = valueOf(id, 'true', nodes, edges, fns, memo, stack)
+        const cond = trueVal === true ? true : valueOf(id, 'false', nodes, edges, fns, memo, stack) === true ? false : '?'
+        setShown(id, cond)
       } else {
-        setShown(id, valueOf(id, nodes, edges, fns, memo, stack))
+        setShown(id, valueOf(id, null, nodes, edges, fns, memo, stack))
       }
     }
 
