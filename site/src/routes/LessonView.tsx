@@ -10,8 +10,6 @@ import { StatePlayground } from '@/components/StatePlayground'
 import { isStatePreset } from '@/lib/statePresets'
 import { PageNav } from '@/components/PageNav'
 
-const PLACEHOLDER_CODE = '// Nothing to run on this page yet.\n// Try writing some Java of your own!'
-
 // Fenced code blocks in the prose render read-only through CodeMirror (same
 // syntax highlighting + line numbers as the playground); the runnable copy of
 // the first snippet still lives in the playground panel. Inline `code` stays as
@@ -56,7 +54,8 @@ export function LessonView() {
   const currentPage = lesson.pages[pageIndex]
   const preset = blocksPreset(currentPage.markdown)
   const prose = preset ? stripBlocksFence(currentPage.markdown) : currentPage.markdown
-  const playgroundCode = firstJavaSnippet(currentPage.markdown) ?? PLACEHOLDER_CODE
+  const javaSnippet = firstJavaSnippet(currentPage.markdown)
+  const hasPlayground = preset != null || javaSnippet != null
 
   const goTo = (index: number) => navigate(`/lesson/${lesson.slug}/${index + 1}`)
 
@@ -73,30 +72,32 @@ export function LessonView() {
           <strong>Goal:</strong> {lesson.goal}
         </p>
       </div>
-      <div className="flex flex-col items-start gap-8 lg:flex-row">
+      <div className={`flex flex-col items-start gap-8 ${hasPlayground ? 'lg:flex-row' : ''}`}>
         <article key={pageIndex} className={`min-w-0 flex-1 ${PROSE_CLASSES}`}>
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
             {prose}
           </ReactMarkdown>
         </article>
-        <div className="w-full min-w-0 flex-1 lg:sticky lg:top-20 lg:min-w-[320px]">
-          {preset && isStatePreset(preset) ? (
-            <>
-              <h2 className="mb-3 text-base font-semibold text-primary">▶ State machine</h2>
-              <StatePlayground key={`${pageIndex}-${preset}`} preset={preset} />
-            </>
-          ) : preset ? (
-            <>
-              <h2 className="mb-3 text-base font-semibold text-primary">▶ Block editor</h2>
-              <BlockPlayground key={`${pageIndex}-${preset}`} preset={preset} />
-            </>
-          ) : (
-            <>
-              <h2 className="mb-3 text-base font-semibold text-primary">▶ Playground</h2>
-              <JavaRunner key={pageIndex} initialCode={playgroundCode} />
-            </>
-          )}
-        </div>
+        {hasPlayground && (
+          <div className="w-full min-w-0 flex-1 lg:sticky lg:top-20 lg:min-w-[320px]">
+            {preset && isStatePreset(preset) ? (
+              <>
+                <h2 className="mb-3 text-base font-semibold text-primary">▶ State machine</h2>
+                <StatePlayground key={`${pageIndex}-${preset}`} preset={preset} />
+              </>
+            ) : preset ? (
+              <>
+                <h2 className="mb-3 text-base font-semibold text-primary">▶ Block editor</h2>
+                <BlockPlayground key={`${pageIndex}-${preset}`} preset={preset} />
+              </>
+            ) : (
+              <>
+                <h2 className="mb-3 text-base font-semibold text-primary">▶ Playground</h2>
+                <JavaRunner key={pageIndex} initialCode={javaSnippet as string} />
+              </>
+            )}
+          </div>
+        )}
       </div>
       <PageNav
         index={pageIndex}
