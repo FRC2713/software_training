@@ -1,7 +1,7 @@
 ---
-title: "Lesson 20: Organizing a state machine"
+title: "Lesson 23: Organizing a state machine"
 goal: "Make a machine safe and tidy with an enum for the states, enter actions, and a class to hold it all together."
-order: 20
+order: 23
 section: "State Machines"
 ---
 
@@ -93,10 +93,10 @@ while you sit in `SHOOTING` — a distinction that matters a lot on a real robot
 # Bundle it into a class
 
 Right now the state lives in a loose variable and the logic in loose methods.
-As machines grow, that gets hard to keep straight. You met the **class** in
-[lesson 11](#/lesson/11-writing-methods) as the shell every program lives in — but a class is really a
-bundle of *data and the methods that work on it*. Perfect for a machine that
-owns a state and an update:
+You already know the fix for that from [lessons 17–19](#/lesson/17-classes-and-objects): a
+**field** for the data, a **constructor** to set its starting value, and
+**methods** that read and write it through `this`. Applied to a state
+machine, it looks like this:
 
 ```java
 enum HandlerState { EMPTY, INTAKING, LOADED, SHOOTING }
@@ -132,20 +132,12 @@ public class Main {
 }
 ```
 
-Three new things to learn, all in `GamePieceHandler`:
-
-- `HandlerState state;` declares a **field** — a variable that lives *inside*
-  each machine, remembered between calls.
-- `GamePieceHandler() { ... }` is the **constructor**: it runs once when you
-  create a machine with `new GamePieceHandler()`, and sets the starting state.
-- **`this`** is *this machine*. `this.state` is its own state field.
-  `handler.update("button")` runs the update on that machine and changes its
-  state in place. (You'll also notice the methods have no `static` — they
-  belong to each machine, not to the program as a whole.)
-
-Run it: the handler starts `EMPTY`, and after a `button` then a `sensor` it's
-`LOADED` — and it stayed `LOADED` between the two calls because the object
-remembers. That memory is why a class beats loose variables once you have more
+Nothing here is new — `HandlerState state;` is a field, `GamePieceHandler()`
+is a constructor, `this.state` reads and writes that field — just aimed at an
+enum instead of the plain data you practiced on earlier. Run it: the handler
+starts `EMPTY`, and after a `button` then a `sensor` it's `LOADED` — and it
+stayed `LOADED` between the two calls because the object remembers its own
+state. That memory is why a class beats loose variables once you have more
 than one machine — which is exactly where we go next.
 
 Your turn: add a `report()` method to the class that prints the current state

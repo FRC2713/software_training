@@ -1,7 +1,7 @@
 ---
-title: "Lesson 19: Events and transitions in code"
+title: "Lesson 22: Events and transitions in code"
 goal: "Drive a machine from events, and make each state ignore the events it has no transition for."
-order: 19
+order: 22
 section: "State Machines"
 ---
 
@@ -12,7 +12,7 @@ it. Real mechanisms wait for **specific events**: a button press, a sensor
 tripping, a shot finishing. So a transition depends on **two things**: which
 state you're in, *and* which event just happened.
 
-This is the game-piece handler you drove in [lesson 17](#/lesson/17-state-machines). Here's a single
+This is the game-piece handler you drove in [lesson 20](#/lesson/20-state-machines). Here's a single
 transition from it:
 
 ```java
@@ -105,7 +105,7 @@ public class Main {
 
 Trace the output. That first `"done"` while `empty` does nothing — the machine
 shrugs it off — then the real sequence walks `empty → intaking → loaded →
-shooting → empty`. This is the loop from [last lesson](#/lesson/18-state-machines-in-code), now fed real events
+shooting → empty`. This is the loop from [last lesson](#/lesson/21-state-machines-in-code), now fed real events
 instead of a timer.
 
 Your turn: write the events array that takes the handler through **two full

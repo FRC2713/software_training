@@ -1,7 +1,7 @@
 ---
-title: "Lesson 21: Coordinating machines"
+title: "Lesson 24: Coordinating machines"
 goal: "Run several small state machines in one loop and let them make decisions based on each other."
-order: 21
+order: 24
 section: "State Machines"
 ---
 
@@ -9,7 +9,7 @@ section: "State Machines"
 
 One giant state machine for a whole robot would be a tangle. Real robot code
 uses **several small machines** — one per mechanism — each an object
-([lesson 20](#/lesson/20-organizing-a-machine)) with its own state. Because a class remembers its own state
+([lesson 18](#/lesson/18-multiple-objects)) with its own state. Because a class remembers its own state
 field, you can make as many as you want and they don't interfere:
 
 ```java
@@ -55,7 +55,7 @@ and easy to reason about on its own — that's the point of splitting them up.
 
 (One shorthand to spot: `IntakeState state = IntakeState.CLEAR;` sets the
 field's starting value right where it's declared, so these little classes
-don't need a constructor. [Lesson 20's](#/lesson/20-organizing-a-machine) constructor form is what you'll
+don't need a constructor. [Lesson 17's](#/lesson/17-classes-and-objects) constructor form is what you'll
 want when starting up takes real work.)
 
 # Machines that watch each other

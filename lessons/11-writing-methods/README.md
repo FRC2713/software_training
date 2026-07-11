@@ -23,7 +23,7 @@ public class Main {
 Two layers, outside-in:
 
 - `public class Main { ... }` — every Java program is a **class**, a named
-  container for code. (Much more on classes in [lesson 20](#/lesson/20-organizing-a-machine).)
+  container for code. (Much more on classes in [lesson 17](#/lesson/17-classes-and-objects).)
 - `public static void main(String[] args) { ... }` — the **main method**:
   the agreed-upon starting point. When a Java program runs, the computer finds
   `main` and follows its instructions top to bottom. Every line you've written

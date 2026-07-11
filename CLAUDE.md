@@ -56,8 +56,9 @@ folder until it's restarted.
     render the state-machine playground (`StatePlayground`) instead — same
     fence, different renderer, chosen by `isStatePreset`.
     Lessons 1–4 are the pre-Java block series (arithmetic → conditionals →
-    loops → functions); Java starts at lesson 5; state machines start at
-    lesson 17.
+    loops → functions); Java starts at lesson 5; the "Objects" section
+    (classes, multiple objects, encapsulation) runs 17–19; state machines
+    start at lesson 20.
   - `lessons/parked/` holds withdrawn drafts. The site's glob only matches
     `lessons/*/README.md`, so anything nested a level deeper never renders.
 - `site/` — the React + TypeScript + Vite app. See `site/README.md` for the

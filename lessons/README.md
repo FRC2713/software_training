@@ -72,7 +72,7 @@ it's the exact content the [training site](../site) renders, page by page.
   [`site/src/lib/statePresets.ts`](../site/src/lib/statePresets.ts) are routed to
   `StatePlayground` (a drivable state diagram with event buttons) rather than the
   dataflow block editor. They follow the same demo → edit → build arc:
-  `sm-demo` (traffic light, lesson 17), `sm-edit` (game-piece handler), and
+  `sm-demo` (traffic light, lesson 20), `sm-edit` (game-piece handler), and
   `sm-build` (wire up a climber yourself).
 - Keep the `goal` to one sentence. It's shown on the lesson card and at the top
   of the lesson — it should tell a student what they'll be able to do
