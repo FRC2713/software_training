@@ -73,7 +73,7 @@ export function LessonView() {
         </p>
       </div>
       <div className={`flex flex-col items-start gap-8 ${hasPlayground ? 'lg:flex-row' : ''}`}>
-        <article key={pageIndex} className={`min-w-0 flex-1 ${PROSE_CLASSES}`}>
+        <article key={`${lesson.slug}-${pageIndex}`} className={`min-w-0 flex-1 ${PROSE_CLASSES}`}>
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
             {prose}
           </ReactMarkdown>
@@ -83,17 +83,17 @@ export function LessonView() {
             {preset && isStatePreset(preset) ? (
               <>
                 <h2 className="mb-3 text-base font-semibold text-primary">▶ State machine</h2>
-                <StatePlayground key={`${pageIndex}-${preset}`} preset={preset} />
+                <StatePlayground key={`${lesson.slug}-${pageIndex}-${preset}`} preset={preset} />
               </>
             ) : preset ? (
               <>
                 <h2 className="mb-3 text-base font-semibold text-primary">▶ Block editor</h2>
-                <BlockPlayground key={`${pageIndex}-${preset}`} preset={preset} />
+                <BlockPlayground key={`${lesson.slug}-${pageIndex}-${preset}`} preset={preset} />
               </>
             ) : (
               <>
                 <h2 className="mb-3 text-base font-semibold text-primary">▶ Playground</h2>
-                <JavaRunner key={pageIndex} initialCode={javaSnippet as string} />
+                <JavaRunner key={`${lesson.slug}-${pageIndex}`} initialCode={javaSnippet as string} />
               </>
             )}
           </div>

@@ -86,10 +86,12 @@ interface PreparedSource {
 }
 
 function prepareSource(code: string): PreparedSource {
-  // Ignore `class` mentions inside line comments when deciding whether the
-  // snippet is already a full compilation unit.
+  // Ignore `class`/`interface`/`enum` mentions inside line comments when
+  // deciding whether the snippet is already a full compilation unit. An
+  // interface-only snippet (lesson 29) must not fall through to the wrap
+  // path below — a top-level `interface` inside a method body is illegal.
   const withoutComments = code.replace(/\/\/[^\n]*/g, '')
-  const declarations = [...withoutComments.matchAll(/\b(?:class|enum)\s+(\w+)/g)]
+  const declarations = [...withoutComments.matchAll(/\b(?:class|enum|interface)\s+(\w+)/g)]
   if (declarations.length > 0) {
     // Run the class that owns main(): the last type declared before the main
     // method (snippets can hold several classes, e.g. lesson 21). The public

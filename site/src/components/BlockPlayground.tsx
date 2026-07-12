@@ -30,10 +30,12 @@ import './BlockPlayground.css'
 export type Op = 'add' | 'sub' | 'mul'
 export type Cmp = 'gt' | 'lt' | 'eq' | 'neq'
 
-// A value can be a number, a boolean (a decision diamond's answer), or '?'
-// once we hit a block whose inputs aren't all connected — or that sits on a
-// branch the program didn't take — so the student sees where the flow breaks.
-type Value = number | boolean | '?'
+// A value can be a number, a boolean (a decision diamond's answer), a config
+// object (the builder pattern's accumulated fields), or '?' once we hit a
+// block whose inputs aren't all connected — or that sits on a branch the
+// program didn't take — so the student sees where the flow breaks.
+type ConfigValue = Record<string, number>
+type Value = number | boolean | ConfigValue | '?'
 
 const OP_SYMBOL: Record<Op, string> = { add: '+', sub: '−', mul: '×' }
 const OP_APPLY: Record<Op, (a: number, b: number) => number> = {
@@ -51,8 +53,16 @@ const CMP_APPLY: Record<Cmp, (a: number, b: number) => boolean> = {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 const isNum = (v: Value): v is number => typeof v === 'number'
-const fmt = (v: Value | null): string =>
-  v === null || v === '?' ? '?' : typeof v === 'boolean' ? (v ? 'true' : 'false') : String(v)
+const isConfig = (v: Value): v is ConfigValue => typeof v === 'object' && v !== null
+const fmt = (v: Value | null): string => {
+  if (v === null || v === '?') return '?'
+  if (typeof v === 'boolean') return v ? 'true' : 'false'
+  if (isConfig(v)) {
+    const entries = Object.entries(v)
+    return entries.length === 0 ? '{ }' : `{ ${entries.map(([k, n]) => `${k}: ${n}`).join(', ')} }`
+  }
+  return String(v)
+}
 
 // ---- Custom nodes ----------------------------------------------------------
 
@@ -89,6 +99,34 @@ interface LoopData extends BaseData {
 interface CallData extends BaseData {
   fn: string
   label: string
+}
+// A static legend card naming an interface and its one method — never wired
+// to anything, just the "here's the contract" header for lesson 28's diagram.
+interface ContractData extends BaseData {
+  title: string
+  method: string
+}
+// One implementation of that contract (labelled SIM or REAL), holding the
+// number its method would return — a leaf value, same shape as `number`.
+interface ImplData extends BaseData {
+  label: string
+  value: number
+  editable: boolean
+}
+// The polymorphism payoff: a manual toggle between two wired implementations.
+// Nothing about its wiring changes when you flip it — only which side it reads.
+interface SwapData extends BaseData {
+  selected: 'a' | 'b'
+}
+// `new Config()` — the start of a builder chain. Always an empty object; the
+// interesting behavior lives in the `withStep` blocks chained after it.
+type ConfigStartData = BaseData
+// One `.withX(value)` call in a builder chain: merges its own field into
+// whatever config flowed in, and passes the result along.
+interface WithStepData extends BaseData {
+  field: string
+  label: string
+  value: number
 }
 
 // Editing a value invalidates every revealed result, so we wipe them all and
@@ -293,6 +331,111 @@ function ResultNode({ data }: NodeProps<Node<BaseData>>) {
   )
 }
 
+// The interface's contract: name + one method signature, no handles at all —
+// it never carries a value, it just labels what the implementations below it
+// promise to do.
+function ContractNode({ data }: NodeProps<Node<ContractData>>) {
+  return (
+    <div className="blk blk-contract">
+      <span className="blk-tag">interface</span>
+      <span className="blk-contract-title">{data.title}</span>
+      <span className="blk-contract-method">{data.method}</span>
+    </div>
+  )
+}
+
+// One implementation of the contract above — a leaf value like `number`, just
+// tagged SIM or REAL so it's obvious which "hardware" it stands in for.
+function ImplNode({ id, data }: NodeProps<Node<ImplData>>) {
+  const { setNodes, setEdges } = useReactFlow()
+  return (
+    <div className={`blk blk-impl blk-impl-${data.label.toLowerCase()}${data.active ? ' blk-active' : ''}`}>
+      <span className="blk-tag">{data.label}</span>
+      {data.editable ? (
+        <input
+          className="nodrag blk-input"
+          type="number"
+          value={data.value}
+          onChange={(e) => {
+            setEdges(clearEdgeRunState)
+            setNodes((nodes) =>
+              clearShownValues(nodes).map((n) =>
+                n.id === id ? { ...n, data: { ...n.data, value: Number(e.target.value) } } : n,
+              ),
+            )
+          }}
+        />
+      ) : (
+        <span className="blk-value">{data.value}</span>
+      )}
+      <Handle type="source" position={Position.Bottom} />
+    </div>
+  )
+}
+
+// The manual toggle between two wired implementations — the whole point:
+// flipping it changes what flows out without touching a single wire.
+function SwapNode({ id, data }: NodeProps<Node<SwapData>>) {
+  const { setNodes, setEdges } = useReactFlow()
+  const flip = () => {
+    setEdges(clearEdgeRunState)
+    setNodes((nodes) =>
+      clearShownValues(nodes).map((n) =>
+        n.id === id ? { ...n, data: { ...n.data, selected: n.data.selected === 'a' ? 'b' : 'a' } } : n,
+      ),
+    )
+  }
+  return (
+    <div className={`blk blk-swap${data.active ? ' blk-active' : ''}`}>
+      <Handle type="target" id="a" position={Position.Top} style={{ left: '30%' }} />
+      <Handle type="target" id="b" position={Position.Top} style={{ left: '70%' }} />
+      <span className="blk-tag">swap</span>
+      <button type="button" className="nodrag blk-swap-toggle" onClick={flip}>
+        using {data.selected === 'a' ? '◀ A' : 'B ▶'}
+      </button>
+      {data.shown !== null && <span className="blk-op-result">= {fmt(data.shown)}</span>}
+      <Handle type="source" position={Position.Bottom} />
+    </div>
+  )
+}
+
+function ConfigStartNode({ data }: NodeProps<Node<ConfigStartData>>) {
+  return (
+    <div className={`blk blk-config-start${data.active ? ' blk-active' : ''}`}>
+      <span className="blk-tag">config</span>
+      <span className="blk-value">new Config()</span>
+      <Handle type="source" position={Position.Bottom} />
+    </div>
+  )
+}
+
+// One link in a builder chain: takes the config flowing in, merges its own
+// field into it, and passes the combined config along to the next step.
+function WithStepNode({ id, data }: NodeProps<Node<WithStepData>>) {
+  const { setNodes, setEdges } = useReactFlow()
+  return (
+    <div className={`blk blk-with-step${data.active ? ' blk-active' : ''}`}>
+      <Handle type="target" id="in" position={Position.Top} style={{ left: '50%' }} />
+      <span className="blk-tag">.{data.label}(…)</span>
+      <input
+        className="nodrag blk-input blk-input-sm"
+        type="number"
+        value={data.value}
+        onChange={(e) => {
+          setEdges(clearEdgeRunState)
+          setNodes((nodes) =>
+            clearShownValues(nodes).map((n) =>
+              n.id === id ? { ...n, data: { ...n.data, value: Number(e.target.value) } } : n,
+            ),
+          )
+        }}
+      />
+      {data.shown !== null && <span className="blk-multi-shown">{fmt(data.shown)}</span>}
+      <Handle type="source" position={Position.Bottom} />
+    </div>
+  )
+}
+
 const nodeTypes = {
   number: NumberNode,
   input: InputNode,
@@ -302,6 +445,11 @@ const nodeTypes = {
   loop: LoopNode,
   call: CallNode,
   result: ResultNode,
+  contract: ContractNode,
+  impl: ImplNode,
+  swap: SwapNode,
+  configStart: ConfigStartNode,
+  withStep: WithStepNode,
 }
 
 // ---- Evaluation ------------------------------------------------------------
@@ -387,6 +535,16 @@ function valueOf(
     const n = input('n')
     const fn = fns[(node.data as CallData).fn]
     if (isNum(n) && fn) result = callFunction(fn, n, fns)
+  } else if (node?.type === 'impl') {
+    result = (node.data as ImplData).value
+  } else if (node?.type === 'swap') {
+    result = input((node.data as SwapData).selected)
+  } else if (node?.type === 'configStart') {
+    result = {}
+  } else if (node?.type === 'withStep') {
+    const configIn = input('in')
+    const { field, value } = node.data as WithStepData
+    result = { ...(isConfig(configIn) ? configIn : {}), [field]: value }
   } else if (node?.type === 'result') {
     result = input(null)
   }
@@ -412,7 +570,7 @@ function callFunction(fn: FunctionDef, arg: number, fns: FnMap): Value {
   return out ? valueOf(out.id, null, nodes, fn.edges, fns, new Map(), new Set()) : '?'
 }
 
-const COMPUTED = new Set(['op', 'if', 'outlet', 'loop', 'call', 'result'])
+const COMPUTED = new Set(['op', 'if', 'outlet', 'loop', 'call', 'result', 'swap', 'withStep'])
 
 // Dependency-first ordering of the computed blocks, so the animation reveals
 // inputs before the blocks that consume them.
