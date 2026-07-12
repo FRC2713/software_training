@@ -135,6 +135,16 @@
   color: var(--accent);
 }
 
+/* A result poisoned by a type-mismatched wire feeding into it somewhere upstream */
+.blk-result-error {
+  border-color: #e5484d;
+  background: color-mix(in srgb, #e5484d 12%, transparent);
+}
+
+.blk-result-error .blk-result-value {
+  color: #e5484d;
+}
+
 .blk-input-node {
   border-style: dashed;
   border-color: var(--accent-border);
@@ -257,6 +267,23 @@
   opacity: 0.4;
 }
 
+/* ---- Invalid wire: something that isn't a real MotorIO, wired into declare */
+
+.react-flow__edge.edge-invalid .react-flow__edge-path {
+  stroke: #e5484d;
+  stroke-dasharray: 6 4;
+}
+
+.react-flow__edge.edge-invalid .react-flow__edge-text {
+  fill: #e5484d;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.react-flow__edge.edge-invalid .react-flow__edge-textbg {
+  fill: var(--code-bg);
+}
+
 /* ---- Loop block: start/step are edited right on the block ---------------- */
 
 .blk-loop {
@@ -287,7 +314,7 @@
   text-align: center;
 }
 
-/* ---- Interface contract + implementations + swap (lesson 28) ------------- */
+/* ---- Interface contract + implementations + declare (lesson 28) ---------- */
 
 .blk-contract {
   border-style: dashed;
@@ -312,23 +339,33 @@
   border-color: #e8974c;
 }
 
-.blk-swap {
-  min-width: 110px;
+.blk-impl-hint {
+  font-size: 11px;
+  font-style: italic;
+  color: var(--text);
 }
 
-.blk-swap-toggle {
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  background: var(--code-bg);
-  color: var(--text-h);
-  font: inherit;
-  font-weight: 600;
-  padding: 4px 10px;
+.blk-declare {
+  min-width: 130px;
 }
 
-.blk-swap-toggle:hover {
-  border-color: var(--accent-border);
-  color: var(--accent);
+.blk-declare-value {
+  font-size: 16px;
+}
+
+/* Wired to something that isn't a real MotorIO — a type mismatch, not a
+   missing value, so it reads as an error rather than a faded/skipped block. */
+.blk-declare-invalid {
+  border-color: #e5484d;
+}
+
+.blk-declare-invalid .blk-declare-value {
+  color: #e5484d;
+  font-weight: 700;
+}
+
+.blk-op-result-error {
+  color: #e5484d;
 }
 
 /* ---- Builder chain: configStart + withStep (lesson 32) -------------------- */

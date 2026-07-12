@@ -1,5 +1,5 @@
 ---
-title: "Lesson 26: Advanced decision making"
+title: "Lesson 26: Decisions in code, revisited"
 goal: "Rewrite if/else-if chains as switch statements — including over an enum — and use the ternary operator for one-line decisions."
 order: 26
 section: "Advanced Java"

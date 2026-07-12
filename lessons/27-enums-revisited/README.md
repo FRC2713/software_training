@@ -80,6 +80,19 @@ Two details worth naming:
 This is exactly the real shape of state-specific setpoints in FRC code: one
 enum, one number per state, no separate lookup table to keep in sync.
 
+**A word of caution, though.** An enum's whole job is to name a **small,
+closed set of options** for a decision — `HandlerState` works because there
+are exactly four states, and every one of them matters to `update()`. One
+field like `motorSpeed` still serves that job. But it's tempting to keep
+piling more fields onto an enum once you've seen it hold one — a second
+number, then a third, then a `String` label — and that's a trap. The moment
+a constant needs several fields, or the list of constants grows past what you
+can hold in your head at once, you've stopped modeling *a choice* and started
+modeling *a small database*, and a `class` ([lesson 17](#/lesson/17-classes-and-objects))
+or a `Map` ([lesson 14](#/lesson/14-maps)) usually fits that better. Keep an
+enum's values doing what they're for — naming the options — and keep what
+they carry small enough that the set of options is still the point.
+
 Your turn: add a fifth state, `JAMMED(0.0)`, to `HandlerState`. Then loop over
 `.values()` again and print each state's name next to its `motorSpeed` —
 confirm your new state shows up automatically, with no other line of the loop

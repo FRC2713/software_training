@@ -103,8 +103,8 @@ const result = (id: string, x: number, y: number): Node => ({
 
 // ---- Lesson 28: interfaces --------------------------------------------------
 
-// The contract: a name and one method signature. Never wired to anything —
-// it's the legend the impl/swap blocks below are living up to.
+// The contract: a name and one method signature. Wires out to any number of
+// `impl` blocks — that connection is what grants each one its method.
 const contract = (id: string, title: string, method: string, x: number, y: number): Node => ({
   id,
   type: 'contract',
@@ -113,7 +113,7 @@ const contract = (id: string, title: string, method: string, x: number, y: numbe
 })
 
 // One implementation of the contract, tagged SIM or REAL, holding the number
-// its method would return.
+// its method would return — but only once a `contract` is wired into it.
 const impl = (id: string, label: 'SIM' | 'REAL', value: number, x: number, y: number): Node => ({
   id,
   type: 'impl',
@@ -121,13 +121,15 @@ const impl = (id: string, label: 'SIM' | 'REAL', value: number, x: number, y: nu
   data: { label, value, editable: true, active: false, shown: null },
 })
 
-// The manual toggle between two wired implementations — flip it and the
-// result changes without a single wire moving.
-const swap = (id: string, x: number, y: number, selected: 'a' | 'b' = 'a'): Node => ({
+// `MotorIO io = ...` — declares one object of the interface type. Its single
+// `impl` input only accepts a wire from an `impl` block; swapping which
+// implementation it holds means dragging in a different wire, not flipping
+// a switch.
+const declareObject = (id: string, x: number, y: number): Node => ({
   id,
-  type: 'swap',
+  type: 'declare',
   position: { x, y },
-  data: { selected, active: false, shown: null },
+  data: { active: false, shown: null },
 })
 
 // ---- Lesson 32: builder pattern ---------------------------------------------
@@ -188,7 +190,7 @@ export function createNode(item: ToolbarItem, id: string, position: { x: number;
   if (kind === 'contract') return contract(id, 'MotorIO', 'getSpeed()', position.x, position.y)
   if (kind === 'implSim') return impl(id, 'SIM', 0.4, position.x, position.y)
   if (kind === 'implReal') return impl(id, 'REAL', 0.55, position.x, position.y)
-  if (kind === 'swap') return swap(id, position.x, position.y)
+  if (kind === 'declare') return declareObject(id, position.x, position.y)
   if (kind === 'configStart') return configStart(id, position.x, position.y)
   if (kind === 'withMaxSpeed') return withStep(id, 'maxSpeed', 'withMaxSpeed', 80, position.x, position.y)
   if (kind === 'withCurrentLimit')
@@ -406,6 +408,8 @@ const fnBuild: BlockPreset = {
 
 // MotorIO: one method, two implementations, and a swap that decides which one
 // answers — the whole "same call, different behavior" idea, before any Java.
+// MotorIO feeds both SIM and REAL their getSpeed() field; declare holds
+// exactly one of them (SIM here), and result shows whatever declare holds.
 const ifaceDemo: BlockPreset = {
   connectable: false,
   toolbar: [],
@@ -413,12 +417,19 @@ const ifaceDemo: BlockPreset = {
     contract('c', 'MotorIO', 'getSpeed()', 90, 0),
     impl('sim', 'SIM', 0.4, 0, 160),
     impl('real', 'REAL', 0.55, 260, 160),
-    swap('sw', 110, 300),
-    result('out', 120, 440),
+    declareObject('d', 110, 320),
+    result('out', 120, 460),
   ],
-  edges: [wire('sim', 'sw', 'a'), wire('real', 'sw', 'b'), wire('sw', 'out')],
+  edges: [
+    wire('c', 'sim', 'contract'),
+    wire('c', 'real', 'contract'),
+    wire('sim', 'd', 'impl'),
+    wire('d', 'out'),
+  ],
 }
 
+// Same shape, but declare is wired to REAL instead of SIM — a different
+// result from a different wire, not a toggle.
 const ifaceEdit: BlockPreset = {
   connectable: false,
   toolbar: [],
@@ -426,10 +437,15 @@ const ifaceEdit: BlockPreset = {
     contract('c', 'MotorIO', 'getSpeed()', 90, 0),
     impl('sim', 'SIM', 0.3, 0, 160),
     impl('real', 'REAL', 0.9, 260, 160),
-    swap('sw', 110, 300, 'b'),
-    result('out', 120, 440),
+    declareObject('d', 110, 320),
+    result('out', 120, 460),
   ],
-  edges: [wire('sim', 'sw', 'a'), wire('real', 'sw', 'b'), wire('sw', 'out')],
+  edges: [
+    wire('c', 'sim', 'contract'),
+    wire('c', 'real', 'contract'),
+    wire('real', 'd', 'impl'),
+    wire('d', 'out'),
+  ],
 }
 
 const ifaceBuild: BlockPreset = {
@@ -438,7 +454,8 @@ const ifaceBuild: BlockPreset = {
     { kind: 'contract', label: 'interface' },
     { kind: 'implSim', label: 'SIM impl' },
     { kind: 'implReal', label: 'REAL impl' },
-    { kind: 'swap', label: 'swap' },
+    { kind: 'declare', label: 'declare object' },
+    { kind: 'number', label: 'number (try this!)' },
   ],
   nodes: [result('out', 130, 300)],
   edges: [],
