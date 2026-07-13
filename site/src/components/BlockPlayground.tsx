@@ -10,6 +10,7 @@ import {
   useNodesState,
   useEdgesState,
   useReactFlow,
+  useNodeConnections,
   type Node,
   type Edge,
   type Connection,
@@ -30,10 +31,15 @@ import './BlockPlayground.css'
 export type Op = 'add' | 'sub' | 'mul'
 export type Cmp = 'gt' | 'lt' | 'eq' | 'neq'
 
-// A value can be a number, a boolean (a decision diamond's answer), or '?'
-// once we hit a block whose inputs aren't all connected — or that sits on a
-// branch the program didn't take — so the student sees where the flow breaks.
-type Value = number | boolean | '?'
+// A value can be a number, a boolean (a decision diamond's answer), a config
+// object (the builder pattern's accumulated fields), or '?' once we hit a
+// block whose inputs aren't all connected — or that sits on a branch the
+// program didn't take — so the student sees where the flow breaks.
+type ConfigValue = Record<string, number>
+// 'error' is what `declare` resolves to when it's fed something that isn't a
+// real MotorIO implementation — a type mismatch made visible, not a missing
+// value like '?'.
+type Value = number | boolean | ConfigValue | '?' | 'error'
 
 const OP_SYMBOL: Record<Op, string> = { add: '+', sub: '−', mul: '×' }
 const OP_APPLY: Record<Op, (a: number, b: number) => number> = {
@@ -51,8 +57,16 @@ const CMP_APPLY: Record<Cmp, (a: number, b: number) => boolean> = {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 const isNum = (v: Value): v is number => typeof v === 'number'
-const fmt = (v: Value | null): string =>
-  v === null || v === '?' ? '?' : typeof v === 'boolean' ? (v ? 'true' : 'false') : String(v)
+const isConfig = (v: Value): v is ConfigValue => typeof v === 'object' && v !== null
+const fmt = (v: Value | null): string => {
+  if (v === null || v === '?') return '?'
+  if (typeof v === 'boolean') return v ? 'true' : 'false'
+  if (isConfig(v)) {
+    const entries = Object.entries(v)
+    return entries.length === 0 ? '{ }' : `{ ${entries.map(([k, n]) => `${k}: ${n}`).join(', ')} }`
+  }
+  return String(v)
+}
 
 // ---- Custom nodes ----------------------------------------------------------
 
@@ -90,6 +104,36 @@ interface CallData extends BaseData {
   fn: string
   label: string
 }
+// A legend card naming an interface and its one method. Wires out to any
+// number of `impl` blocks — "here's the contract you're signing up for."
+interface ContractData extends BaseData {
+  title: string
+  method: string
+}
+// One implementation of the contract (labelled SIM or REAL). It only reveals
+// its `getSpeed` field once something is wired into its `contract` input —
+// you can't provide the method until you've actually hooked up to the
+// interface, same as `implements MotorIO` unlocking the method body in Java.
+interface ImplData extends BaseData {
+  label: string
+  value: number
+  editable: boolean
+}
+// "MotorIO io = ...": declares one object of the interface type. Its single
+// `impl` input only accepts a wire from an `impl` block (enforced by
+// isValidConnection in Playground) — you can plug in SIM or REAL, nothing
+// else, exactly like a real declaration only ever names one implementation.
+type DeclareData = BaseData
+// `new Config()` — the start of a builder chain. Always an empty object; the
+// interesting behavior lives in the `withStep` blocks chained after it.
+type ConfigStartData = BaseData
+// One `.withX(value)` call in a builder chain: merges its own field into
+// whatever config flowed in, and passes the result along.
+interface WithStepData extends BaseData {
+  field: string
+  label: string
+  value: number
+}
 
 // Editing a value invalidates every revealed result, so we wipe them all and
 // let the student re-run to see the new answer flow through.
@@ -101,7 +145,10 @@ function clearShownValues(nodes: Node[]): Node[] {
 // branch), so whatever invalidates the nodes' revealed values must also strip
 // the edges back to neutral.
 function clearEdgeRunState(edges: Edge[]): Edge[] {
-  return edges.map((e) => ({ ...e, animated: false, className: undefined }))
+  // A wire marked `invalid` (declare fed by something other than an impl)
+  // stays dashed/✕ across runs and edits — that's a standing property of the
+  // wire itself, not a per-run animation state like `edge-skipped`.
+  return edges.map((e) => ({ ...e, animated: false, className: e.data?.invalid ? 'edge-invalid' : undefined }))
 }
 
 function NumberNode({ id, data }: NodeProps<Node<NumberData>>) {
@@ -284,11 +331,127 @@ function CallNode({ data }: NodeProps<Node<CallData>>) {
 }
 
 function ResultNode({ data }: NodeProps<Node<BaseData>>) {
+  const isError = data.shown === 'error'
   return (
-    <div className={`blk blk-result${data.active ? ' blk-active' : ''}`}>
+    <div className={`blk blk-result${data.active ? ' blk-active' : ''}${isError ? ' blk-result-error' : ''}`}>
       <Handle type="target" position={Position.Top} />
       <span className="blk-tag">result</span>
       <span className="blk-result-value">{fmt(data.shown)}</span>
+    </div>
+  )
+}
+
+// The interface's contract: name + one method signature. Its source handle
+// feeds any number of `impl` blocks below — the wire that "grants" each one
+// the right to expose that method.
+function ContractNode({ data }: NodeProps<Node<ContractData>>) {
+  return (
+    <div className="blk blk-contract">
+      <span className="blk-tag">interface</span>
+      <span className="blk-contract-title">{data.title}</span>
+      <span className="blk-contract-method">{data.method}</span>
+      <Handle type="source" position={Position.Bottom} />
+    </div>
+  )
+}
+
+// One implementation of the contract, tagged SIM or REAL. Its `getSpeed`
+// field only appears once something is wired into its `contract` input —
+// implementing the interface is what unlocks the method, same as writing
+// `implements MotorIO` before you're allowed to define `getSpeed()` in Java.
+function ImplNode({ id, data }: NodeProps<Node<ImplData>>) {
+  const { setNodes, setEdges } = useReactFlow()
+  const connections = useNodeConnections({ id, handleType: 'target', handleId: 'contract' })
+  const connected = connections.length > 0
+  return (
+    <div className={`blk blk-impl blk-impl-${data.label.toLowerCase()}${data.active ? ' blk-active' : ''}`}>
+      <Handle type="target" id="contract" position={Position.Top} />
+      <span className="blk-tag">{data.label}</span>
+      {connected ? (
+        <>
+          <span className="blk-row-label">getSpeed()</span>
+          <input
+            className="nodrag blk-input"
+            type="number"
+            value={data.value}
+            onChange={(e) => {
+              setEdges(clearEdgeRunState)
+              setNodes((nodes) =>
+                clearShownValues(nodes).map((n) =>
+                  n.id === id ? { ...n, data: { ...n.data, value: Number(e.target.value) } } : n,
+                ),
+              )
+            }}
+          />
+        </>
+      ) : (
+        <span className="blk-impl-hint">connect MotorIO</span>
+      )}
+      <Handle type="source" position={Position.Bottom} />
+    </div>
+  )
+}
+
+// "MotorIO io = ...": declares one object of the interface type. Its `impl`
+// input only ever accepts a wire from an `impl` block (Playground's
+// isValidConnection enforces this) — plug in SIM or REAL, nothing else. To
+// change which implementation it holds, drag a new wire in; a named handle
+// only ever keeps its most recent connection.
+function DeclareNode({ id, data }: NodeProps<Node<DeclareData>>) {
+  const { getNode } = useReactFlow()
+  const connections = useNodeConnections({ id, handleType: 'target', handleId: 'impl' })
+  const sourceId = connections[0]?.source
+  const sourceNode = sourceId ? getNode(sourceId) : undefined
+  const isImpl = sourceNode?.type === 'impl'
+  const invalid = sourceNode != null && !isImpl
+  const label = isImpl ? (sourceNode.data as ImplData).label : invalid ? '✕' : '—'
+  const isError = data.shown === 'error'
+  return (
+    <div className={`blk blk-declare${data.active ? ' blk-active' : ''}${invalid ? ' blk-declare-invalid' : ''}`}>
+      <Handle type="target" id="impl" position={Position.Top} />
+      <span className="blk-tag">MotorIO io =</span>
+      <span className="blk-value blk-declare-value">{label}</span>
+      {data.shown !== null && (
+        <span className={`blk-op-result${isError ? ' blk-op-result-error' : ''}`}>= {fmt(data.shown)}</span>
+      )}
+      <Handle type="source" position={Position.Bottom} />
+    </div>
+  )
+}
+
+function ConfigStartNode({ data }: NodeProps<Node<ConfigStartData>>) {
+  return (
+    <div className={`blk blk-config-start${data.active ? ' blk-active' : ''}`}>
+      <span className="blk-tag">config</span>
+      <span className="blk-value">new Config()</span>
+      <Handle type="source" position={Position.Bottom} />
+    </div>
+  )
+}
+
+// One link in a builder chain: takes the config flowing in, merges its own
+// field into it, and passes the combined config along to the next step.
+function WithStepNode({ id, data }: NodeProps<Node<WithStepData>>) {
+  const { setNodes, setEdges } = useReactFlow()
+  return (
+    <div className={`blk blk-with-step${data.active ? ' blk-active' : ''}`}>
+      <Handle type="target" id="in" position={Position.Top} style={{ left: '50%' }} />
+      <span className="blk-tag">.{data.label}(…)</span>
+      <input
+        className="nodrag blk-input blk-input-sm"
+        type="number"
+        value={data.value}
+        onChange={(e) => {
+          setEdges(clearEdgeRunState)
+          setNodes((nodes) =>
+            clearShownValues(nodes).map((n) =>
+              n.id === id ? { ...n, data: { ...n.data, value: Number(e.target.value) } } : n,
+            ),
+          )
+        }}
+      />
+      {data.shown !== null && <span className="blk-multi-shown">{fmt(data.shown)}</span>}
+      <Handle type="source" position={Position.Bottom} />
     </div>
   )
 }
@@ -302,6 +465,11 @@ const nodeTypes = {
   loop: LoopNode,
   call: CallNode,
   result: ResultNode,
+  contract: ContractNode,
+  impl: ImplNode,
+  declare: DeclareNode,
+  configStart: ConfigStartNode,
+  withStep: WithStepNode,
 }
 
 // ---- Evaluation ------------------------------------------------------------
@@ -387,6 +555,24 @@ function valueOf(
     const n = input('n')
     const fn = fns[(node.data as CallData).fn]
     if (isNum(n) && fn) result = callFunction(fn, n, fns)
+  } else if (node?.type === 'impl') {
+    // No getSpeed() without implementing the interface first: an impl block
+    // with nothing wired into its `contract` handle has nothing to offer.
+    const implementsContract = edgesInto(edges, id, 'contract').length > 0
+    result = implementsContract ? (node.data as ImplData).value : '?'
+  } else if (node?.type === 'declare') {
+    // A wire from anything but an `impl` block is a type mismatch — same
+    // idea as `MotorIO io = someNumber;` failing to compile in Java, just
+    // surfaced at run time here instead of rejected at wire time.
+    const wireEdge = edgesInto(edges, id, 'impl')[0]
+    const sourceNode = wireEdge ? nodes.find((n) => n.id === wireEdge.source) : undefined
+    result = sourceNode && sourceNode.type !== 'impl' ? 'error' : input('impl')
+  } else if (node?.type === 'configStart') {
+    result = {}
+  } else if (node?.type === 'withStep') {
+    const configIn = input('in')
+    const { field, value } = node.data as WithStepData
+    result = { ...(isConfig(configIn) ? configIn : {}), [field]: value }
   } else if (node?.type === 'result') {
     result = input(null)
   }
@@ -412,7 +598,9 @@ function callFunction(fn: FunctionDef, arg: number, fns: FnMap): Value {
   return out ? valueOf(out.id, null, nodes, fn.edges, fns, new Map(), new Set()) : '?'
 }
 
-const COMPUTED = new Set(['op', 'if', 'outlet', 'loop', 'call', 'result'])
+// `impl` is computed (not a plain leaf like `number`) because its value now
+// depends on whether a contract is wired in.
+const COMPUTED = new Set(['op', 'if', 'outlet', 'loop', 'call', 'result', 'impl', 'declare', 'withStep'])
 
 // Dependency-first ordering of the computed blocks, so the animation reveals
 // inputs before the blocks that consume them.
@@ -495,9 +683,15 @@ function Playground({ preset }: { preset: string }) {
         params.sourceHandle === 'true' || params.sourceHandle === 'false'
           ? { ...params, label: params.sourceHandle }
           : params
+      // `declare` accepts a wire from anything, but only an `impl` block is a
+      // real MotorIO — wiring in anything else still connects, marked as a
+      // broken wire (dashed, ✕) rather than silently refusing the drop.
+      const sourceNode = nodes.find((n) => n.id === params.source)
+      const invalidDeclare = params.targetHandle === 'impl' && sourceNode?.type !== 'impl'
+      const wired = invalidDeclare ? { ...labelled, label: '✕', className: 'edge-invalid', data: { invalid: true } } : labelled
       setEdges((eds) =>
         addEdge(
-          labelled,
+          wired,
           clearEdgeRunState(
             params.targetHandle == null
               ? eds
@@ -509,7 +703,23 @@ function Playground({ preset }: { preset: string }) {
         ),
       )
     },
-    [setEdges, setNodes],
+    [setEdges, setNodes, nodes],
+  )
+
+  // `impl` only becomes a real implementation once a `contract` is plugged
+  // into its `contract` handle — that one's a hard rule, enforced here.
+  // `declare`'s `impl` handle is deliberately *not* restricted the same way:
+  // wiring in something that isn't an `impl` is allowed to connect (see
+  // onConnect above), just marked as broken, so a student can actually see
+  // what a type mismatch looks like instead of the wire simply refusing to
+  // drop.
+  const isValidConnection = useCallback(
+    (conn: Connection | Edge) => {
+      const source = nodes.find((n) => n.id === conn.source)
+      if (conn.targetHandle === 'contract') return source?.type === 'contract'
+      return true
+    },
+    [nodes],
   )
 
   const addNode = useCallback(
@@ -653,10 +863,15 @@ function Playground({ preset }: { preset: string }) {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={config.connectable ? onConnect : undefined}
+          isValidConnection={isValidConnection}
           nodeTypes={nodeTypes}
           nodesConnectable={config.connectable}
           fitView
-          fitViewOptions={{ padding: 0.2 }}
+          // Capped so a preset that starts with just one or two small nodes
+          // (e.g. a bare `result` in a build-from-scratch preset) doesn't
+          // zoom in so tight that blocks added later via the toolbar land
+          // outside the visible, clipped canvas.
+          fitViewOptions={{ padding: 0.2, maxZoom: 1 }}
           colorMode="system"
           proOptions={{ hideAttribution: true }}
         >

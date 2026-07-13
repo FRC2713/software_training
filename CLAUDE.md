@@ -43,9 +43,9 @@ folder until it's restarted.
   - ` ```java ` fences are live/runnable, not decoration — only the first one
     per page becomes "the" runnable snippet (`firstJavaSnippet`). Use
     ` ```text ` for output samples or pseudocode that shouldn't be executable.
-    Snippets without a `class`/`enum` declaration are auto-wrapped in a
-    `Main`-class shell (with `import java.util.*;`) by the runtime; snippets
-    that declare a class run as written (see `prepareSource` in
+    Snippets without a `class`/`enum`/`interface` declaration are auto-wrapped
+    in a `Main`-class shell (with `import java.util.*;`) by the runtime;
+    snippets that declare a type run as written (see `prepareSource` in
     `site/src/lib/javaRuntime.ts` and the authoring notes in
     `lessons/README.md`).
   - ` ```blocks ` fences replace the Java playground with the xyflow-based
@@ -58,7 +58,11 @@ folder until it's restarted.
     Lessons 1–4 are the pre-Java block series (arithmetic → conditionals →
     loops → functions); Java starts at lesson 5; the "Objects" section
     (classes, multiple objects, encapsulation) runs 17–19; state machines
-    start at lesson 20.
+    run 20–25 (ending in Capstone 1, lesson 25, where students design their
+    own mechanism); the "Advanced Java" section (switch/ternary, enums with
+    fields, interfaces → the AdvantageKit IO pattern, access modifiers,
+    lambdas, the builder pattern → PhoenixLib-style fluent config, and
+    Capstone 2 — upgrading that same Capstone 1 mechanism) runs 26–34.
   - `lessons/parked/` holds withdrawn drafts. The site's glob only matches
     `lessons/*/README.md`, so anything nested a level deeper never renders.
 - `site/` — the React + TypeScript + Vite app. See `site/README.md` for the
@@ -130,6 +134,24 @@ folder until it's restarted.
     number fields), not wired in — the loop's internal logic lives inside the
     block, matching the mentor-facing metaphor of "a block with its own logic
     that repeats N times and outputs a number."
+  - **Lesson 28** (interfaces) and **lesson 32** (builder pattern) add five
+    more node types on top of the original eight: `contract`/`impl`/`declare`
+    and `configStart`/`withStep`. A `contract` is a legend card with a source
+    handle; an `impl` (tagged SIM/REAL) only reveals its `getSpeed` field once
+    something is wired into its `contract` handle — no contract, no method.
+    `declare` ("`MotorIO io = ...`") holds whatever `impl` is wired into it;
+    `isValidConnection` in `Playground` lets `impl`→`contract` wiring be
+    strictly enforced, but deliberately lets anything wire into `declare`'s
+    `impl` handle — a non-`impl` source there is allowed to connect but gets
+    marked `edge-invalid` (dashed, `✕` label) in `onConnect`, and resolves to
+    the `'error'` `Value` in `valueOf` instead of being rejected outright, so
+    a type mismatch is something a student can see rather than a wire that
+    silently won't drop. `configStart`/`withStep` is a builder chain that
+    accumulates a plain object field by field, `{ ...configIn, [field]: value }`.
+    These pushed `Value` from `number | boolean | '?'` to also include a
+    config object (`Record<string, number>`) and `'error'`, so `fmt()` and
+    any exhaustive switch over `Value` need both — check when touching the
+    evaluator.
 - **State-machine playground** (`site/src/components/StatePlayground.tsx` +
   `site/src/lib/statePresets.ts`): a sibling to the block editor for the state
   machine lessons (14+). Instead of evaluating a dataflow graph, the student

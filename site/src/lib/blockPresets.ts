@@ -101,6 +101,63 @@ const result = (id: string, x: number, y: number): Node => ({
   data: { active: false, shown: null },
 })
 
+// ---- Lesson 28: interfaces --------------------------------------------------
+
+// The contract: a name and one method signature. Wires out to any number of
+// `impl` blocks — that connection is what grants each one its method.
+const contract = (id: string, title: string, method: string, x: number, y: number): Node => ({
+  id,
+  type: 'contract',
+  position: { x, y },
+  data: { title, method, active: false, shown: null },
+})
+
+// One implementation of the contract, tagged SIM or REAL, holding the number
+// its method would return — but only once a `contract` is wired into it.
+const impl = (id: string, label: 'SIM' | 'REAL', value: number, x: number, y: number): Node => ({
+  id,
+  type: 'impl',
+  position: { x, y },
+  data: { label, value, editable: true, active: false, shown: null },
+})
+
+// `MotorIO io = ...` — declares one object of the interface type. Its single
+// `impl` input only accepts a wire from an `impl` block; swapping which
+// implementation it holds means dragging in a different wire, not flipping
+// a switch.
+const declareObject = (id: string, x: number, y: number): Node => ({
+  id,
+  type: 'declare',
+  position: { x, y },
+  data: { active: false, shown: null },
+})
+
+// ---- Lesson 32: builder pattern ---------------------------------------------
+
+// `new Config()` — the start of a fluent chain. Always an empty config.
+const configStart = (id: string, x: number, y: number): Node => ({
+  id,
+  type: 'configStart',
+  position: { x, y },
+  data: { active: false, shown: null },
+})
+
+// One `.withX(value)` link in the chain: `field` is the config key it sets,
+// `label` is the method name shown on the block (e.g. `withMaxSpeed`).
+const withStep = (
+  id: string,
+  field: string,
+  label: string,
+  value: number,
+  x: number,
+  y: number,
+): Node => ({
+  id,
+  type: 'withStep',
+  position: { x, y },
+  data: { field, label, value, active: false, shown: null },
+})
+
 // Arrows leaving a decision diamond's true/false handles get labelled, so the
 // graph reads like a textbook flowchart branch.
 const wire = (source: string, target: string, targetHandle?: string, sourceHandle?: string): Edge => ({
@@ -130,6 +187,15 @@ export function createNode(item: ToolbarItem, id: string, position: { x: number;
   if (kind === 'loopAdd') return loop(id, 'add', 0, 3, position.x, position.y)
   if (kind === 'loopMul') return loop(id, 'mul', 1, 2, position.x, position.y)
   if (kind.startsWith('call:')) return call(id, kind.slice(5), label, position.x, position.y)
+  if (kind === 'contract') return contract(id, 'MotorIO', 'getSpeed()', position.x, position.y)
+  if (kind === 'implSim') return impl(id, 'SIM', 0.4, position.x, position.y)
+  if (kind === 'implReal') return impl(id, 'REAL', 0.55, position.x, position.y)
+  if (kind === 'declare') return declareObject(id, position.x, position.y)
+  if (kind === 'configStart') return configStart(id, position.x, position.y)
+  if (kind === 'withMaxSpeed') return withStep(id, 'maxSpeed', 'withMaxSpeed', 80, position.x, position.y)
+  if (kind === 'withCurrentLimit')
+    return withStep(id, 'currentLimit', 'withCurrentLimit', 40, position.x, position.y)
+  if (kind === 'withGearRatio') return withStep(id, 'gearRatio', 'withGearRatio', 4, position.x, position.y)
   return num(id, 0, position.x, position.y, true)
 }
 
@@ -338,6 +404,103 @@ const fnBuild: BlockPreset = {
   edges: [],
 }
 
+// ---- Lesson 28: interfaces ---------------------------------------------------
+
+// MotorIO: one method, two implementations, and a swap that decides which one
+// answers — the whole "same call, different behavior" idea, before any Java.
+// MotorIO feeds both SIM and REAL their getSpeed() field; declare holds
+// exactly one of them (SIM here), and result shows whatever declare holds.
+const ifaceDemo: BlockPreset = {
+  connectable: false,
+  toolbar: [],
+  nodes: [
+    contract('c', 'MotorIO', 'getSpeed()', 90, 0),
+    impl('sim', 'SIM', 0.4, 0, 160),
+    impl('real', 'REAL', 0.55, 260, 160),
+    declareObject('d', 110, 320),
+    result('out', 120, 460),
+  ],
+  edges: [
+    wire('c', 'sim', 'contract'),
+    wire('c', 'real', 'contract'),
+    wire('sim', 'd', 'impl'),
+    wire('d', 'out'),
+  ],
+}
+
+// Same shape, but declare is wired to REAL instead of SIM — a different
+// result from a different wire, not a toggle.
+const ifaceEdit: BlockPreset = {
+  connectable: false,
+  toolbar: [],
+  nodes: [
+    contract('c', 'MotorIO', 'getSpeed()', 90, 0),
+    impl('sim', 'SIM', 0.3, 0, 160),
+    impl('real', 'REAL', 0.9, 260, 160),
+    declareObject('d', 110, 320),
+    result('out', 120, 460),
+  ],
+  edges: [
+    wire('c', 'sim', 'contract'),
+    wire('c', 'real', 'contract'),
+    wire('real', 'd', 'impl'),
+    wire('d', 'out'),
+  ],
+}
+
+const ifaceBuild: BlockPreset = {
+  connectable: true,
+  toolbar: [
+    { kind: 'contract', label: 'interface' },
+    { kind: 'implSim', label: 'SIM impl' },
+    { kind: 'implReal', label: 'REAL impl' },
+    { kind: 'declare', label: 'declare object' },
+    { kind: 'number', label: 'number (try this!)' },
+  ],
+  nodes: [result('out', 130, 300)],
+  edges: [],
+}
+
+// ---- Lesson 32: builder pattern ----------------------------------------------
+
+// new Config().withMaxSpeed(80).withCurrentLimit(40) — each step merges one
+// field into the config flowing through it.
+const builderDemo: BlockPreset = {
+  connectable: false,
+  toolbar: [],
+  nodes: [
+    configStart('start', 40, 0),
+    withStep('s1', 'maxSpeed', 'withMaxSpeed', 80, 20, 140),
+    withStep('s2', 'currentLimit', 'withCurrentLimit', 40, 20, 280),
+    result('out', 40, 420),
+  ],
+  edges: [wire('start', 's1', 'in'), wire('s1', 's2', 'in'), wire('s2', 'out')],
+}
+
+const builderEdit: BlockPreset = {
+  connectable: false,
+  toolbar: [],
+  nodes: [
+    configStart('start', 40, 0),
+    withStep('s1', 'maxSpeed', 'withMaxSpeed', 60, 20, 140),
+    withStep('s2', 'currentLimit', 'withCurrentLimit', 30, 20, 280),
+    result('out', 40, 420),
+  ],
+  edges: [wire('start', 's1', 'in'), wire('s1', 's2', 'in'), wire('s2', 'out')],
+}
+
+const builderBuild: BlockPreset = {
+  connectable: true,
+  toolbar: [
+    { kind: 'configStart', label: 'new Config()' },
+    { kind: 'withMaxSpeed', label: 'with max speed' },
+    { kind: 'withCurrentLimit', label: 'with current limit' },
+    { kind: 'withGearRatio', label: 'with gear ratio' },
+  ],
+  nodes: [result('out', 130, 300)],
+  edges: [],
+}
+
 // ---- Registry --------------------------------------------------------------
 
 const PRESETS: Record<string, BlockPreset> = {
@@ -353,6 +516,12 @@ const PRESETS: Record<string, BlockPreset> = {
   'fn-demo': fnDemo,
   'fn-chain': fnChain,
   'fn-build': fnBuild,
+  'iface-demo': ifaceDemo,
+  'iface-edit': ifaceEdit,
+  'iface-build': ifaceBuild,
+  'builder-demo': builderDemo,
+  'builder-edit': builderEdit,
+  'builder-build': builderBuild,
 }
 
 export function getPreset(name: string): BlockPreset {

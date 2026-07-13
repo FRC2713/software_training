@@ -1,5 +1,5 @@
 ---
-title: "Lesson 25: Capstone — design a state machine"
+title: "Lesson 25: Capstone 1 — design a state machine"
 goal: "Take a real mechanism from words to a diagram to working code you can simulate."
 order: 25
 section: "State Machines"
@@ -126,7 +126,7 @@ Watch the second `"button"` do nothing — while `EXTENDING`, the climber
 ignores the button and waits for `at_top`, just like the diagram says. That's
 the safety you designed in, running in code.
 
-**Your capstone.** Pick a real mechanism from this year's robot — an arm, a
+**Your Capstone 1.** Pick a real mechanism from this year's robot — an arm, a
 turret, an indexer, whatever your team is building. Then:
 
 1. Write its states, its events, and its arrows as a diagram (page 1's three
@@ -138,3 +138,7 @@ turret, an indexer, whatever your team is building. Then:
 
 Do that, and you haven't just finished the lessons — you've written the kind of
 code your robot will actually run this season.
+
+Keep this mechanism around. Once you've picked up a few more tools in the
+Advanced Java section, Capstone 2 will have you come back and upgrade this
+exact class.
