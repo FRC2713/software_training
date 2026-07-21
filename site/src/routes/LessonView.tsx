@@ -92,7 +92,6 @@ export function LessonView() {
               </>
             ) : (
               <>
-                <h2 className="mb-3 text-base font-semibold text-primary">▶ Playground</h2>
                 <JavaRunner
                   key={`${lesson.slug}-${pageIndex}`}
                   initialCode={javaSnippet as string}
