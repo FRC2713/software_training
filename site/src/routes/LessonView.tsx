@@ -93,7 +93,11 @@ export function LessonView() {
             ) : (
               <>
                 <h2 className="mb-3 text-base font-semibold text-primary">▶ Playground</h2>
-                <JavaRunner key={`${lesson.slug}-${pageIndex}`} initialCode={javaSnippet as string} />
+                <JavaRunner
+                  key={`${lesson.slug}-${pageIndex}`}
+                  initialCode={javaSnippet as string}
+                  storageKey={`frc2713-playground:${lesson.slug}:${pageIndex + 1}`}
+                />
               </>
             )}
           </div>

@@ -7,8 +7,15 @@ import { editorTheme, usePrefersDark } from '@/lib/editorTheme'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-export function JavaRunner({ initialCode }: { initialCode: string }) {
-  const [code, setCode] = useState(initialCode.trimEnd())
+export function JavaRunner({
+  initialCode,
+  storageKey,
+}: {
+  initialCode: string
+  storageKey: string
+}) {
+  const originalCode = initialCode.trimEnd()
+  const [code, setCode] = useState(() => localStorage.getItem(storageKey) ?? originalCode)
   const [output, setOutput] = useState<string | null>(null)
   const [ok, setOk] = useState(true)
   const [running, setRunning] = useState(false)
@@ -26,11 +33,16 @@ export function JavaRunner({ initialCode }: { initialCode: string }) {
     setRunning(false)
   }
 
+  const handleChange = (value: string) => {
+    setCode(value)
+    localStorage.setItem(storageKey, value)
+  }
+
   return (
     <div className="my-4 overflow-hidden rounded-lg border bg-muted">
       <CodeMirror
         value={code}
-        onChange={setCode}
+        onChange={handleChange}
         extensions={extensions}
         theme={dark ? oneDark : 'light'}
         basicSetup={{
