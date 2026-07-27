@@ -1,13 +1,13 @@
 ---
-title: "Lesson 26: Decisions in code, revisited"
+title: "Decisions in code, revisited"
 goal: "Rewrite if/else-if chains as switch statements — including over an enum — and use the ternary operator for one-line decisions."
-order: 26
+order: 260
 section: "Advanced Java"
 ---
 
 # switch: one question, many answers
 
-[Lesson 22](#/lesson/22-events-and-transitions) dispatched on an event string with `if`/`else if`. That works, but
+[Lesson {n}](#/lesson/22-events-and-transitions) dispatched on an event string with `if`/`else if`. That works, but
 when every branch is testing the *same* variable against different exact
 values, Java has a shape built for exactly that: **`switch`**.
 
@@ -62,7 +62,7 @@ things to notice:
 
 `switch` gets even better once the thing you're checking is an
 **`enum`**, because Java already knows every value it could possibly be.
-Here's [lesson 23's](#/lesson/23-organizing-a-machine) `onEnter`, rewritten:
+Here's [lesson {n}'s](#/lesson/23-organizing-a-machine) `onEnter`, rewritten:
 
 ```java
 enum HandlerState { EMPTY, INTAKING, LOADED, SHOOTING }
@@ -95,7 +95,7 @@ Run it: `SHOOTING` prints the spin-up message, and `LOADED` prints nothing —
 it falls to `default`, which does nothing on purpose. Notice the case labels
 are just `INTAKING`, not `HandlerState.INTAKING` — once you `switch (state)`,
 Java already knows the type, so the enum name would be redundant. Compare
-this to the `if (state == HandlerState.INTAKING)` chain from lesson 23: same
+this to the `if (state == HandlerState.INTAKING)` chain from [lesson {n}](#/lesson/23-organizing-a-machine): same
 logic, less repetition, and far easier to scan when a state list grows long.
 
 # The ternary operator: a decision in one line
@@ -111,9 +111,9 @@ System.out.println(status);
 
 Read it as *"ready? then `"GO"`, otherwise `"WAIT"`."* Change `ready` to
 `false` and run again — `status` flips. It's exactly the two-branch `if`/`else`
-from [lesson 9](#/lesson/09-if-statements), just squeezed onto one line
+from [lesson {n}](#/lesson/09-if-statements), just squeezed onto one line
 because both branches are a single value, not a block of statements. A
-realistic use — the ready check from [lesson 19's](#/lesson/19-encapsulation)
+realistic use — the ready check from [lesson {n}'s](#/lesson/19-encapsulation)
 `Flywheel`:
 
 ```java

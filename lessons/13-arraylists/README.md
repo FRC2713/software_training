@@ -1,14 +1,15 @@
 ---
-title: "Lesson 13: ArrayLists"
+title: "ArrayLists"
 goal: "Hold a group that grows and shrinks while the program runs, instead of a fixed number of slots."
-order: 13
+order: 130
 section: "Data Structures"
 ---
 
 # A row that can grow
 
 [Last lesson's](#/lesson/12-arrays) array is great, but it commits to a size up
-front: `new int[5]` is five slots, forever. That's a problem the moment you
+front: the five values you write between the braces are five slots, forever.
+That's a problem the moment you
 don't know the count ahead of time — how many game pieces will you score this
 match? You don't know until the match is over.
 
@@ -53,7 +54,7 @@ System.out.println(scores.get(1));
 ```
 
 `.get(1)` is the second item (`25`) — indexes still start at **0**, same rule
-as [lesson 12](#/lesson/12-arrays). To change a slot without touching the
+as [lesson {n}](#/lesson/12-arrays). To change a slot without touching the
 others, use `.set(index, value)`:
 
 ```java
@@ -83,7 +84,7 @@ list's does, on demand.
 
 # Looping and checking membership
 
-A for-each loop ([lesson 12](#/lesson/12-arrays)) walks a list exactly like it
+A for-each loop ([lesson {n}](#/lesson/12-arrays)) walks a list exactly like it
 walks an array:
 
 ```java

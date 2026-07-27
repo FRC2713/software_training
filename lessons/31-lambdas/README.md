@@ -1,7 +1,7 @@
 ---
-title: "Lesson 31: Lambdas"
+title: "Lambdas"
 goal: "Write a lambda that hands back a value, then one that just does something, and pass either into a method as a parameter."
-order: 31
+order: 310
 section: "Advanced Java"
 ---
 
@@ -119,7 +119,7 @@ public class Main {
 ```
 
 `checkSensor` doesn't know or care *how* its `sensor` decides — it just calls
-`.isReady()` once and reacts to whatever comes back ([lesson 9's](#/lesson/09-if-statements)
+`.isReady()` once and reacts to whatever comes back ([lesson {n}'s](#/lesson/09-if-statements)
 `if`, doing exactly what it always does). Three calls, three different
 lambdas, and `checkSensor` itself never changes. A method can take a
 `Runnable` the same way:

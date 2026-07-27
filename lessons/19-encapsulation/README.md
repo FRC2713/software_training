@@ -1,7 +1,7 @@
 ---
-title: "Lesson 19: Encapsulation"
+title: "Encapsulation"
 goal: "Hide an object's fields behind public methods so outside code can't force it into a broken state."
-order: 19
+order: 190
 section: "Objects"
 ---
 

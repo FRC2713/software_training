@@ -1,7 +1,7 @@
 ---
-title: "Lesson 12: Arrays"
+title: "Arrays"
 goal: "Hold many values in one place, reach any of them by position, and walk through them with a loop."
-order: 12
+order: 120
 section: "Data Structures"
 ---
 
@@ -36,7 +36,7 @@ batch. That's the whole idea of an array.
 You pull a single value out of an array by its **position**, written in square
 brackets after the name. And here's the catch that trips up everyone: Java
 counts positions starting from **0**, not 1 — the same "programmers start at
-zero" rule the loop counter followed back in [lesson 10](#/lesson/10-loops).
+zero" rule the loop counter followed back in [lesson {n}](#/lesson/10-loops).
 
 ```java
 int[] readings = {12, 47, 3, 88, 21};
@@ -67,7 +67,7 @@ System.out.println(Arrays.toString(readings));
 
 # Walking the whole array
 
-[Lesson 10's](#/lesson/10-loops) `for` loop counted with `i`. There's a second form of `for` whose
+[Lesson {n}'s](#/lesson/10-loops) `for` loop counted with `i`. There's a second form of `for` whose
 real job is walking an array — handing you each item, one per pass. It's
 called the **for-each** loop:
 
@@ -82,7 +82,7 @@ No indexes, no counting — the loop takes care of visiting every item in order.
 Read the colon as "in": "for each `score` in `scores`, print it." Run it and
 you get one line per match.
 
-Now combine it with the **running total** from [lesson 10](#/lesson/10-loops) to add an array up:
+Now combine it with the **running total** from [lesson {n}](#/lesson/10-loops) to add an array up:
 
 ```java
 int[] scores = {10, 25, 5, 40};
@@ -101,6 +101,6 @@ slots and keeps them forever. [Next lesson](#/lesson/13-arraylists) covers
 a fixed row of numbered slots.
 
 Your turn: make an array of five sensor `readings`, then loop through and print
-only the ones **above 20** (you'll need an `if` inside the `for` — [lesson 9](#/lesson/09-if-statements)
-meets lesson 12). Then use the running-total pattern and `.length` to print the
+only the ones **above 20** (you'll need an `if` inside the `for` — [lesson {n}](#/lesson/09-if-statements)
+meets [lesson {n}](#/lesson/12-arrays)). Then use the running-total pattern and `.length` to print the
 **average**. Predict it first, then check.

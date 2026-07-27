@@ -1,7 +1,7 @@
 ---
-title: "Lesson 18: Multiple objects, one blueprint"
+title: "Multiple objects, one blueprint"
 goal: "See that every object made from a class keeps its own independent data, and hold a whole group of them in a list."
-order: 18
+order: 180
 section: "Objects"
 ---
 
@@ -38,14 +38,14 @@ public class Main {
 ```
 
 `Intake(String name)` takes a value in, exactly like a method parameter
-([lesson 11](#/lesson/11-writing-methods)) — `new Intake("left")` fills it in. Run it: `left.start()` sets
+([lesson {n}](#/lesson/11-writing-methods)) — `new Intake("left")` fills it in. Run it: `left.start()` sets
 `left`'s speed to `0.8` and leaves `right` completely untouched, at `0.0`. One
 blueprint, two independent objects, no way for one to reach into the other's
 fields by accident.
 
 # static vs. instance: who does a method belong to?
 
-Every method you wrote before [lesson 17](#/lesson/17-classes-and-objects) had `static` in front of it, and
+Every method you wrote before [lesson {n}](#/lesson/17-classes-and-objects) had `static` in front of it, and
 you probably didn't think twice about it — there was nothing yet for a method
 to belong to. Now that objects exist, the difference matters:
 
@@ -84,7 +84,7 @@ whole rule: no `static` and no object, no call.
 # A list of objects
 
 Real robots don't have one intake — they have a handful of mechanisms, all
-built from a small number of classes. An `ArrayList` ([lesson 13](#/lesson/13-arraylists))
+built from a small number of classes. An `ArrayList` ([lesson {n}](#/lesson/13-arraylists))
 holds objects exactly the way it holds numbers or strings:
 
 ```java
@@ -119,7 +119,7 @@ public class Main {
 ```
 
 `ArrayList<Intake>` says exactly what it holds: not numbers this time, but
-whole `Intake` objects. The for-each loop ([lesson 10](#/lesson/10-loops)) hands you one object at
+whole `Intake` objects. The for-each loop ([lesson {n}](#/lesson/12-arrays)) hands you one object at
 a time — `intake` is a real object each pass, so `intake.start()` and
 `intake.name` work exactly as they did above. Run it and watch both mechanisms
 start independently.

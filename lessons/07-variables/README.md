@@ -1,7 +1,7 @@
 ---
-title: "Lesson 7: Naming things"
+title: "Naming things"
 goal: "Store a value under a typed name so you can reuse it and change it in one place."
-order: 7
+order: 70
 section: "Java Fundamentals"
 ---
 
@@ -24,7 +24,7 @@ the computer reaches in and uses that value.
 The word in front of the name — `String` — is the variable's **type**: what
 *kind* of value it holds. `String` means text. Java makes you say the type up
 front, and in exchange it will catch you the moment you try to put the wrong
-kind of value in — more on this in [lesson 8](#/lesson/08-numbers-and-text).
+kind of value in — more on this in [lesson {n}](#/lesson/08-numbers-and-text).
 
 The `+` between `"Hello, "` and `name` **joins** text together into one string,
 so this program prints `Hello, Ada`.
@@ -88,7 +88,7 @@ and stores `10`. Then `score = score + 5` looks confusing until you remember `=`
 means "gets set to," not "equals": the computer works out the right side first
 (`10 + 5 = 15`), then stores that back into `score`. This "take the value, change
 it, put it back" pattern is exactly the running total the **repeat** block kept
-in [lesson 3](#/lesson/03-loops) — a value that updates itself, one step at a time.
+in [lesson {n}](#/lesson/03-loops) — a value that updates itself, one step at a time.
 
 Your turn: add a line that gives a `10` penalty (subtract, don't add), then
 print the score again. Predict the final number before you run it.

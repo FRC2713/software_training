@@ -1,7 +1,7 @@
 ---
-title: "Lesson 28: Interfaces, as diagrams"
+title: "Interfaces, as diagrams"
 goal: "See that a contract can have more than one implementation, and that plugging in something that isn't one shows up as a visible, broken wire — before writing a line of Java."
-order: 28
+order: 280
 section: "Advanced Java"
 ---
 

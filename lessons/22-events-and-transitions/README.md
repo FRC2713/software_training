@@ -1,7 +1,7 @@
 ---
-title: "Lesson 22: Events and transitions in code"
+title: "Events and transitions in code"
 goal: "Drive a machine from events, and make each state ignore the events it has no transition for."
-order: 22
+order: 220
 section: "State Machines"
 ---
 
@@ -12,7 +12,7 @@ it. Real mechanisms wait for **specific events**: a button press, a sensor
 tripping, a shot finishing. So a transition depends on **two things**: which
 state you're in, *and* which event just happened.
 
-This is the game-piece handler you drove in [lesson 20](#/lesson/20-state-machines). Here's a single
+This is the game-piece handler you drove in [lesson {n}](#/lesson/20-state-machines). Here's a single
 transition from it:
 
 ```java
@@ -26,7 +26,7 @@ if (state.equals("empty") && event.equals("button")) {
 System.out.println(state);
 ```
 
-The `&&` ([lesson 16](#/lesson/16-booleans)) is the key: the machine only moves when it's in `empty`
+The `&&` ([lesson {n}](#/lesson/16-booleans)) is the key: the machine only moves when it's in `empty`
 **and** the driver's `button` event happened. Run it — `empty` becomes
 `intaking`. Change `event` to `"sensor"` and run again: nothing changes,
 because `empty` has no transition for `sensor`. That's the diagram's "ignore"
@@ -74,7 +74,7 @@ there.
 # Feeding it a stream of events
 
 A robot gets a new event every tick. We can simulate a whole match by putting
-events in an **array** ([lesson 12](#/lesson/12-arrays)) and running them through the machine one
+events in an **array** ([lesson {n}](#/lesson/12-arrays)) and running them through the machine one
 at a time with a for-each loop:
 
 ```java

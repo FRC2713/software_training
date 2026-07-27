@@ -105,6 +105,16 @@ export function getLesson(slug: string): Lesson | undefined {
   return lessons.find((lesson) => lesson.slug === slug)
 }
 
+// The displayed lesson number is derived from position in the sorted `lessons`
+// array (1-based), never stored in content. This is the single source of truth
+// for "what number is this lesson" - cards, the sidebar, and cross-reference
+// links all read it, so inserting/reordering a lesson (change its `order`) is
+// the only edit needed to renumber everything.
+export function lessonNumber(slug: string): number {
+  const index = lessons.findIndex((lesson) => lesson.slug === slug)
+  return index === -1 ? 0 : index + 1
+}
+
 // The lesson that follows `slug` in `order`, or undefined if it's the last one.
 export function nextLesson(slug: string): Lesson | undefined {
   const index = lessons.findIndex((lesson) => lesson.slug === slug)

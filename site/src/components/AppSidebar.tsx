@@ -13,10 +13,6 @@ import {
 } from '@/components/ui/sidebar'
 import { lessons, lessonSections } from '@/lib/lessons'
 
-// The lesson titles already read "Lesson N: ..."; the sidebar shows its own
-// number badge, so strip the redundant prefix from the label.
-const shortTitle = (title: string) => title.replace(/^Lesson\s+\d+:\s*/, '')
-
 export function AppSidebar() {
   const { pathname } = useLocation()
 
@@ -52,7 +48,7 @@ export function AppSidebar() {
                           <span className="w-5 shrink-0 text-right font-medium tabular-nums text-primary">
                             {lessons.indexOf(lesson) + 1}
                           </span>
-                          <span className="truncate">{shortTitle(lesson.title)}</span>
+                          <span className="truncate">{lesson.title}</span>
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>

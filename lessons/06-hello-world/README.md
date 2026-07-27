@@ -1,16 +1,16 @@
 ---
-title: "Lesson 6: Hello, World!"
+title: "Hello, World!"
 goal: "Explain what a program actually is, then write and run your first one."
-order: 6
+order: 60
 section: "Java Fundamentals"
 ---
 
 # What is a program?
 
 You've already been building programs — as flowcharts of blocks. Everything you
-did there carries over: doing steps in order ([lesson 1](#/lesson/01-flowcharts)), making decisions
-([lesson 2](#/lesson/02-conditionals)), repeating steps ([lesson 3](#/lesson/03-loops)), and packaging steps into reusable pieces
-([lesson 4](#/lesson/04-functions)). From here on we write those same ideas as **text** instead of wiring
+did there carries over: doing steps in order ([lesson {n}](#/lesson/01-flowcharts)), making decisions
+([lesson {n}](#/lesson/02-conditionals)), repeating steps ([lesson {n}](#/lesson/03-loops)), and packaging steps into reusable pieces
+([lesson {n}](#/lesson/04-functions)). From here on we write those same ideas as **text** instead of wiring
 boxes together. The concepts don't change; only the notation does — and
 [last lesson](#/lesson/05-what-is-java) you already met that notation: braces,
 parentheses, commas, semicolons, quotes.
@@ -48,7 +48,7 @@ Two things to know about the playground before you press Run:
 - Java instructions normally live inside a small "program shell" of wrapper
   code. The playground writes that shell for you so you can focus on the
   instructions themselves — you'll learn to write the shell yourself in
-  [lesson 11](#/lesson/11-writing-methods).
+  [lesson {n}](#/lesson/11-writing-methods).
 
 Press **Run** and watch the output panel below the code.
 

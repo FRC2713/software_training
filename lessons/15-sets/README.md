@@ -1,15 +1,15 @@
 ---
-title: "Lesson 15: Sets"
+title: "Sets"
 goal: "Track a group where duplicates aren't allowed and all you need is membership, not order or position."
-order: 15
+order: 150
 section: "Data Structures"
 ---
 
 # Just "is it in here?"
 
 Three data structures in, and each one answers a different question. An array
-or `ArrayList` ([lessons 12](#/lesson/12-arrays)–[13](#/lesson/13-arraylists))
-answers "what's at position `i`?" A map ([lesson 14](#/lesson/14-maps))
+or `ArrayList` ([lessons {n}](#/lesson/12-arrays)–[{n}](#/lesson/13-arraylists))
+answers "what's at position `i`?" A map ([lesson {n}](#/lesson/14-maps))
 answers "what's filed under this key?" A **set** throws position and keys out
 entirely and answers just one question: **"is this value in the group, or
 not?"**
@@ -34,7 +34,7 @@ duplicates" for you, so you never have to check yourself before adding.
 # Checking membership
 
 The move you'll use constantly is `.contains(...)` — same method name as
-`ArrayList` ([lesson 13](#/lesson/13-arraylists)), but here it's the *reason
+`ArrayList` ([lesson {n}](#/lesson/13-arraylists)), but here it's the *reason
 the type exists*, not an extra trick:
 
 ```java
@@ -76,7 +76,7 @@ for (String alliance : alliances) {
 
 Run it a couple of times. The three lines always appear, but not necessarily
 in the order you added them — same warning as `HashMap` in
-[lesson 14](#/lesson/14-maps): a `HashSet` files things for fast lookup, not
+[lesson {n}](#/lesson/14-maps): a `HashSet` files things for fast lookup, not
 for tidy printing. If you need "no duplicates" *and* "keeps the order I added
 them," Java has `LinkedHashSet` — same methods, different filing system — but
 plain `HashSet` is the one you'll reach for first.

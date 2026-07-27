@@ -1,7 +1,7 @@
 ---
-title: "Lesson 32: The builder pattern, as diagrams"
+title: "The builder pattern, as diagrams"
 goal: "See a configuration accumulate one field at a time through a chain of steps, before writing a line of code."
-order: 32
+order: 320
 section: "Advanced Java"
 ---
 

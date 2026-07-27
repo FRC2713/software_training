@@ -1,7 +1,7 @@
 ---
-title: "Lesson 33: The builder pattern, in code"
+title: "The builder pattern, in code"
 goal: "Write a chain of fluent setters that each return this, in the exact shape PhoenixLib uses to configure a motor."
-order: 33
+order: 330
 section: "Advanced Java"
 ---
 
@@ -41,7 +41,7 @@ diagram chained steps together instead. Here's how to make that legal Java.
 # Setters that return this
 
 The fix is one word: instead of `void`, a setter returns **`this`** — *the
-object it was just called on* ([lesson 17](#/lesson/17-classes-and-objects)).
+object it was just called on* ([lesson {n}](#/lesson/17-classes-and-objects)).
 That lets you call the *next* method directly on what the last one handed
 back:
 
@@ -86,7 +86,7 @@ Run it — all three settings land in one chained expression. Read
 `new MotorConfig().withMaxSpeed(80)` as "build a config, then call
 `withMaxSpeed` on it" — and because `withMaxSpeed` **returns that very
 object**, `.withCurrentLimit(40)` can be called directly on whatever it just
-returned, and so on. The fields stay `private` ([lesson 19](#/lesson/19-encapsulation))
+returned, and so on. The fields stay `private` ([lesson {n}](#/lesson/19-encapsulation))
 — nothing outside `MotorConfig` ever touches `maxSpeed` directly, only
 through a `with*` method that sets it on purpose.
 
@@ -97,7 +97,7 @@ of it. Real motor configs aren't just speed and current limit — they cover
 dozens of settings — but every one of them is set the same way: one
 `with*` method, one field, `return this;`.
 
-Your turn: go back to your capstone mechanism from [lesson 25](#/lesson/25-capstone-state-machine).
+Your turn: go back to your capstone mechanism from [lesson {n}](#/lesson/25-capstone-state-machine).
 Write a fluent config class for it with at least three `with*` methods (pick
 settings that make sense for your mechanism — a max height, a hold current, a
 speed, whatever fits) and a `report()` method. Build one with a chained call

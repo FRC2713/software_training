@@ -1,14 +1,14 @@
 ---
-title: "Lesson 8: Types — numbers and text"
+title: "Types — numbers and text"
 goal: "Tell the basic kinds of data apart, and convert between them."
-order: 8
+order: 80
 section: "Java Fundamentals"
 ---
 
 # Numbers are not text
 
 The block editor quietly hid something from you: it only ever dealt with
-numbers. Real programs juggle different **kinds** of data — [lesson 7](#/lesson/07-variables) already
+numbers. Real programs juggle different **kinds** of data — [lesson {n}](#/lesson/07-variables) already
 made you name the kind every time you declared a variable. That kind is the
 **type**, and the two you'll meet first are:
 
@@ -24,7 +24,7 @@ System.out.println("3" + "4");
 ```
 
 The first line prints `7` — that's math. The second prints `34`, because with
-text, `+` means **stick these together** (you used it that way in [lesson 7](#/lesson/07-variables)),
+text, `+` means **stick these together** (you used it that way in [lesson {n}](#/lesson/07-variables)),
 not "add." `"3"` and `"4"` aren't numbers to Java; they're just characters that
 happen to look like digits, so it glues them into `"34"`.
 
@@ -58,12 +58,12 @@ System.out.println("Next year you will be " + (age + 1));
 ```
 
 Notice we needed a **second variable**. `ageText` is a `String` and its type
-can never change — that's the deal Java made with you in [lesson 7](#/lesson/07-variables). So the
+can never change — that's the deal Java made with you in [lesson {n}](#/lesson/07-variables). So the
 converted number gets its own name, `age`, with its own type, `int`. One name
 per kind of thing keeps the program honest: you can always tell what's text
 and what's a number just by reading the declarations. (The parentheses around
 `(age + 1)` make the math happen *before* the joining — remember inner-first
-from [lesson 1](#/lesson/01-flowcharts).)
+from [lesson {n}](#/lesson/01-flowcharts).)
 
 Conversion goes the other way too: `String.valueOf(42)` turns a number into
 text — though as you saw, gluing a number onto a string with `+` usually does

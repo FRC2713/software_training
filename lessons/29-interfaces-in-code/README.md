@@ -1,7 +1,7 @@
 ---
-title: "Lesson 29: Interfaces, in code"
+title: "Interfaces, in code"
 goal: "Write an interface as a contract with no body, implement it two ways, and see one method work unchanged against either implementation."
-order: 29
+order: 290
 section: "Advanced Java"
 ---
 
@@ -28,7 +28,7 @@ empty on purpose; the first real output shows up once something
 `implements` it, below.)
 
 That's it — no `{ }` body on `getSpeed()`, just a signature ending in a
-semicolon, like a method header from [lesson 11](#/lesson/11-writing-methods)
+semicolon, like a method header from [lesson {n}](#/lesson/11-writing-methods)
 with the body torn off. `MotorIO` is a promise: "whatever `implements` me can
 answer `getSpeed()`" — nothing about *how* it answers.
 

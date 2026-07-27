@@ -1,7 +1,7 @@
 ---
-title: "Lesson 2: Making decisions"
+title: "Making decisions"
 goal: "Use a condition to make a program choose between two paths."
-order: 2
+order: 20
 section: "Programming with Blocks"
 ---
 
@@ -30,7 +30,7 @@ asks `a > b?` — that's `true` here (`7 > 4`) — so the program follows the
 Press **▶ Run step by step**. Watch the diamond answer `true` and the program
 head down the `true` arrow — while the other branch **grays out and gets
 skipped**. Those blocks never run. This fork is exactly what Java writes as
-`if / else` — you'll type it yourself in lesson 9.
+`if / else` — you'll type it yourself in [lesson {n}](#/lesson/09-if-statements).
 
 ```blocks
 preset: cond-demo

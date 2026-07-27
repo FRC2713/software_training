@@ -1,7 +1,7 @@
 ---
-title: "Lesson 3: Doing things over and over"
+title: "Doing things over and over"
 goal: "Use a loop to repeat a step many times without copying it out by hand."
-order: 3
+order: 30
 section: "Programming with Blocks"
 ---
 
