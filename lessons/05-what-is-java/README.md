@@ -1,14 +1,14 @@
 ---
-title: "Lesson 5: What is Java?"
+title: "What is Java?"
 goal: "Recognize Java's basic punctuation and program shape before writing or running any code."
-order: 5
+order: 50
 section: "Java Fundamentals"
 ---
 
 # A language, not a magic spell
 
 You've been building programs already — as flowcharts of blocks
-([lesson 1](#/lesson/01-flowcharts) onward). From here on we write those same
+([lesson {n}](#/lesson/01-flowcharts) onward). From here on we write those same
 ideas as **text**, in a language called **Java**. It's the language FRC robot
 code is written in, and one of the most widely used languages in the world.
 
@@ -72,7 +72,7 @@ public class Main {
 
 Don't worry about memorizing this — the playground writes it for you for now,
 and you'll learn to write it yourself in
-[lesson 11](#/lesson/11-writing-methods). For today, just recognize the shapes
+[lesson {n}](#/lesson/11-writing-methods). For today, just recognize the shapes
 in it with the vocabulary from above:
 
 - `public class Main { ... }` — a **class** named `Main`, with everything it

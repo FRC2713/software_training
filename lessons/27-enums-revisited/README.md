@@ -1,13 +1,13 @@
 ---
-title: "Lesson 27: Enums, revisited"
+title: "Enums, revisited"
 goal: "Loop over every value an enum can hold, and give an enum a field so each state carries its own number."
-order: 27
+order: 270
 section: "Advanced Java"
 ---
 
 # Every value an enum can hold
 
-You've had `HandlerState` since [lesson 23](#/lesson/23-organizing-a-machine)
+You've had `HandlerState` since [lesson {n}](#/lesson/23-organizing-a-machine)
 — four fixed values, nothing else legal. Here's a trick you haven't seen yet:
 an enum can hand you **every value it has**, with `.values()`.
 
@@ -24,8 +24,8 @@ public class Main {
 ```
 
 Run it — all four states print, in the order they were declared. `.values()`
-returns an array of every constant ([lesson 12's](#/lesson/12-arrays) array,
-[lesson 10's](#/lesson/10-loops) for-each) — handy anywhere you'd otherwise
+returns an array of every constant ([lesson {n}'s](#/lesson/12-arrays) array
+and for-each) — handy anywhere you'd otherwise
 have to list the states yourself and hope you didn't forget one. If you add a
 fifth state to the enum, this loop picks it up automatically; a hand-written
 list would silently miss it.
@@ -34,7 +34,7 @@ list would silently miss it.
 
 So far an enum constant has only ever been a name. But a constant can also
 carry its **own data** — say, the motor speed each state should run at. Give
-`HandlerState` a field and a constructor, the same way [lesson 17](#/lesson/17-classes-and-objects)
+`HandlerState` a field and a constructor, the same way [lesson {n}](#/lesson/17-classes-and-objects)
 gave `Flywheel` one:
 
 ```java
@@ -64,7 +64,7 @@ Run it. Each constant now calls the constructor with its own number —
 `INTAKING(0.5)` means "build the `INTAKING` constant, passing `0.5` to its
 constructor" — exactly like `new Flywheel(0.5)` would, just written before the
 semicolon that ends the constant list. `this.motorSpeed = motorSpeed;` inside
-the constructor is the same assignment pattern from lesson 17; it just runs
+the constructor is the same assignment pattern from [lesson {n}](#/lesson/17-classes-and-objects); it just runs
 once per constant instead of once per `new`.
 
 Two details worth naming:
@@ -88,8 +88,8 @@ piling more fields onto an enum once you've seen it hold one — a second
 number, then a third, then a `String` label — and that's a trap. The moment
 a constant needs several fields, or the list of constants grows past what you
 can hold in your head at once, you've stopped modeling *a choice* and started
-modeling *a small database*, and a `class` ([lesson 17](#/lesson/17-classes-and-objects))
-or a `Map` ([lesson 14](#/lesson/14-maps)) usually fits that better. Keep an
+modeling *a small database*, and a `class` ([lesson {n}](#/lesson/17-classes-and-objects))
+or a `Map` ([lesson {n}](#/lesson/14-maps)) usually fits that better. Keep an
 enum's values doing what they're for — naming the options — and keep what
 they carry small enough that the set of options is still the point.
 

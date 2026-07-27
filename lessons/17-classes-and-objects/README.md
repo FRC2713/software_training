@@ -1,7 +1,7 @@
 ---
-title: "Lesson 17: Classes and objects"
+title: "Classes and objects"
 goal: "Bundle related data and the actions on it into one thing you can create with new."
-order: 17
+order: 170
 section: "Objects"
 ---
 
@@ -134,6 +134,6 @@ is exactly why robot code is built this way.
 Your turn: write a `Shooter` class. In its constructor set `this.rpm = 0` and
 `this.ready = false`. Add a `spinUp()` method that sets `rpm` to `5000` and
 `ready` to `true`, and a `fire()` method that prints `"Fired!"` **only if**
-`this.ready` is true (an `if` inside a method — [lesson 9](#/lesson/09-if-statements) lives here too).
+`this.ready` is true (an `if` inside a method — [lesson {n}](#/lesson/09-if-statements) lives here too).
 Make one, try to `fire()` before spinning up, then `spinUp()` and fire for
 real.

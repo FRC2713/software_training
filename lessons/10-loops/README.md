@@ -1,13 +1,13 @@
 ---
-title: "Lesson 10: Loops in code"
+title: "Loops in code"
 goal: "Repeat steps in Java with for and while instead of copying lines."
-order: 10
+order: 100
 section: "Java Fundamentals"
 ---
 
 # Repeat, in text
 
-In [lesson 3](#/lesson/03-loops) the **repeat** block did a step over and over so you didn't have to
+In [lesson {n}](#/lesson/03-loops) the **repeat** block did a step over and over so you didn't have to
 copy it out by hand. Java's version is the **`for` loop**, and it comes with a
 built-in counter. Meet the counter first:
 
@@ -26,11 +26,11 @@ The header has **three slots**, separated by semicolons:
   for `i = i + 1`).
 
 Those are the same three ideas the repeat block had — a start, a count, and a
-step. The braces hold the step that repeats, just like `if` in [lesson 9](#/lesson/09-if-statements).
+step. The braces hold the step that repeats, just like `if` in [lesson {n}](#/lesson/09-if-statements).
 
 Run it and watch `i` climb: `0`, `1`, `2`, `3`, `4` — five passes, and the loop
 hands you the "which time around am I?" number on every one, free of charge.
-(Programmers start counting at zero; you'll see why it's handy in [lesson 12](#/lesson/12-arrays).)
+(Programmers start counting at zero; you'll see why it's handy in [lesson {n}](#/lesson/12-arrays).)
 
 Once the counting makes sense, put the loop to work: change the middle slot to
 `i < 3`, then `i < 10`, and watch the count follow. Then swap the print line
@@ -40,9 +40,9 @@ repeating.
 
 # A running total
 
-The real power of [lesson 3's](#/lesson/03-loops) repeat block was the **running total** — a value it
+The real power of [lesson {n}'s](#/lesson/03-loops) repeat block was the **running total** — a value it
 remembered and updated each time around. You build that yourself in a `for`
-loop by combining it with a variable ([lesson 7](#/lesson/07-variables)):
+loop by combining it with a variable ([lesson {n}](#/lesson/07-variables)):
 
 ```java
 int total = 0;

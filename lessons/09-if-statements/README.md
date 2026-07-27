@@ -1,13 +1,13 @@
 ---
-title: "Lesson 9: Decisions in code"
+title: "Decisions in code"
 goal: "Use if, else if, and else to make a program choose between paths."
-order: 9
+order: 90
 section: "Java Fundamentals"
 ---
 
 # The decision diamond, in text
 
-Remember the **decision diamond** from [lesson 2](#/lesson/02-conditionals)? It asked a true/false question and then
+Remember the **decision diamond** from [lesson {n}](#/lesson/02-conditionals)? It asked a true/false question and then
 took one path or the other, skipping the branch it didn't take. Java writes
 that same idea with the word **`if`**:
 
@@ -35,7 +35,7 @@ but the "good day" line always prints.
 
 # Both paths: else
 
-[Lesson 2's](#/lesson/02-conditionals) diamond always had *two* arrows — a `true` arrow and a `false` arrow.
+[Lesson {n}'s](#/lesson/02-conditionals) diamond always had *two* arrows — a `true` arrow and a `false` arrow.
 Java spells the second one **`else`**:
 
 ```java
@@ -49,12 +49,12 @@ if (score >= 6) {
 
 Exactly one of those two blocks runs, every time. If the question is true, you
 get the first; otherwise you get the second. The other is skipped — "the road
-not taken" from [lesson 2](#/lesson/02-conditionals), in text form.
+not taken" from [lesson {n}](#/lesson/02-conditionals), in text form.
 
 One thing to watch closely: that's `>=` ("greater than or equal to"), and the
 "is it equal?" test is `==` with **two** equals signs. A single `=` means
-"store a value" ([lesson 7](#/lesson/07-variables)), so Java uses `==` to *ask* about equality. Mixing
-them up is the code version of the `>` vs `≥` bug [lesson 2](#/lesson/02-conditionals) warned about.
+"store a value" ([lesson {n}](#/lesson/07-variables)), so Java uses `==` to *ask* about equality. Mixing
+them up is the code version of the `>` vs `≥` bug [lesson {n}](#/lesson/02-conditionals) warned about.
 
 Change `score` to `6`, then `5`, and run each time. Convince yourself `>= 6`
 lets a `6` pass but a `5` doesn't.
@@ -81,7 +81,7 @@ Java checks each question **top to bottom** and takes the **first** one that's
 true — then skips all the rest. That order matters: a score of `95` is also
 `>= 80`, but because `>= 90` is checked first and wins, you never reach the B
 line. This is the same "inputs before the things that use them, one step at a
-time" discipline from [lesson 1](#/lesson/01-flowcharts).
+time" discipline from [lesson {n}](#/lesson/01-flowcharts).
 
 Run it, then change `score` to `85`, `72`, and `40` and run each time to see a
 different branch win. Then your challenge: build a program that sets a number

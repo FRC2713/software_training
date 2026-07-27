@@ -1,13 +1,13 @@
 ---
-title: "Lesson 30: Encapsulation, revisited"
+title: "Encapsulation, revisited"
 goal: "Add the default (package-private) access level to private and public, and see how a real robot project uses all three."
-order: 30
+order: 300
 section: "Advanced Java"
 ---
 
 # A third option: no modifier at all
 
-[Lesson 19](#/lesson/19-encapsulation) gave you two access levels: `private`
+[Lesson {n}](#/lesson/19-encapsulation) gave you two access levels: `private`
 (only this class can see it) and `public` (anything can see it). There's a
 third, and you've actually been writing it by accident — leave the modifier
 off entirely, and you get **default** access, also called **package-private**:
@@ -69,7 +69,7 @@ to me," not the entire codebase.
 Every field or method you write is really a decision among three doors:
 
 - **`private`** — only this class. The default choice for fields
-  ([lesson 19](#/lesson/19-encapsulation)).
+  ([lesson {n}](#/lesson/19-encapsulation)).
 - **(no modifier)** — this class, plus anything else in the same package. Use
   it for helpers that other closely-related classes legitimately need, but
   that have no business being called from anywhere else in the robot.
@@ -77,7 +77,7 @@ Every field or method you write is really a decision among three doors:
   outside code genuinely needs — `getSpeed()`, `setSpeed()`, not
   `clampSpeed()`.
 
-Your turn: go back to [lesson 23's](#/lesson/23-organizing-a-machine)
+Your turn: go back to [lesson {n}'s](#/lesson/23-organizing-a-machine)
 `GamePieceHandler`. Make its `state` field `private` with a public
 `getState()` method, keep `update(String event)` `public` (outside code needs
 to drive it), and add a package-private helper method,

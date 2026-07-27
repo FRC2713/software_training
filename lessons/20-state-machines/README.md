@@ -1,7 +1,7 @@
 ---
-title: "Lesson 20: State machines as diagrams"
+title: "State machines as diagrams"
 goal: "See a machine that's always in exactly one state and moves between states when events happen — before writing a line of code."
-order: 20
+order: 200
 section: "State Machines"
 ---
 

@@ -1,8 +1,16 @@
+import type { ReactNode } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import type { Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { blocksPreset, firstJavaSnippet, getLesson, nextLesson, stripBlocksFence } from '@/lib/lessons'
+import {
+  blocksPreset,
+  firstJavaSnippet,
+  getLesson,
+  lessonNumber,
+  nextLesson,
+  stripBlocksFence,
+} from '@/lib/lessons'
 import { JavaRunner } from '@/components/JavaRunner'
 import { CodeBlock } from '@/components/CodeBlock'
 import { BlockPlayground } from '@/components/BlockPlayground'
@@ -15,7 +23,33 @@ import { PageNav } from '@/components/PageNav'
 // the first snippet still lives in the playground panel. Inline `code` stays as
 // a plain styled element. `pre` is a pass-through so CodeBlock owns its own
 // container instead of nesting inside a prose <pre>.
+// Cross-reference links point at `#/lesson/<slug>` and carry no stored lesson
+// number - their visible text uses `{n}` / `{title}` tokens that we fill in
+// here from the target's CURRENT position, so reordering a lesson (its `order`)
+// re-labels every reference to it automatically, with no content edit.
+const LESSON_HREF = /^#\/lesson\/([a-z0-9-]+)$/
+
+function flattenText(node: ReactNode): string {
+  if (typeof node === 'string' || typeof node === 'number') return String(node)
+  if (Array.isArray(node)) return node.map(flattenText).join('')
+  return ''
+}
+
 const markdownComponents: Components = {
+  a: ({ href, children }) => {
+    const match = LESSON_HREF.exec(href ?? '')
+    if (match) {
+      const slug = match[1]
+      const text = flattenText(children)
+      if (text.includes('{n}') || text.includes('{title}')) {
+        const filled = text
+          .replace(/\{n\}/g, String(lessonNumber(slug)))
+          .replace(/\{title\}/g, getLesson(slug)?.title ?? '')
+        return <a href={href}>{filled}</a>
+      }
+    }
+    return <a href={href}>{children}</a>
+  },
   pre: ({ children }) => <>{children}</>,
   code: ({ className, children }) => {
     const language = /language-(\w+)/.exec(className ?? '')?.[1]
@@ -115,7 +149,9 @@ export function LessonView() {
             <span className="text-xs font-semibold uppercase tracking-wide text-primary">
               Next lesson
             </span>
-            <span className="text-lg font-semibold text-foreground">{next.title} →</span>
+            <span className="text-lg font-semibold text-foreground">
+              Lesson {lessonNumber(next.slug)}: {next.title} →
+            </span>
           </Link>
         ) : (
           <Link

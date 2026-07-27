@@ -1,7 +1,7 @@
 ---
-title: "Lesson 34: Capstone 2 — an advanced mechanism"
+title: "Capstone 2 — an advanced mechanism"
 goal: "Return to your Capstone 1 mechanism and upgrade it with enums with fields, switch, interfaces, access modifiers, and the builder pattern — so it runs identically in simulation and on real hardware."
-order: 34
+order: 340
 section: "Advanced Java"
 ---
 
@@ -18,7 +18,7 @@ end. When a page adds a field to `ClimberState`, add one to your enum. When a
 page gives `Climber` an interface, give yours one too. By the last page,
 `Climber` and your mechanism should have grown up together.
 
-Start with [lesson 27's](#/lesson/27-enums-revisited) trick, applied to the
+Start with [lesson {n}'s](#/lesson/27-enums-revisited) trick, applied to the
 states from Capstone 1: give every state its own motor speed, right on the
 enum.
 
@@ -47,12 +47,12 @@ public class Main {
 
 Run it — the four states from Capstone 1 print out, each now carrying the
 number the motor should run at while the climber is in that state. No new
-behavior otherwise, just [lesson 27's](#/lesson/27-enums-revisited) trick
+behavior otherwise, just [lesson {n}'s](#/lesson/27-enums-revisited) trick
 applied a second time. Go add a field to your own enum before moving on.
 
 # Give it real and simulated hardware
 
-Next, [lesson 29's](#/lesson/29-interfaces-in-code) pattern: a contract for
+Next, [lesson {n}'s](#/lesson/29-interfaces-in-code) pattern: a contract for
 "whatever moves the actual motor," plus a `Sim` and a `Real` that both keep
 it.
 
@@ -82,14 +82,14 @@ public class Main {
 ```
 
 Run it — `SIM: setSpeed(0.6)` prints. Neither implementation talks to actual
-hardware — they're stand-ins, exactly like lesson 29's `MotorIO`, so you can
+hardware — they're stand-ins, exactly like [lesson {n}](#/lesson/29-interfaces-in-code)'s `MotorIO`, so you can
 see which one ran without needing a real motor controller plugged in. Write
 the same `-IO` interface, plus `Sim` and `Real`, for your own mechanism now.
 
 # Recap: the config builder
 
 Before combining everything, rebuild one more piece on its own:
-[lesson 33's](#/lesson/33-builder-pattern-in-code) fluent config, this time
+[lesson {n}'s](#/lesson/33-builder-pattern-in-code) fluent config, this time
 guarding the climber's speed instead of a generic motor's.
 
 ```java
@@ -121,7 +121,7 @@ public class Main {
 Run it: `0.5`, `-0.5`, `0.2` — the first two get reined in to `maxSpeed`,
 the third was already safely inside it and passes through untouched.
 `private double maxSpeed` plus one `with*` method that returns `this` is the
-whole builder — nothing new here, just the exact class from lesson 33,
+whole builder — nothing new here, just the exact class from [lesson {n}](#/lesson/33-builder-pattern-in-code),
 renamed for this mechanism. Keep this shape in mind; it's about to plug
 straight into the next piece.
 
@@ -129,8 +129,8 @@ straight into the next piece.
 
 Now combine the pieces from the first two pages — the enum with a field, and
 the `Sim`/`Real` hardware — into an actual state-machine class, using
-[lesson 26's](#/lesson/26-decisions-in-code-revisited) `switch` for the
-transitions and [lesson 30's](#/lesson/30-encapsulation-revisited) access
+[lesson {n}'s](#/lesson/26-decisions-in-code-revisited) `switch` for the
+transitions and [lesson {n}'s](#/lesson/30-encapsulation-revisited) access
 modifiers for the fields. No config yet — `update` hands the enum's speed
 straight to `io`:
 

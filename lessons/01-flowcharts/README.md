@@ -1,7 +1,7 @@
 ---
-title: "Lesson 1: Programs are step-by-step"
+title: "Programs are step-by-step"
 goal: "See a program as a flowchart of blocks and watch the computer evaluate it one step at a time."
-order: 1
+order: 10
 section: "Programming with Blocks"
 ---
 
