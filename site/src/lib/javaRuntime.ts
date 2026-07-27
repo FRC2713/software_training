@@ -17,7 +17,14 @@ const TOOLS_JAR = `/app${import.meta.env.BASE_URL}tools.jar`
 // so students write solving algorithms against it instead of raw bitmasks. The
 // jar is produced by CI on deploy and by scripts/vendor-maze-solver.sh locally.
 const SOLVER_JAR = `/app${import.meta.env.BASE_URL}maze-solver.jar`
-const CLASS_PATH = `${TOOLS_JAR}:${SOLVER_JAR}:/files/`
+// Temporary shim: the maze-solver library ships only interfaces, so snippets
+// that call `new GridMaze(grid)` need a concrete implementation on the
+// classpath. maze-engine.jar (built by scripts/build-maze-engine.sh, committed
+// like tools.jar) supplies GridMaze/GridRobot/GridCell. It comes after
+// SOLVER_JAR so the library's own GridMaze wins once it ships one — at which
+// point this jar and its classpath entry can be deleted.
+const ENGINE_JAR = `/app${import.meta.env.BASE_URL}maze-engine.jar`
+const CLASS_PATH = `${TOOLS_JAR}:${SOLVER_JAR}:${ENGINE_JAR}:/files/`
 
 // Globals installed by loader.js (a classic script, not an ES module).
 declare global {

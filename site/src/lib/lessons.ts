@@ -158,16 +158,18 @@ export function hasMaze(markdown: string): boolean {
   return MAZE_FENCE.test(markdown)
 }
 
-// The maze fence can carry a `solver:` directive to reveal an animated
-// solver button. Three modes drive the "what is an algorithm?" progression:
+// The maze fence can carry a `solver:` directive to reveal a solver control.
+// The three canned modes drive the "what is an algorithm?" progression:
 //   random — move to a random open neighbour (not an algorithm: unrepeatable)
 //   naive  — fixed direction priority, no memory (an algorithm, but it loops)
 //   wall   — the wall follower (an algorithm that works, if not optimally)
-export type SolverMode = 'random' | 'naive' | 'wall'
+// The fourth, `java`, swaps the canned button for an editor where the student
+// writes their own solver in real Java, run through the maze round-trip.
+export type SolverMode = 'random' | 'naive' | 'wall' | 'java'
 
 export function mazeSolver(markdown: string): SolverMode | null {
   const match = MAZE_FENCE.exec(markdown)
   if (!match) return null
-  const m = /solver:\s*(random|naive|wall)/.exec(match[1])
+  const m = /solver:\s*(random|naive|wall|java)/.exec(match[1])
   return m ? (m[1] as SolverMode) : null
 }

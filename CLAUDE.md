@@ -166,8 +166,16 @@ folder until it's restarted.
 - **Components**: `LessonCard` (index listing), `PageNav` (in-lesson page
   navigation), `JavaRunner` (the editable/runnable code block UI backed by
   `javaRuntime.ts`).
-- **Maze round-trip** (design, not yet built): `docs/maze-roundtrip.md` specs how
-  a JS-generated maze is passed into Java as an interpolated `int[][]` literal,
-  solved by a student's algorithm against the `maze-solver` library, and the
-  resulting **Maze Trail** emitted as a sentinel-tagged stdout line
-  (`__TRAIL__ [[row,col],…]`) for `MazePlayground` to animate back.
+- **Maze round-trip** (`site/src/lib/mazeHarness.ts` + the `'java'` mode of
+  `MazePlayground`): the `solver: java` maze fence renders an editor where a
+  student writes a `solve(Robot)` method. `buildMazeHarness` interpolates the
+  current JS maze in as an `int[][]` literal, splices the student's method into a
+  `MazeRun` class, and drives the robot; the **Maze Trail** is emitted as a
+  sentinel-tagged stdout line (`__TRAIL__ [[row,col],…]`), which `parseTrail`
+  reads back (the single `[row,col]→[x,y]` swap) and `MazePlayground` animates.
+  `docs/maze-roundtrip.md` documents the seams. `new GridMaze(grid)` resolves
+  against `site/public/maze-engine.jar` — a concrete engine (GridMaze/GridRobot/
+  GridCell implementing the library interfaces) vendored on the CheerpJ classpath
+  while the `maze-solver` library still ships interfaces only; built by
+  `site/scripts/build-maze-engine.sh` and committed like `tools.jar`. Delete it
+  and the `ENGINE_JAR` classpath entry once the library ships its own `GridMaze`.

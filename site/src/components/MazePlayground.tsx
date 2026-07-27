@@ -1,4 +1,18 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import CodeMirror, { EditorView } from '@uiw/react-codemirror'
+import { java } from '@codemirror/lang-java'
+import { oneDark } from '@codemirror/theme-one-dark'
+import { getJavaRuntimeStatus, runJava } from '@/lib/javaRuntime'
+import { editorTheme, usePrefersDark } from '@/lib/editorTheme'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import {
+  buildMazeHarness,
+  mazeGridLiteral,
+  parseTrail,
+  retargetErrorLines,
+  studentLineOffset,
+} from '@/lib/mazeHarness'
 
 // NOTE: the `maze-generator` npm package is broken — its internal `shuffle` is
 // written as `for (...; ...; update) return o`, so it returns on the first
@@ -68,7 +82,7 @@ const cy = (y: number) => PAD + y * CELL + CELL / 2
 // the same N/S/E/W bitmask the grid already uses, so Java reads it with the
 // identical constants (N=1, S=2, E=4, W=8) and `cell & N` wall checks.
 function serializeToJava(grid: number[][]): string {
-  const rows = grid.map((row) => '    {' + row.join(', ') + '}').join(',\n')
+  const rows = mazeGridLiteral(grid)
   return `// Maze as an N/S/E/W bitmask grid. For each cell, a set bit means that
 // side is OPEN (you can move that way); a clear bit is a wall.
 //   N = 1 (up)   S = 2 (down)   E = 4 (right)   W = 8 (left)
@@ -97,13 +111,50 @@ const DIR4 = [
 // most mazes the memory-less robot marches into a corner and loops.
 const NAIVE_ORDER = [0, 3, 2, 1]
 
-export type SolverMode = 'random' | 'naive' | 'wall'
+// The three canned JS-animated demos, plus `java` — the student writes a real
+// solver run through the maze round-trip (see lib/mazeHarness.ts).
+type CannedMode = 'random' | 'naive' | 'wall'
+export type SolverMode = CannedMode | 'java'
 
-const SOLVER_LABEL: Record<SolverMode, string> = {
+const SOLVER_LABEL: Record<CannedMode, string> = {
   random: 'Move at random',
   naive: 'Run the naive rule',
   wall: 'Run wall follower',
 }
+
+// The editor's starting point for `solver: java`: a right-hand wall follower,
+// the same algorithm lesson "Navigating a maze" builds up to — translated to
+// the library's absolute-move API with a remembered `facing` heading.
+const DEFAULT_JAVA_SOLVE = `// Drive the robot from start (green) to goal (red).
+// You have: robot.canMoveUp/Down/Left/Right(), robot.moveUp/Down/Left/Right(),
+// robot.atGoal(), robot.row(), robot.col().
+//
+// This starter is the "keep your right hand on the wall" follower.
+void solve(Robot robot) {
+    // Heading: 0 = up, 1 = right, 2 = down, 3 = left. Start facing right.
+    int facing = 1;
+    int maxSteps = 1000;
+    for (int i = 0; i < maxSteps && !robot.atGoal(); i++) {
+        // Try right, straight, left, back — relative to the way we're facing.
+        int[] order = { (facing + 1) % 4, facing, (facing + 3) % 4, (facing + 2) % 4 };
+        for (int dir : order) {
+            if (tryMove(robot, dir)) {
+                facing = dir;
+                break;
+            }
+        }
+    }
+}
+
+// Move one step in an absolute direction if that side is open; report whether
+// we actually moved.
+boolean tryMove(Robot robot, int dir) {
+    if (dir == 0 && robot.canMoveUp())    { robot.moveUp();    return true; }
+    if (dir == 1 && robot.canMoveRight()) { robot.moveRight(); return true; }
+    if (dir == 2 && robot.canMoveDown())  { robot.moveDown();  return true; }
+    if (dir == 3 && robot.canMoveLeft())  { robot.moveLeft();  return true; }
+    return false;
+}`
 
 export function MazePlayground({ solver = null }: { solver?: SolverMode | null }) {
   const [grid, setGrid] = useState<number[][]>(() => generateMaze(SIZE))
@@ -112,6 +163,14 @@ export function MazePlayground({ solver = null }: { solver?: SolverMode | null }
   const [stuck, setStuck] = useState(false)
   const timer = useRef<ReturnType<typeof setInterval> | null>(null)
   const [copied, setCopied] = useState(false)
+
+  // `solver: java` state — the editable Java solver and its run output.
+  const isJava = solver === 'java'
+  const [code, setCode] = useState(DEFAULT_JAVA_SOLVE)
+  const [javaOutput, setJavaOutput] = useState<string | null>(null)
+  const [javaOk, setJavaOk] = useState(true)
+  const dark = usePrefersDark()
+  const editorExtensions = useMemo(() => [java(), editorTheme, EditorView.lineWrapping], [])
 
   const copyForJava = () => {
     const java = serializeToJava(grid)
@@ -142,7 +201,7 @@ export function MazePlayground({ solver = null }: { solver?: SolverMode | null }
   //            is the whole difference from `naive`; in a perfect maze it
   //            always reaches the goal.
   const runSolver = useCallback(
-    (mode: SolverMode) => {
+    (mode: CannedMode) => {
       stopSolver()
       let x = START[0]
       let y = START[1]
@@ -202,9 +261,73 @@ export function MazePlayground({ solver = null }: { solver?: SolverMode | null }
     [grid, stopSolver],
   )
 
+  // Replay a Maze Trail computed in Java: place the robot at each cell in turn,
+  // same 180ms cadence as the canned solvers but *reading* cells rather than
+  // computing moves. The trail is exactly what happened in the JVM, so there is
+  // no wall logic here at all. If it doesn't end on the goal, flag it stuck.
+  const animateTrail = useCallback(
+    (cells: [number, number][]) => {
+      stopSolver()
+      const last = cells[cells.length - 1] ?? START
+      const reachedGoal = last[0] === GOAL[0] && last[1] === GOAL[1]
+      setRobot(cells[0] ?? START)
+      setStuck(false)
+      if (cells.length <= 1) {
+        // Robot never left Start — nothing to animate.
+        setStuck(!reachedGoal)
+        return
+      }
+      setRunning(true)
+      let i = 1
+      timer.current = setInterval(() => {
+        if (i >= cells.length) {
+          stopSolver()
+          setStuck(!reachedGoal)
+          return
+        }
+        setRobot(cells[i++])
+      }, 180)
+    },
+    [stopSolver],
+  )
+
+  const runJavaSolver = useCallback(async () => {
+    stopSolver()
+    setStuck(false)
+    setRobot(START)
+    setJavaOk(true)
+    setJavaOutput(getJavaRuntimeStatus() === 'ready' ? 'Running…' : 'Loading Java…')
+    const harness = buildMazeHarness(grid, code)
+    const result = await runJava(harness)
+    if (!result.ok) {
+      const offset = studentLineOffset(grid)
+      setJavaOk(false)
+      setJavaOutput(retargetErrorLines(result.output, offset) || '(error)')
+      return
+    }
+    const trail = parseTrail(result.output)
+    if (!trail) {
+      setJavaOk(false)
+      setJavaOutput(
+        'Ran, but produced no Maze Trail. Make sure solve(robot) moves the robot.',
+      )
+      return
+    }
+    // Show any debug output the student printed, minus the sentinel line.
+    const debug = result.output
+      .split('\n')
+      .filter((l) => !l.startsWith('__TRAIL__ '))
+      .join('\n')
+      .trim()
+    setJavaOk(true)
+    setJavaOutput(debug || null)
+    animateTrail(trail.cells)
+  }, [grid, code, stopSolver, animateTrail])
+
   const generate = () => {
     stopSolver()
     setStuck(false)
+    setJavaOutput(null)
     setGrid(generateMaze(SIZE))
     setRobot(START)
   }
@@ -350,13 +473,13 @@ export function MazePlayground({ solver = null }: { solver?: SolverMode | null }
       </div>
 
       <div className="flex flex-wrap justify-center gap-2">
-        {solver && (
+        {solver && !isJava && (
           <button
             type="button"
-            onClick={running ? stopSolver : () => runSolver(solver)}
+            onClick={running ? stopSolver : () => runSolver(solver as CannedMode)}
             className="rounded-md border border-primary px-4 py-2 text-sm font-semibold text-primary transition hover:bg-primary hover:text-primary-foreground"
           >
-            {running ? 'Stop' : SOLVER_LABEL[solver]}
+            {running ? 'Stop' : SOLVER_LABEL[solver as CannedMode]}
           </button>
         )}
         <button
@@ -366,14 +489,70 @@ export function MazePlayground({ solver = null }: { solver?: SolverMode | null }
         >
           Generate new maze
         </button>
-        <button
-          type="button"
-          onClick={copyForJava}
-          className="rounded-md border border-border px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-primary hover:text-primary-foreground"
-        >
-          {copied ? 'Copied!' : 'Copy for Java'}
-        </button>
+        {!isJava && (
+          <button
+            type="button"
+            onClick={copyForJava}
+            className="rounded-md border border-border px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-primary hover:text-primary-foreground"
+          >
+            {copied ? 'Copied!' : 'Copy for Java'}
+          </button>
+        )}
       </div>
+
+      {isJava && (
+        <div className="w-full">
+          <div className="overflow-hidden rounded-lg border bg-muted">
+            <CodeMirror
+              value={code}
+              onChange={setCode}
+              extensions={editorExtensions}
+              theme={dark ? oneDark : 'light'}
+              basicSetup={{
+                lineNumbers: true,
+                foldGutter: false,
+                highlightActiveLine: true,
+                highlightActiveLineGutter: true,
+                autocompletion: false,
+              }}
+              className="text-[13px]"
+            />
+            <div className="flex justify-between gap-2 border-t px-2.5 py-2">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setCode(DEFAULT_JAVA_SOLVE)
+                  setJavaOutput(null)
+                }}
+                disabled={running}
+              >
+                Reset code
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={running ? stopSolver : runJavaSolver}
+                className="border-primary/40 bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary"
+              >
+                {running ? 'Stop' : '▶ Run in the maze'}
+              </Button>
+            </div>
+            {javaOutput !== null && (
+              <pre
+                className={cn(
+                  'm-0 whitespace-pre-wrap break-words border-t bg-background px-3.5 py-3 font-mono text-sm text-foreground',
+                  !javaOk && 'text-destructive',
+                )}
+              >
+                {javaOutput}
+              </pre>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

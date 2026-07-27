@@ -1,10 +1,20 @@
 # The maze round-trip: JS → Java → animated steps
 
-**Status: proposed / design spec.** As of this writing the round-trip is *not
-wired end to end.* The individual pieces exist and are noted below, but nothing
-today feeds a JS-generated maze into the JVM as data, and nothing parses the
-Java output back into the animation. This document specifies the seams and data
-contracts needed to connect them, so a future change can build it.
+**Status: built.** The round-trip is wired end to end and drives the interactive
+"write your own solver" playground (the `solver: java` maze fence, last page of
+`lessons/algorithms/README.md`). The glue lives in `site/src/lib/mazeHarness.ts`
+(`buildMazeHarness`, `parseTrail`, `retargetErrorLines`) and the `'java'` mode of
+`site/src/components/MazePlayground.tsx`. This document describes the seams and
+data contracts; a few assumptions in the original spec were corrected against the
+real library and are noted inline below.
+
+**Library shim.** The `maze-solver` library ships only interfaces (Maze/Robot/
+Cell) — no concrete `GridMaze` — so `new GridMaze(grid)` resolves against
+`site/public/maze-engine.jar`, a small concrete engine the site vendors on the
+classpath (built by `site/scripts/build-maze-engine.sh`, sources in
+`site/scripts/maze-engine/`, committed like `tools.jar`). Delete the jar, its
+sources, the build script, and the `ENGINE_JAR` classpath entry in
+`javaRuntime.ts` once the library ships its own `GridMaze`.
 
 Audience: developers working on the site. This is not student-facing lesson
 content.
@@ -202,14 +212,15 @@ public class MazeRun {
 - Wiring `MazePlayground` to call `runJava` and replay the parsed Trail (a new
   solver "mode" alongside the existing `'random' | 'naive' | 'wall'`).
 
-## Integration details to confirm against the library
+## Integration details (confirmed against the library)
 
-The library lives in `FRC2713/maze-solver-java` (only the built jar is vendored),
-so verify these against its actual API before implementing:
-- The exact type and accessors of `robot.trail()` elements (assumed `Cell` with
-  `row()`/`col()` above) — the lessons only ever use `robot.trail().length`.
-- Whether the constructor is `new GridMaze(grid)` returning `Maze` and
-  `maze.robot()` returns a Start-positioned `Robot` (matches the lesson snippet
-  in `lessons/algorithms/README.md`).
-- The move/query method names (`canMoveUp` vs `canGoUp` — the lesson uses
-  `canMove*`, `CONTEXT.md`'s Helper entry says `canGo*`; reconcile before wiring).
+Resolved against the vendored interface jar's bytecode while wiring this up:
+- `robot.trail()` returns **`int[][]`** — already `[row, col]` pairs, not `Cell[]`.
+  So the harness emits the Trail by iterating the `int[][]` directly (simpler
+  than the `Cell.row()/col()` the earlier draft assumed).
+- `new GridMaze(grid)` returns a `Maze`; `maze.robot()` returns a Start-positioned
+  `Robot`. `GridMaze` is not in the library yet — see the library-shim note at the
+  top; it's supplied by `maze-engine.jar` with Start = (0,0) and Goal =
+  (rows-1, cols-1).
+- The move/query methods are **`canMoveUp/Down/Left/Right`** and
+  **`moveUp/Down/Left/Right`** (the lesson's spelling, not `CONTEXT.md`'s `canGo*`).

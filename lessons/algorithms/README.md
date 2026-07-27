@@ -206,114 +206,38 @@ your sensors, decide what to do, act, and loop.
 
 Everything so far has been visual. But the whole point is that a maze is just
 **data**, and an algorithm is just **code** — and once it's data and code, a
-robot can run it. Here's that exact wall follower written in Java, reading a
-maze that was serialized straight out of the generator on the previous page.
+robot can run it. Here's that exact wall follower written in real Java.
 
-The maze is an `int[][]` — a grid of numbers. Each number is the same
-**N/S/E/W bitmask** you've been looking at: a set bit means that side of the
-cell is open. Reading a wall is one operation: `(maze[row][col] & E) != 0` asks
-"is the east side open — can I move right?"
+The maze starts as an `int[][]` — a grid of numbers, each the same **N/S/E/W
+bitmask** you've been looking at (a set bit means that side of the cell is
+open). But you don't want to be doing bitmask arithmetic while you're trying to
+think about *solving* the maze. That's what a **library** is for. Our team's
+`maze-solver` library (`com.frc2713.mazesolver`) turns that raw grid into three
+friendly tools:
 
-The loop below is the flowchart from earlier turned into code: while we're not
-at the goal, try to turn right, else go straight, else turn left, else turn
-around — take the first open direction, step, repeat. Press **Run** and watch it
-count its way to the exit. Then try editing the start heading, or paste your own
-maze from the **Copy for Java** button and run *that*.
-
-```java
-public class Maze {
-    // Wall bits: for a cell, a SET bit means that side is open.
-    static final int N = 1, S = 2, E = 4, W = 8;
-
-    // Headings, clockwise: 0 = up, 1 = right, 2 = down, 3 = left.
-    // BIT/DR/DC line up with those indexes: which wall to check, and how the
-    // row/column change when you step that way.
-    static final int[] BIT  = { N, E, S, W };
-    static final int[] DR   = { -1, 0, 1, 0 };
-    static final int[] DC   = { 0, 1, 0, -1 };
-    static final char[] FACE = { 'U', 'R', 'D', 'L' };
-
-    public static void main(String[] args) {
-        // A maze serialized from the generator: each cell is an N/S/E/W bitmask.
-        int[][] maze = {
-      {4, 12, 10, 6, 10, 4, 14, 10, 4, 12, 14, 12, 12, 10},
-      {6, 10, 5, 9, 5, 12, 9, 5, 12, 12, 9, 6, 12, 9},
-      {3, 5, 12, 14, 12, 12, 12, 10, 6, 12, 10, 3, 6, 8},
-      {3, 6, 10, 3, 6, 8, 6, 9, 5, 10, 3, 3, 5, 10},
-      {5, 9, 3, 3, 7, 12, 13, 12, 10, 1, 3, 5, 10, 3},
-      {6, 8, 3, 3, 5, 8, 6, 10, 5, 10, 3, 6, 9, 3},
-      {3, 6, 9, 5, 10, 6, 9, 3, 4, 13, 9, 5, 12, 11},
-      {3, 5, 12, 10, 5, 9, 2, 5, 12, 12, 12, 14, 10, 3},
-      {7, 14, 8, 5, 10, 4, 13, 12, 12, 14, 10, 3, 1, 3},
-      {3, 3, 6, 10, 5, 10, 6, 12, 12, 9, 3, 5, 12, 9},
-      {1, 3, 3, 5, 12, 9, 3, 6, 12, 10, 3, 2, 6, 10},
-      {6, 11, 3, 4, 12, 14, 9, 3, 2, 5, 9, 7, 9, 3},
-      {3, 1, 3, 6, 10, 3, 6, 9, 5, 12, 12, 13, 8, 3},
-      {5, 12, 13, 9, 5, 9, 5, 12, 12, 12, 12, 12, 12, 9}
-        };
-        int startRow = 0, startCol = 0;
-        int goalRow = 13, goalCol = 13;
-
-        int row = startRow, col = startCol;
-        int dir = 1; // start facing right
-        int steps = 0;
-        int maxSteps = maze.length * maze[0].length * 4;
-        StringBuilder path = new StringBuilder();
-
-        System.out.println("Start at (" + row + ", " + col + "), goal is ("
-            + goalRow + ", " + goalCol + ")");
-
-        while (!(row == goalRow && col == goalCol) && steps < maxSteps) {
-            // Right-hand rule: try right (+1), straight (0), left (+3),
-            // back (+2) — take the first heading whose wall is open.
-            for (int turn : new int[] { 1, 0, 3, 2 }) {
-                int d = (dir + turn) % 4;
-                if ((maze[row][col] & BIT[d]) != 0) {
-                    dir = d;
-                    row += DR[d];
-                    col += DC[d];
-                    path.append(FACE[d]);
-                    break;
-                }
-            }
-            steps++;
-        }
-
-        if (row == goalRow && col == goalCol) {
-            System.out.println("Reached the goal in " + steps + " steps!");
-            System.out.println("Path: " + path);
-        } else {
-            System.out.println("Gave up after " + steps + " steps.");
-        }
-    }
-}
-```
-
-# Solving with a maze library
-
-That last program worked, but look at how much of it was *plumbing* — bitmask
-constants, `DR`/`DC` offset arrays, `maze[row][col] & BIT[d]`. None of that is
-the algorithm. It's bookkeeping you have to get exactly right before you can
-even start thinking about *how to solve the maze*.
-
-That's what a **library** is for. Our team's `maze-solver` library
-(`com.frc2713.mazesolver`) wraps all of that up and hands you three friendly
-tools:
-
-- a **`Maze`** you build from the grid,
+- a **`Maze`** you build from the grid — `new GridMaze(grid)`,
 - a **`Robot`** that walks it — `robot.canMoveRight()`, `robot.moveRight()`,
   `robot.atGoal()`,
 - and **`Cell`**s you can ask plain questions like `cell.wallRight()`.
 
-No bitmasks. The exact same wall-follower now reads like the *idea* instead of
-the bookkeeping — "if I can turn right, turn right; otherwise go straight, then
-left, then back." You write the algorithm; the library handles the maze.
+The library handles the *maze* — no bitmasks, no `maze[row][col]` arithmetic, no
+tracking coordinates as the robot steps. What's left is just the algorithm, and
+the algorithm keeps exactly **one** piece of its own state: `facing`, the
+direction the robot is currently pointing. That's the single remembered fact
+from the last page — the whole reason the wall follower beats the naive rule.
+The maze is the library's job; the facing is the part that's genuinely *yours*.
+
+The loop below is the flowchart from earlier turned into code: relative to the
+way it's facing, the robot tries right, else straight, else left, else back —
+takes the first open direction, remembers that as its new facing, and repeats.
+Press **Run** and watch it count its way to the exit.
 
 ```java
 import com.frc2713.mazesolver.*;
 
 public class SolveMaze {
     public static void main(String[] args) {
+        // A maze serialized from the generator: each cell is an N/S/E/W bitmask.
         int[][] grid = {
       {4, 12, 10, 6, 10, 4, 14, 10, 4, 12, 14, 12, 12, 10},
       {6, 10, 5, 9, 5, 12, 9, 5, 12, 12, 9, 6, 12, 9},
@@ -335,18 +259,18 @@ public class SolveMaze {
         Maze maze = new GridMaze(grid);
         Robot robot = maze.robot();
 
-        // Heading, clockwise: 0 = up, 1 = right, 2 = down, 3 = left.
-        int heading = 1; // start facing right
+        // The robot's one remembered fact: which way it's facing.
+        // 0 = up, 1 = right, 2 = down, 3 = left. Start facing right.
+        int facing = 1;
         int cap = maze.rows() * maze.cols() * 4; // safety stop
 
         while (!robot.atGoal() && robot.trail().length <= cap) {
-            // Right-hand rule: prefer turning right, then straight, then left,
-            // then back — the first heading the robot can actually move.
-            for (int turn : new int[] { 1, 0, 3, 2 }) {
-                int dir = (heading + turn) % 4;
-                if (canMove(robot, dir)) {
-                    heading = dir;
-                    move(robot, dir);
+            // Try right, straight, left, back — relative to the way we're facing
+            // — and take the first one that's open, remembering it as the new facing.
+            int[] order = { (facing + 1) % 4, facing, (facing + 3) % 4, (facing + 2) % 4 };
+            for (int dir : order) {
+                if (tryMove(robot, dir)) {
+                    facing = dir;
                     break;
                 }
             }
@@ -359,24 +283,54 @@ public class SolveMaze {
         }
     }
 
-    // Ask the robot, in one absolute direction, whether it can move.
-    static boolean canMove(Robot robot, int dir) {
-        switch (dir) {
-            case 0:  return robot.canMoveUp();
-            case 1:  return robot.canMoveRight();
-            case 2:  return robot.canMoveDown();
-            default: return robot.canMoveLeft();
-        }
-    }
-
-    // Move the robot one step in that absolute direction.
-    static void move(Robot robot, int dir) {
-        switch (dir) {
-            case 0:  robot.moveUp();    break;
-            case 1:  robot.moveRight(); break;
-            case 2:  robot.moveDown();  break;
-            default: robot.moveLeft();  break;
-        }
+    // Move one step in an absolute direction if that side is open; report
+    // whether we actually moved. (0 = up, 1 = right, 2 = down, 3 = left.)
+    static boolean tryMove(Robot robot, int dir) {
+        if (dir == 0 && robot.canMoveUp())    { robot.moveUp();    return true; }
+        if (dir == 1 && robot.canMoveRight()) { robot.moveRight(); return true; }
+        if (dir == 2 && robot.canMoveDown())  { robot.moveDown();  return true; }
+        if (dir == 3 && robot.canMoveLeft())  { robot.moveLeft();  return true; }
+        return false;
     }
 }
+```
+
+# Now you try: write your own solver
+
+You just read the whole program — building the maze, getting the robot, the
+loop, checking the goal. You could run it, but not *change* it. Now it's your
+turn.
+
+Notice how much of that program was the same every time: `main`, building the
+`Maze`, the safety cap, printing the result. The only part that was really *the
+algorithm* was the decision inside the loop. So that's the only part we'll ask
+you for. The playground below hands you a `Robot` already standing at the start
+and asks for one method — `solve` — the interesting part.
+
+The maze on the right is a real one, freshly generated. Write an algorithm that
+drives the robot from the **green** cell to the **red** one, press **Run in the
+maze**, and watch *your* robot walk the path your code produced. This is the full
+round-trip: the maze you see is handed to your Java `solve` method, your
+algorithm drives the `Robot`, and the exact path it took is animated right back
+here. You have:
+
+- `robot.canMoveUp()`, `robot.canMoveDown()`, `robot.canMoveLeft()`,
+  `robot.canMoveRight()` — is that side open?
+- `robot.moveUp()`, `robot.moveDown()`, `robot.moveLeft()`, `robot.moveRight()`
+  — step one cell (a move into a wall does nothing).
+- `robot.atGoal()`, `robot.row()`, `robot.col()` — where am I, am I done?
+
+The starter code is the **wall follower** from the last two pages. Run it first
+to see it solve the maze. Then make it yours:
+
+- Hit **Generate new maze** and run again — a good algorithm clears *any* maze,
+  not just one.
+- Break it on purpose: change the starting `facing` to `0`, or drive the robot
+  straight into a wall, and watch it get stuck exactly where your code went
+  wrong.
+- Throw out the wall follower entirely and write your own rule. Anything that
+  reaches red counts.
+
+```maze
+solver: java
 ```
