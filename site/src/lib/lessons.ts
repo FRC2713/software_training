@@ -158,9 +158,16 @@ export function hasMaze(markdown: string): boolean {
   return MAZE_FENCE.test(markdown)
 }
 
-// The maze fence can carry a `solver:` directive to reveal the wall-follower
-// animation button (used only on the algorithm page).
-export function mazeShowsSolver(markdown: string): boolean {
+// The maze fence can carry a `solver:` directive to reveal an animated
+// solver button. Three modes drive the "what is an algorithm?" progression:
+//   random — move to a random open neighbour (not an algorithm: unrepeatable)
+//   naive  — fixed direction priority, no memory (an algorithm, but it loops)
+//   wall   — the wall follower (an algorithm that works, if not optimally)
+export type SolverMode = 'random' | 'naive' | 'wall'
+
+export function mazeSolver(markdown: string): SolverMode | null {
   const match = MAZE_FENCE.exec(markdown)
-  return match ? /solver:\s*wall/.test(match[1]) : false
+  if (!match) return null
+  const m = /solver:\s*(random|naive|wall)/.exec(match[1])
+  return m ? (m[1] as SolverMode) : null
 }

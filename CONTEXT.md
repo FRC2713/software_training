@@ -32,7 +32,10 @@ edge of a Cell is the up edge of the Cell below it.
 **Robot**:
 The thing that traverses the Maze by executing a Solution. It has a position on
 the Grid (a Cell) and **no orientation** — it does not face a direction, so every
-Move is an absolute step, not a turn.
+Move is an absolute step, not a turn. Orientation is a property of the robot's
+_interface_, not of every algorithm: a wall-follower may choose to *remember*
+which way it last stepped (a `facing` variable it owns), but that state lives in
+the algorithm, not the robot — the robot still only ever takes absolute Moves.
 
 **Start**:
 The cell where the Robot begins.

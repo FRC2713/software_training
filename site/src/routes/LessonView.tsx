@@ -8,7 +8,7 @@ import {
   firstJavaSnippet,
   getLesson,
   hasMaze,
-  mazeShowsSolver,
+  mazeSolver,
   lessonNumber,
   nextLesson,
   stripBlocksFence,
@@ -124,7 +124,7 @@ export function LessonView() {
                 <h2 className="mb-3 text-base font-semibold text-primary">▶ Maze</h2>
                 <MazePlayground
                   key={`${lesson.slug}-${pageIndex}`}
-                  solver={mazeShowsSolver(currentPage.markdown)}
+                  solver={mazeSolver(currentPage.markdown)}
                 />
               </>
             ) : preset && isStatePreset(preset) ? (

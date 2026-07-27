@@ -1,8 +1,8 @@
 ---
 title: "Navigating a maze"
-goal: "See a maze as a robot's world — a grid it must cross — and understand how an algorithm steps through it: sense, decide, move, repeat, until it reaches the goal."
-order: 350
-section: "Extras"
+goal: "See a maze as a robot's world — a grid it must cross — and learn what makes something an algorithm by watching three robots try to solve it: a random walk (no plan), a fixed rule that loops (an algorithm, but a bad one), and the wall follower (sense, decide, move, repeat)."
+order: 195
+section: "Algorithms"
 ---
 
 # A maze is a robot's world
@@ -51,11 +51,132 @@ press is one **"sense → decide → move"** cycle.
 ```maze
 ```
 
-# An algorithm is that loop, written down
+# The dumbest possible robot: move at random
 
-Driving by hand is fine, but robots run **algorithms** — a plan the computer
-repeats, the same way every time, until the job is done. And a maze algorithm
-is just the loop you've been doing by hand, spelled out:
+You just drove the maze by hand, making a real choice at every cell. So here's a
+fair question — what if the robot *didn't* choose? What if, at each step, it just
+picked one of the open directions **at random** and went?
+
+Hit **Move at random** and watch.
+
+```maze
+solver: random
+```
+
+Sometimes it stumbles onto the goal. Sometimes it wanders forever. And here's the
+part that matters: **run it again and it does something completely different.**
+There's no plan — just a coin flip at every cell.
+
+That's exactly why this is *not an algorithm*. An algorithm is something you can
+write down, hand to someone else, and have them get the **same result you did**.
+You can't write down "flip a coin" and call that a plan. Notice, too, that
+nothing guarantees it ever finishes — it could bounce around and simply never
+happen to land on red.
+
+(Random isn't worthless — real robots sometimes add a pinch of it on purpose. But
+as *the whole strategy*, it's nothing you can count on, and that's the point.)
+
+# A rule you can repeat
+
+Let's give the robot an actual rule — the simplest one imaginable. At every cell,
+always try the same directions in the same order, and take the first one that's
+open:
+
+```text
+at each cell, try these in order and take the first open one:
+    up, then left, then down, then right
+```
+
+That's the entire rule. No randomness, no cleverness. Press **Run the naive
+rule**:
+
+```maze
+solver: naive
+```
+
+Two things to notice.
+
+First, it's **completely repeatable**. Run it again on this same maze and the
+robot retraces the *exact* same steps — every time. That's what random didn't
+have, and it's what makes this an **algorithm**: a precise rule that produces the
+same result on every run.
+
+Second… it barely gets anywhere. Watch it take a step and then immediately walk
+**right back** the way it came, jittering between two cells forever. (A rule with
+*no memory* that returns to a cell it's already seen will make the identical
+choice it made last time — so it's provably doomed to loop there. We let it
+bounce a few times so you can see it, then stop it.)
+
+Why does it trap itself so fast? Because "up" is first in its list, and once
+it steps down into a cell, the very next thing it does is look up — back where it
+came from — and take it. It has **no memory** of having just been there. It
+doesn't know which way it was heading, and it doesn't know the goal exists.
+
+So being an algorithm doesn't make a rule *good*. This one is perfectly precise
+and perfectly repeatable — and perfectly useless for crossing the maze. The bar
+for "algorithm" is just *definiteness and repeatability*; **whether it actually
+works is a separate question**, and it's the interesting one. Give this robot
+just *one* fact to remember, and something surprising happens.
+
+# An algorithm that actually crosses the maze
+
+Here's the surprise: the **wall follower** is almost the same rule as the naive
+one — a fixed order of directions, take the first open one. It adds exactly **one
+remembered fact**: which way the robot is currently facing. And it tries its
+directions *relative to that heading* instead of relative to the screen:
+
+```text
+at each cell, relative to the way I'm facing, take the first open one:
+1. turn right  — is there an opening to my right?  take it.
+2. go straight — else, is the way ahead open?      take it.
+3. turn left   — else, is there an opening left?   take it.
+4. turn around — else, it's a dead end. go back.
+```
+
+That's the whole idea behind **"keep your right hand on the wall."** And look at
+what it does to the jitter: "turn around" is now **dead last**, so the robot only
+reverses at a true dead end — never on the very next step. Because "right" and
+"straight" are measured from a heading the robot *remembers* between steps, it
+hugs the wall and keeps moving instead of bouncing in place. That single
+remembered fact — its facing — is the *only* thing it adds to the naive rule. No
+map, no list of visited cells, no idea where the goal is. Press **Run wall
+follower**:
+
+```maze
+solver: wall
+```
+
+## Why it works
+
+Here's the surprising part. The walls of this maze aren't a scattering of
+separate obstacles — they're all **one single connected piece**. The generator
+carved the maze by knocking out walls without ever sealing off a loop, so what's
+left is one continuous wall with no islands (mazes like this are called *simply
+connected*, or "perfect" mazes).
+
+Now picture tracing your finger along the edge of one connected shape — say, the
+outline of a single puzzle piece. Keep going and you always come back around; you
+can't get stranded, because there's only one border to follow. The wall follower
+does exactly that: it traces the boundary of that one giant wall. Since the start
+and the goal both sit on that same connected boundary, faithfully following it
+**must** eventually walk the robot from one to the other. It might wander down
+dead ends and back out — but it can never get permanently lost.
+
+That's why the naive rule fails and this one doesn't: it isn't luck, it's the
+memory. Facing is just enough state to keep the robot *committed to a wall*
+rather than making the same local choice from scratch each time.
+
+But "works" still isn't "good." The wall follower cheerfully explores every dead
+end, and the path it finds is usually far from the **shortest** one. And the
+whole guarantee rests on that one assumption — one connected wall. Add a loop to
+the maze, a wall island floating in the middle, and the robot can circle that
+island forever, hugging a border that never touches the goal. For our perfect
+mazes, though, it always gets there.
+
+## The same skeleton, over and over
+
+Look back at all three robots and you'll see they're built from the *same loop* —
+they only disagree about one step:
 
 ```text
 start at the green cell
@@ -65,70 +186,21 @@ repeat until you reach the red cell:
     step that way                       (move)
 ```
 
-Everything interesting lives in that middle line — **"choose one."** *How* the
-robot chooses is what makes one algorithm smart and another one dumb:
+Everything interesting lives in that middle line — **"choose one."** Random rolls
+a die there; the naive rule reads a fixed list; the wall follower consults its
+remembered heading. Swap in a smarter "decide" and you get smarter algorithms:
 
-- **Wall follower** — "always keep your right hand on the wall." Simple, needs
-  no memory, and it works for a lot of mazes.
-- **Depth-first search** — "keep pushing into new cells; when you hit a dead
-  end, back up to the last spot with an untried opening and try that."
-  (Fun fact: this maze was *built* by that exact idea, running in reverse.)
+- **Wall follower** — "keep your right hand on the wall." One remembered fact,
+  and it clears any perfect maze.
+- **Depth-first search** — "keep pushing into new cells; when you hit a dead end,
+  back up to the last spot with an untried opening and try that." (Fun fact: this
+  maze was *built* by that exact idea, running in reverse.)
 - **Breadth-first search** — "explore all the cells one step away, then all the
-  cells two steps away…" — slower to write, but it finds the *shortest* path.
+  cells two steps away…" — more to write, but it finds the *shortest* path.
 
-They all share the same skeleton — **sense, decide, move, repeat** — and differ
-only in the "decide" step. That skeleton is the shape of an enormous amount of
-robot code: read your sensors, decide what to do, act, and loop.
-
-## A closer look at the wall follower
-
-The wall follower is the simplest of the three, and it's worth understanding in
-full because it shows how a *tiny* rule can produce smart-looking behavior.
-
-**How it works.** Imagine walking the maze with your **right hand** pressed flat
-against the wall. You never lift it. At every cell the robot runs through the
-same four choices, always in this order, and takes the **first** one that's
-open:
-
-```text
-1. turn right  — is there an opening to my right?  take it.
-2. go straight — else, is the way ahead open?      take it.
-3. turn left   — else, is there an opening left?   take it.
-4. turn around — else, it's a dead end. go back.
-```
-
-That "right first" order is exactly what keeping your right hand on the wall
-does: you hug the wall by always turning toward it when you can, and only peel
-away when you must. The robot needs to remember just **one** thing between
-steps — the direction it's currently facing — so it can tell which way "right"
-is. No map. No list of visited cells. No idea where the goal is.
-
-**Why it works.** Here's the surprising part. The walls of this maze aren't a
-scattering of separate obstacles — they're all **one single connected piece**.
-The generator carved the maze by knocking out walls without ever sealing off a
-loop, so what's left is one continuous wall with no islands (mazes like this are
-called *simply connected*, or "perfect" mazes).
-
-Now picture tracing your finger along the edge of one connected shape — say, the
-outline of a single puzzle piece. Keep going and you always come back around;
-you can't get stranded, because there's only one border to follow. The wall
-follower does exactly that: it traces the boundary of that one giant wall. Since
-the start and the goal both sit on that same connected boundary, faithfully
-following it **must** eventually walk the robot from one to the other. It might
-wander down dead ends and back out — but it can never get permanently lost.
-
-The catch is right there in the "why": it only works when the walls are one
-connected piece. Add a loop to the maze — a wall island floating in the middle —
-and the robot can end up circling that island forever, hugging a border that
-never touches the goal. For our perfect mazes, though, it's guaranteed.
-
-Hit **Run wall follower** below and watch it happen: no map, no memory of where
-it's been, just those four choices in order, over and over, until it lands on
-the goal.
-
-```maze
-solver: wall
-```
+Same skeleton — **sense, decide, move, repeat** — every time, differing only in
+"decide." That skeleton is the shape of an enormous amount of robot code: read
+your sensors, decide what to do, act, and loop.
 
 # The same algorithm, in Java
 

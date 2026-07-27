@@ -92,10 +92,24 @@ const DIR4 = [
   { bit: W, dx: -1, dy: 0 }, // left
 ]
 
-export function MazePlayground({ solver = false }: { solver?: boolean }) {
+// The naive rule's fixed direction priority: up, then left, then down, then
+// right. It biases toward the top-left, away from the bottom-right goal, so on
+// most mazes the memory-less robot marches into a corner and loops.
+const NAIVE_ORDER = [0, 3, 2, 1]
+
+export type SolverMode = 'random' | 'naive' | 'wall'
+
+const SOLVER_LABEL: Record<SolverMode, string> = {
+  random: 'Move at random',
+  naive: 'Run the naive rule',
+  wall: 'Run wall follower',
+}
+
+export function MazePlayground({ solver = null }: { solver?: SolverMode | null }) {
   const [grid, setGrid] = useState<number[][]>(() => generateMaze(SIZE))
   const [robot, setRobot] = useState<[number, number]>(START)
   const [running, setRunning] = useState(false)
+  const [stuck, setStuck] = useState(false)
   const timer = useRef<ReturnType<typeof setInterval> | null>(null)
   const [copied, setCopied] = useState(false)
 
@@ -116,38 +130,81 @@ export function MazePlayground({ solver = false }: { solver?: boolean }) {
     setRunning(false)
   }, [])
 
-  // "Right-hand rule": at each step try to turn right, else go straight, else
-  // turn left, else turn around — taking the first direction that's open. In a
-  // perfect maze (no loops) this always reaches the goal.
-  const runWallFollower = useCallback(() => {
-    stopSolver()
-    let x = START[0]
-    let y = START[1]
-    let dir = 1 // start heading right
-    let steps = 0
-    const maxSteps = SIZE * SIZE * 4
-    setRobot([x, y])
-    setRunning(true)
-    timer.current = setInterval(() => {
-      if ((x === GOAL[0] && y === GOAL[1]) || steps++ > maxSteps) {
-        stopSolver()
-        return
-      }
-      for (const nd of [(dir + 1) % 4, dir, (dir + 3) % 4, (dir + 2) % 4]) {
-        const { bit, dx, dy } = DIR4[nd]
-        if (grid[y][x] & bit) {
-          dir = nd
+  // Animate one of the three solvers, one step every 180ms:
+  //   random — step to a uniformly-random open neighbour. No rule, so no two
+  //            runs match; it only reaches the goal by luck.
+  //   naive  — take the first open direction in a fixed priority order, with no
+  //            memory of where it came from. Deterministic, so the moment it
+  //            re-enters a cell it will forever repeat the same choices — that
+  //            first revisit is a provable infinite loop, and we stop there.
+  //   wall   — the right-hand rule: relative to a *remembered* heading, try
+  //            right, straight, left, back. That one remembered fact (facing)
+  //            is the whole difference from `naive`; in a perfect maze it
+  //            always reaches the goal.
+  const runSolver = useCallback(
+    (mode: SolverMode) => {
+      stopSolver()
+      let x = START[0]
+      let y = START[1]
+      let dir = 1 // wall follower's remembered heading (start facing right)
+      let steps = 0
+      const maxSteps = SIZE * SIZE * 4
+      const visits = new Map<string, number>([[`${x},${y}`, 1]])
+      setRobot([x, y])
+      setRunning(true)
+      setStuck(false)
+      timer.current = setInterval(() => {
+        if ((x === GOAL[0] && y === GOAL[1]) || steps++ > maxSteps) {
+          stopSolver()
+          return
+        }
+        if (mode === 'wall') {
+          for (const nd of [(dir + 1) % 4, dir, (dir + 3) % 4, (dir + 2) % 4]) {
+            const { bit, dx, dy } = DIR4[nd]
+            if (grid[y][x] & bit) {
+              dir = nd
+              x += dx
+              y += dy
+              break
+            }
+          }
+        } else if (mode === 'naive') {
+          for (const nd of NAIVE_ORDER) {
+            const { bit, dx, dy } = DIR4[nd]
+            if (grid[y][x] & bit) {
+              x += dx
+              y += dy
+              break
+            }
+          }
+        } else {
+          const opens = [0, 1, 2, 3].filter((nd) => grid[y][x] & DIR4[nd].bit)
+          const { dx, dy } = DIR4[opens[Math.floor(Math.random() * opens.length)]]
           x += dx
           y += dy
-          break
         }
-      }
-      setRobot([x, y])
-    }, 180)
-  }, [grid, stopSolver])
+        setRobot([x, y])
+        // A memory-less rule that revisits a cell is doomed to loop forever
+        // (same cell -> same choice). We don't stop on the *first* revisit
+        // though — we let the robot visibly bounce a few times so the loop is
+        // something you can watch, then call it once a cell has been hit 4×.
+        if (mode === 'naive' && !(x === GOAL[0] && y === GOAL[1])) {
+          const key = `${x},${y}`
+          const n = (visits.get(key) ?? 0) + 1
+          visits.set(key, n)
+          if (n >= 4) {
+            setStuck(true)
+            stopSolver()
+          }
+        }
+      }, 180)
+    },
+    [grid, stopSolver],
+  )
 
   const generate = () => {
     stopSolver()
+    setStuck(false)
     setGrid(generateMaze(SIZE))
     setRobot(START)
   }
@@ -155,6 +212,7 @@ export function MazePlayground({ solver = false }: { solver?: boolean }) {
   const move = useCallback(
     (dir: keyof typeof MOVES) => {
       stopSolver()
+      setStuck(false)
       setRobot(([x, y]) => {
         const { bit, dx, dy } = MOVES[dir]
         // Can only move through a carved opening (no wall on that side).
@@ -276,6 +334,9 @@ export function MazePlayground({ solver = false }: { solver?: boolean }) {
         <span className="text-[#ef4444]">■</span> goal&nbsp;&nbsp;
         <span className="text-[#3b82f6]">●</span> robot
         {solved && <strong className="ml-2 text-[#22c55e]">— solved! 🎉</strong>}
+        {stuck && !solved && (
+          <strong className="ml-2 text-[#ef4444]">— stuck in a loop 🔁</strong>
+        )}
       </p>
 
       {/* Directional pad. */}
@@ -292,10 +353,10 @@ export function MazePlayground({ solver = false }: { solver?: boolean }) {
         {solver && (
           <button
             type="button"
-            onClick={running ? stopSolver : runWallFollower}
+            onClick={running ? stopSolver : () => runSolver(solver)}
             className="rounded-md border border-primary px-4 py-2 text-sm font-semibold text-primary transition hover:bg-primary hover:text-primary-foreground"
           >
-            {running ? 'Stop' : 'Run wall follower'}
+            {running ? 'Stop' : SOLVER_LABEL[solver]}
           </button>
         )}
         <button
