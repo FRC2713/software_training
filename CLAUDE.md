@@ -166,3 +166,8 @@ folder until it's restarted.
 - **Components**: `LessonCard` (index listing), `PageNav` (in-lesson page
   navigation), `JavaRunner` (the editable/runnable code block UI backed by
   `javaRuntime.ts`).
+- **Maze round-trip** (design, not yet built): `docs/maze-roundtrip.md` specs how
+  a JS-generated maze is passed into Java as an interpolated `int[][]` literal,
+  solved by a student's algorithm against the `maze-solver` library, and the
+  resulting **Maze Trail** emitted as a sentinel-tagged stdout line
+  (`__TRAIL__ [[row,col],…]`) for `MazePlayground` to animate back.

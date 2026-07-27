@@ -50,6 +50,15 @@ only by whether it finishes the Maze (reaches the Goal). A Move blocked by a Wal
 is not a modeled failure — it simply does nothing; nothing is penalized. The
 module is about *finishing*, not collision avoidance.
 
+**Maze Trail**:
+The ordered sequence of Cells the Robot has occupied while executing its
+Solution, from Start onward. It is the *consequence* of a Solution, not the same
+thing: a Solution is the Moves the algorithm emits, whereas the Maze Trail is
+where the Robot actually ended up standing after each. A Move blocked by a Wall
+adds no Maze Trail entry, so an algorithm that drives into a wall leaves a Trail
+that simply stays put there.
+_Avoid_: path (ambiguous — could mean the open corridors of the Maze itself)
+
 **Maze Battle**:
 The module's finale. A student submits one program; it is scored by how many of a
 set of *unseen* Mazes it finishes (a gauntlet), tie-broken by total Moves. The
