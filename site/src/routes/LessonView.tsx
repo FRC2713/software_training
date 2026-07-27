@@ -7,6 +7,8 @@ import {
   blocksPreset,
   firstJavaSnippet,
   getLesson,
+  hasMaze,
+  mazeShowsSolver,
   lessonNumber,
   nextLesson,
   stripBlocksFence,
@@ -14,6 +16,7 @@ import {
 import { JavaRunner } from '@/components/JavaRunner'
 import { CodeBlock } from '@/components/CodeBlock'
 import { BlockPlayground } from '@/components/BlockPlayground'
+import { MazePlayground } from '@/components/MazePlayground'
 import { StatePlayground } from '@/components/StatePlayground'
 import { isStatePreset } from '@/lib/statePresets'
 import { PageNav } from '@/components/PageNav'
@@ -87,9 +90,11 @@ export function LessonView() {
     : 0
   const currentPage = lesson.pages[pageIndex]
   const preset = blocksPreset(currentPage.markdown)
-  const prose = preset ? stripBlocksFence(currentPage.markdown) : currentPage.markdown
+  const maze = hasMaze(currentPage.markdown)
+  const prose =
+    preset || maze ? stripBlocksFence(currentPage.markdown) : currentPage.markdown
   const javaSnippet = firstJavaSnippet(currentPage.markdown)
-  const hasPlayground = preset != null || javaSnippet != null
+  const hasPlayground = preset != null || maze || javaSnippet != null
 
   const goTo = (index: number) => navigate(`/lesson/${lesson.slug}/${index + 1}`)
 
@@ -114,7 +119,15 @@ export function LessonView() {
         </article>
         {hasPlayground && (
           <div className="w-full min-w-0 flex-1 lg:sticky lg:top-20 lg:min-w-[320px]">
-            {preset && isStatePreset(preset) ? (
+            {maze ? (
+              <>
+                <h2 className="mb-3 text-base font-semibold text-primary">▶ Maze</h2>
+                <MazePlayground
+                  key={`${lesson.slug}-${pageIndex}`}
+                  solver={mazeShowsSolver(currentPage.markdown)}
+                />
+              </>
+            ) : preset && isStatePreset(preset) ? (
               <>
                 <h2 className="mb-3 text-base font-semibold text-primary">▶ State machine</h2>
                 <StatePlayground key={`${lesson.slug}-${pageIndex}-${preset}`} preset={preset} />

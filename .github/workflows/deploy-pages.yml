@@ -19,6 +19,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # Build the maze-solver library and vendor its jar into site/public/ so
+      # the Java playground can load the com.frc2713.mazesolver API. Built fresh
+      # each deploy from the library's main; not committed (see site/.gitignore).
+      - uses: actions/checkout@v4
+        with:
+          repository: FRC2713/maze-solver-java
+          ref: main
+          path: maze-solver-java
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Build maze-solver jar
+        run: |
+          mvn -B -q -DskipTests package
+          cp target/maze-solver.jar "$GITHUB_WORKSPACE/site/public/maze-solver.jar"
+        working-directory: maze-solver-java
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20

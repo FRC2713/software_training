@@ -144,6 +144,23 @@ export function blocksPreset(markdown: string): string | null {
 export function stripBlocksFence(markdown: string): string {
   return markdown
     .replace(/```blocks\r?\n[\s\S]*?```/g, '')
+    .replace(/```maze[\s\S]*?```/g, '')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
+}
+
+// A page can swap the playground for the maze-generator demo with a ```maze
+// fence. Like ```blocks it's a directive, not content, so it's stripped from
+// the prose.
+const MAZE_FENCE = /```maze\r?\n?([\s\S]*?)```/
+
+export function hasMaze(markdown: string): boolean {
+  return MAZE_FENCE.test(markdown)
+}
+
+// The maze fence can carry a `solver:` directive to reveal the wall-follower
+// animation button (used only on the algorithm page).
+export function mazeShowsSolver(markdown: string): boolean {
+  const match = MAZE_FENCE.exec(markdown)
+  return match ? /solver:\s*wall/.test(match[1]) : false
 }
