@@ -78,24 +78,23 @@ const MOVES: Record<'up' | 'down' | 'left' | 'right', { bit: number; dx: number;
 const cx = (x: number) => PAD + x * CELL + CELL / 2
 const cy = (y: number) => PAD + y * CELL + CELL / 2
 
-// Serialize the maze as a ready-to-paste Java `int[][]` literal. Each cell is
-// the same N/S/E/W bitmask the grid already uses, so Java reads it with the
-// identical constants (N=1, S=2, E=4, W=8) and `cell & N` wall checks.
+// Serialize the maze as a ready-to-paste Java `int[][]` literal, wired into the
+// maze-solver library so it runs without any bitmask arithmetic. Each cell is
+// the same N/S/E/W bitmask the grid uses, but the library reads it for you.
 function serializeToJava(grid: number[][]): string {
   const rows = mazeGridLiteral(grid)
-  return `// Maze as an N/S/E/W bitmask grid. For each cell, a set bit means that
-// side is OPEN (you can move that way); a clear bit is a wall.
-//   N = 1 (up)   S = 2 (down)   E = 4 (right)   W = 8 (left)
-// Example check: (maze[row][col] & E) != 0  -->  can move right.
-final int N = 1, S = 2, E = 4, W = 8;
+  return `import com.frc2713.mazesolver.*;
 
-int[][] maze = {
+// The maze as a grid of numbers (each cell an N/S/E/W bitmask). Hand it to a
+// GridMaze and you get a robot on the start cell — no bitmask math needed.
+int[][] grid = {
 ${rows}
 };
 
-// Where the robot starts and where it's trying to get to (row, col):
-int startRow = ${START[1]}, startCol = ${START[0]};
-int goalRow  = ${GOAL[1]}, goalCol  = ${GOAL[0]};`
+Maze maze = new GridMaze(grid);
+Robot robot = maze.robot();
+// Now drive it: robot.readWallSensor(Direction.UP), robot.drive(Direction.RIGHT),
+// robot.facing(), robot.atGoal(), robot.row(), robot.col().`
 }
 
 // Headings for the wall follower, clockwise: 0=up, 1=right, 2=down, 3=left.
@@ -123,37 +122,31 @@ const SOLVER_LABEL: Record<CannedMode, string> = {
 }
 
 // The editor's starting point for `solver: java`: a right-hand wall follower,
-// the same algorithm lesson "Navigating a maze" builds up to — translated to
-// the library's absolute-move API with a remembered `facing` heading.
-const DEFAULT_JAVA_SOLVE = `// Drive the robot from start (green) to goal (red).
-// You have: robot.canMoveUp/Down/Left/Right(), robot.moveUp/Down/Left/Right(),
-// robot.atGoal(), robot.row(), robot.col().
+// the same algorithm the maze lessons build up to — written against the
+// library's Robot API, using the facing() the robot remembers for itself.
+const DEFAULT_JAVA_SOLVE = `// Drive the robot from start (green) to goal (red). Your robot can:
+//   robot.readWallSensor(Direction.UP/DOWN/LEFT/RIGHT) — is that side a wall?
+//   robot.drive(Direction.UP/DOWN/LEFT/RIGHT)          — move one cell that way
+//   robot.facing()                                     — the way it last drove
+//   robot.atGoal(), robot.row(), robot.col()
 //
 // This starter is the "keep your right hand on the wall" follower.
 void solve(Robot robot) {
-    // Heading: 0 = up, 1 = right, 2 = down, 3 = left. Start facing right.
-    int facing = 1;
     int maxSteps = 1000;
     for (int i = 0; i < maxSteps && !robot.atGoal(); i++) {
-        // Try right, straight, left, back — relative to the way we're facing.
-        int[] order = { (facing + 1) % 4, facing, (facing + 3) % 4, (facing + 2) % 4 };
-        for (int dir : order) {
-            if (tryMove(robot, dir)) {
-                facing = dir;
+        // Relative to the way we're facing, try right, straight, left, then
+        // back — and drive the first opening. drive() updates facing() for us.
+        Direction ahead = robot.facing();
+        Direction[] order = {
+            ahead.clockwise(), ahead, ahead.counterClockwise(), ahead.opposite()
+        };
+        for (Direction dir : order) {
+            if (!robot.readWallSensor(dir)) {
+                robot.drive(dir);
                 break;
             }
         }
     }
-}
-
-// Move one step in an absolute direction if that side is open; report whether
-// we actually moved.
-boolean tryMove(Robot robot, int dir) {
-    if (dir == 0 && robot.canMoveUp())    { robot.moveUp();    return true; }
-    if (dir == 1 && robot.canMoveRight()) { robot.moveRight(); return true; }
-    if (dir == 2 && robot.canMoveDown())  { robot.moveDown();  return true; }
-    if (dir == 3 && robot.canMoveLeft())  { robot.moveLeft();  return true; }
-    return false;
 }`
 
 export function MazePlayground({ solver = null }: { solver?: SolverMode | null }) {

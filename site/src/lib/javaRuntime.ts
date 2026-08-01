@@ -13,18 +13,13 @@ const CHEERPJ_LOADER_URL = 'https://cjrtnc.leaningtech.com/4.3/loader.js'
 // lives under the Vite base path (/software_training/ in production).
 const TOOLS_JAR = `/app${import.meta.env.BASE_URL}tools.jar`
 // FRC2713/maze-solver-java, built into a jar and vendored the same way. Gives
-// lesson snippets the com.frc2713.mazesolver API (Maze/Cell/Robot/MazeSolver)
-// so students write solving algorithms against it instead of raw bitmasks. The
-// jar is produced by CI on deploy and by scripts/vendor-maze-solver.sh locally.
+// lesson snippets the com.frc2713.mazesolver API — the Direction enum, the
+// Maze/Cell/Robot interfaces, the concrete GridMaze students build with
+// `new GridMaze(grid)`, and MazeSolver — so they write solving algorithms
+// against it instead of raw bitmasks. The jar is produced by CI on deploy and
+// by scripts/vendor-maze-solver.sh locally.
 const SOLVER_JAR = `/app${import.meta.env.BASE_URL}maze-solver.jar`
-// Temporary shim: the maze-solver library ships only interfaces, so snippets
-// that call `new GridMaze(grid)` need a concrete implementation on the
-// classpath. maze-engine.jar (built by scripts/build-maze-engine.sh, committed
-// like tools.jar) supplies GridMaze/GridRobot/GridCell. It comes after
-// SOLVER_JAR so the library's own GridMaze wins once it ships one — at which
-// point this jar and its classpath entry can be deleted.
-const ENGINE_JAR = `/app${import.meta.env.BASE_URL}maze-engine.jar`
-const CLASS_PATH = `${TOOLS_JAR}:${SOLVER_JAR}:${ENGINE_JAR}:/files/`
+const CLASS_PATH = `${TOOLS_JAR}:${SOLVER_JAR}:/files/`
 
 // Globals installed by loader.js (a classic script, not an ES module).
 declare global {

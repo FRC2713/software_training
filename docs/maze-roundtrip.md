@@ -8,13 +8,12 @@
 data contracts; a few assumptions in the original spec were corrected against the
 real library and are noted inline below.
 
-**Library shim.** The `maze-solver` library ships only interfaces (Maze/Robot/
-Cell) — no concrete `GridMaze` — so `new GridMaze(grid)` resolves against
-`site/public/maze-engine.jar`, a small concrete engine the site vendors on the
-classpath (built by `site/scripts/build-maze-engine.sh`, sources in
-`site/scripts/maze-engine/`, committed like `tools.jar`). Delete the jar, its
-sources, the build script, and the `ENGINE_JAR` classpath entry in
-`javaRuntime.ts` once the library ships its own `GridMaze`.
+**Library.** `new GridMaze(grid)` and the `Robot`/`Cell`/`Direction` API resolve
+against `site/public/maze-solver.jar` — the `FRC2713/maze-solver-java` library,
+built fresh by CI on deploy and by `scripts/vendor-maze-solver.sh` locally. The
+library ships the concrete `GridMaze`/`GridRobot`/`GridCell` itself; there is no
+longer a separate engine shim. (Earlier revisions vendored a `maze-engine.jar`
+while the library shipped interfaces only — that shim has been removed.)
 
 Audience: developers working on the site. This is not student-facing lesson
 content.
@@ -54,7 +53,7 @@ sequenceDiagram
     RT->>H: compile + run (CheerpJ)
     H->>Lib: new GridMaze(grid); maze.robot()
     H->>Stu: solve(robot)
-    Stu->>Lib: robot.canMove*/move*/atGoal()   // library records the Maze Trail
+    Stu->>Lib: robot.readWallSensor/drive/atGoal()   // library records the Maze Trail
     H->>H: print "__TRAIL__ [[row,col],…]" (sentinel line)
     RT-->>JS: RunOutcome.output (captured stdout)
     JS->>JS: scan for sentinel, JSON.parse, [row,col]→[x,y]
@@ -94,11 +93,11 @@ The student never sees the bitmask grid or `main`.
 ### 4. Execute the student's algorithm (Java)
 
 The harness calls the student's `solve(Robot)`. The student drives the robot with
-the library's absolute-move API — `robot.canMoveUp/Right/Down/Left()`,
-`robot.moveUp/…()`, `robot.atGoal()`. Each successful move extends the **Maze
-Trail** the library records; a move blocked by a wall does nothing and adds no
-Trail entry (so a buggy algorithm that drives into a wall shows the robot
-*actually stuck there* when animated).
+the library's sensor/drivetrain API — `robot.readWallSensor(Direction)`,
+`robot.drive(Direction)`, `robot.facing()`, `robot.atGoal()`. Each successful
+drive extends the **Maze Trail** the library records; a drive blocked by a wall
+does nothing and adds no Trail entry (so a buggy algorithm that drives into a
+wall shows the robot *actually stuck there* when animated).
 
 ### 5. Emit the steps (new)
 
@@ -199,8 +198,9 @@ public class MazeRun {
 - `serializeToJava`'s literal format (`MazePlayground.tsx`).
 - `runJava` / `RunOutcome`, stdout capture, compile+run, error simplification,
   `prepareSource` class-with-`main` handling (`javaRuntime.ts`).
-- The `maze-solver` library API — `GridMaze`, `Robot`, `Cell` (external repo
-  `FRC2713/maze-solver-java`, vendored as `site/public/maze-solver.jar`).
+- The `maze-solver` library API — `GridMaze`, `Robot`, `Cell`, `Direction`
+  (external repo `FRC2713/maze-solver-java`, vendored as
+  `site/public/maze-solver.jar`).
 - `MazePlayground`'s interval-driven robot animation loop.
 
 **To build (the new glue):**
@@ -219,8 +219,9 @@ Resolved against the vendored interface jar's bytecode while wiring this up:
   So the harness emits the Trail by iterating the `int[][]` directly (simpler
   than the `Cell.row()/col()` the earlier draft assumed).
 - `new GridMaze(grid)` returns a `Maze`; `maze.robot()` returns a Start-positioned
-  `Robot`. `GridMaze` is not in the library yet — see the library-shim note at the
-  top; it's supplied by `maze-engine.jar` with Start = (0,0) and Goal =
-  (rows-1, cols-1).
-- The move/query methods are **`canMoveUp/Down/Left/Right`** and
-  **`moveUp/Down/Left/Right`** (the lesson's spelling, not `CONTEXT.md`'s `canGo*`).
+  `Robot`. `GridMaze` now lives in the library itself, with Start = (0,0) and
+  Goal = (rows-1, cols-1).
+- The sensor/drivetrain methods are **`readWallSensor(Direction)`** and
+  **`drive(Direction)`**, with `facing()` remembering the last drive; `Direction`
+  is an `enum { UP, DOWN, LEFT, RIGHT }` with `bit()`, `opposite()`,
+  `clockwise()`, `counterClockwise()`.

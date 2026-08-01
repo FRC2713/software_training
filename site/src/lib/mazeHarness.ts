@@ -6,9 +6,8 @@
 // body, and a `main` drives the robot then prints the Maze Trail as a single
 // sentinel-tagged line for the JS side to parse and animate back.
 //
-// `new GridMaze(grid)` resolves against maze-engine.jar — a concrete engine the
-// site vendors on the classpath while the maze-solver library still ships only
-// interfaces (see lib/javaRuntime.ts). Nothing maze-specific is bundled into
+// `new GridMaze(grid)` resolves against the maze-solver library on the
+// classpath (see lib/javaRuntime.ts). Nothing maze-specific is bundled into
 // the harness source itself.
 
 // The maze as a ready-to-embed Java `int[][]` literal body (just the rows, no
