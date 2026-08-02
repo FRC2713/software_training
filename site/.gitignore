@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Built by CI on deploy / scripts/vendor-maze-solver.sh locally, not committed.
+public/maze-solver.jar
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -12,7 +12,14 @@ const CHEERPJ_LOADER_URL = 'https://cjrtnc.leaningtech.com/4.3/loader.js'
 // CheerpJ mounts the site's HTTP origin at /app/, so the vendored compiler
 // lives under the Vite base path (/software_training/ in production).
 const TOOLS_JAR = `/app${import.meta.env.BASE_URL}tools.jar`
-const CLASS_PATH = `${TOOLS_JAR}:/files/`
+// FRC2713/maze-solver-java, built into a jar and vendored the same way. Gives
+// lesson snippets the com.frc2713.mazesolver API — the Direction enum, the
+// Maze/Cell/Robot interfaces, the concrete GridMaze students build with
+// `new GridMaze(grid)`, and MazeSolver — so they write solving algorithms
+// against it instead of raw bitmasks. The jar is produced by CI on deploy and
+// by scripts/vendor-maze-solver.sh locally.
+const SOLVER_JAR = `/app${import.meta.env.BASE_URL}maze-solver.jar`
+const CLASS_PATH = `${TOOLS_JAR}:${SOLVER_JAR}:/files/`
 
 // Globals installed by loader.js (a classic script, not an ES module).
 declare global {

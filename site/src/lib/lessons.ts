@@ -144,6 +144,32 @@ export function blocksPreset(markdown: string): string | null {
 export function stripBlocksFence(markdown: string): string {
   return markdown
     .replace(/```blocks\r?\n[\s\S]*?```/g, '')
+    .replace(/```maze[\s\S]*?```/g, '')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
+}
+
+// A page can swap the playground for the maze-generator demo with a ```maze
+// fence. Like ```blocks it's a directive, not content, so it's stripped from
+// the prose.
+const MAZE_FENCE = /```maze\r?\n?([\s\S]*?)```/
+
+export function hasMaze(markdown: string): boolean {
+  return MAZE_FENCE.test(markdown)
+}
+
+// The maze fence can carry a `solver:` directive to reveal a solver control.
+// The three canned modes drive the "what is an algorithm?" progression:
+//   random — move to a random open neighbour (not an algorithm: unrepeatable)
+//   naive  — fixed direction priority, no memory (an algorithm, but it loops)
+//   wall   — the wall follower (an algorithm that works, if not optimally)
+// The fourth, `java`, swaps the canned button for an editor where the student
+// writes their own solver in real Java, run through the maze round-trip.
+export type SolverMode = 'random' | 'naive' | 'wall' | 'java'
+
+export function mazeSolver(markdown: string): SolverMode | null {
+  const match = MAZE_FENCE.exec(markdown)
+  if (!match) return null
+  const m = /solver:\s*(random|naive|wall|java)/.exec(match[1])
+  return m ? (m[1] as SolverMode) : null
 }

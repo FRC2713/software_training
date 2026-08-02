@@ -166,3 +166,28 @@ folder until it's restarted.
 - **Components**: `LessonCard` (index listing), `PageNav` (in-lesson page
   navigation), `JavaRunner` (the editable/runnable code block UI backed by
   `javaRuntime.ts`).
+- **Maze round-trip** (`site/src/lib/mazeHarness.ts` + the `'java'` mode of
+  `MazePlayground`): the `solver: java` maze fence renders an editor where a
+  student writes a `solve(Robot)` method. `buildMazeHarness` interpolates the
+  current JS maze in as an `int[][]` literal, splices the student's method into a
+  `MazeRun` class, and drives the robot; the **Maze Trail** is emitted as a
+  sentinel-tagged stdout line (`__TRAIL__ [[row,col],…]`), which `parseTrail`
+  reads back (the single `[row,col]→[x,y]` swap) and `MazePlayground` animates.
+  `docs/maze-roundtrip.md` documents the seams. `new GridMaze(grid)`, the
+  `Robot`/`Cell`/`Maze` types, and the `Direction` enum all resolve against
+  `site/public/maze-solver.jar` — the `FRC2713/maze-solver-java` library, which
+  ships the concrete `GridMaze`/`GridRobot`/`GridCell` itself (built fresh by CI
+  on deploy and by `scripts/vendor-maze-solver.sh` locally). The robot API is
+  sensor/drivetrain-shaped: `robot.readWallSensor(Direction.UP)` (true = wall),
+  `robot.drive(Direction.RIGHT)` (no-op into a wall), and `robot.facing()`, which
+  the robot auto-updates on each successful drive; `Direction` is an
+  `enum {UP,DOWN,LEFT,RIGHT}` with `bit()`/`opposite()`/`clockwise()`/
+  `counterClockwise()`. Earlier revisions vendored a separate `maze-engine.jar`
+  shim while the library shipped interfaces only — that shim (and its
+  `ENGINE_JAR` classpath entry, build script, and `scripts/maze-engine/` sources)
+  has been removed; the library and site share the contract in the library's
+  `CONTRACT.md`. The Algorithms section runs four lessons: `algorithms` (visual —
+  what an algorithm is, three robots), then `algorithms-maze-data` (the maze as a
+  2D `int[][]`), `algorithms-robot-api` (reading the library's API, writing
+  `tryMove`), and `algorithms-maze-solver` (the wall follower + the round-trip
+  playground).
