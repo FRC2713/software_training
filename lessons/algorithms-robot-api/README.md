@@ -12,7 +12,7 @@ decode those numbers by hand. This is where that promise pays off. We hand the
 grid to a small **library** (a bundle of ready-made code someone else wrote for
 you), and it gives back two friendly objects:
 
-```java
+```text
 Maze maze = new GridMaze(grid);   // turn the raw grid into a maze
 Robot robot = maze.robot();       // a robot standing on the start cell
 ```
