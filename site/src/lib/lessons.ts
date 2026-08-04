@@ -164,12 +164,14 @@ export function hasMaze(markdown: string): boolean {
 //   naive  — fixed direction priority, no memory (an algorithm, but it loops)
 //   wall   — the wall follower (an algorithm that works, if not optimally)
 // The fourth, `java`, swaps the canned button for an editor where the student
-// writes their own solver in real Java, run through the maze round-trip.
-export type SolverMode = 'random' | 'naive' | 'wall' | 'java'
+// writes their own reactive solver in real Java, run through the maze round-trip.
+// The fifth, `astar`, is the same editor but its harness also hands the student
+// the whole Maze so they can plan a global shortest path (the A* lesson).
+export type SolverMode = 'random' | 'naive' | 'wall' | 'java' | 'astar'
 
 export function mazeSolver(markdown: string): SolverMode | null {
   const match = MAZE_FENCE.exec(markdown)
   if (!match) return null
-  const m = /solver:\s*(random|naive|wall|java)/.exec(match[1])
+  const m = /solver:\s*(random|naive|wall|java|astar)/.exec(match[1])
   return m ? (m[1] as SolverMode) : null
 }

@@ -22,8 +22,21 @@ export function mazeGridLiteral(grid: number[][]): string {
 // Everything the harness puts *above* the student's spliced-in code. Kept as its
 // own string so we can measure its line count and translate compile-error line
 // numbers back to what the student sees in their editor.
-function harnessPrefix(grid: number[][]): string {
-  return `import com.frc2713.mazesolver.*;
+//
+// The `wall` harness hands the student just a `Robot` (a reactive, sense-as-you-go
+// algorithm like the wall follower). The `astar` harness also hands them the whole
+// `Maze` — random access to every cell via `maze.cellAt(...)` — and imports
+// `java.util.*`, because a global planner like A* needs the full map plus
+// PriorityQueue/HashMap up front. The trail emission is identical either way.
+export type HarnessMode = 'wall' | 'astar'
+
+function harnessPrefix(grid: number[][], mode: HarnessMode): string {
+  const imports =
+    mode === 'astar'
+      ? 'import java.util.*;\nimport com.frc2713.mazesolver.*;'
+      : 'import com.frc2713.mazesolver.*;'
+  const call = mode === 'astar' ? 'new MazeRun().solve(maze, robot);' : 'new MazeRun().solve(robot);'
+  return `${imports}
 
 public class MazeRun {
     static final int[][] GRID = {
@@ -34,7 +47,7 @@ ${mazeGridLiteral(grid)}
         Maze maze = new GridMaze(GRID);
         Robot robot = maze.robot();
 
-        new MazeRun().solve(robot);
+        ${call}
 
         // Emit the Maze Trail as one sentinel-tagged JSON line of [row,col] pairs.
         int[][] trail = robot.trail();
@@ -55,14 +68,20 @@ const HARNESS_SUFFIX = '\n}\n'
 
 // How many lines the harness inserts above the student's first line. Compile
 // errors come back as "line N: ..." counted in the assembled file; subtracting
-// this maps them to the line the student actually typed.
-export function studentLineOffset(grid: number[][]): number {
-  return harnessPrefix(grid).split('\n').length - 1
+// this maps them to the line the student actually typed. The offset depends on
+// the mode (the astar prefix has one extra import line), so pass the same mode
+// used to build the harness.
+export function studentLineOffset(grid: number[][], mode: HarnessMode = 'wall'): number {
+  return harnessPrefix(grid, mode).split('\n').length - 1
 }
 
 // Assemble the full compilation unit: harness prefix + student code + close.
-export function buildMazeHarness(grid: number[][], studentCode: string): string {
-  return harnessPrefix(grid) + studentCode.trimEnd() + HARNESS_SUFFIX
+export function buildMazeHarness(
+  grid: number[][],
+  studentCode: string,
+  mode: HarnessMode = 'wall',
+): string {
+  return harnessPrefix(grid, mode) + studentCode.trimEnd() + HARNESS_SUFFIX
 }
 
 // Rewrite the "line N:" prefixes in a compile-error message so they point at the
