@@ -2,7 +2,7 @@
 title: "Hello, World!"
 goal: "Explain what a program actually is, then write and run your first one."
 order: 60
-section: "Java Fundamentals"
+section: "Java Fundamentals: Part 1"
 ---
 
 # What is a program?

@@ -2,7 +2,7 @@
 title: "Loops in code"
 goal: "Repeat steps in Java with for and while instead of copying lines."
 order: 100
-section: "Java Fundamentals"
+section: "Java Fundamentals: Part 2"
 ---
 
 # Repeat, in text

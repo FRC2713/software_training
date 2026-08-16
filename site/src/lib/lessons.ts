@@ -9,6 +9,7 @@ export interface Lesson {
   goal: string
   order: number
   section: string
+  layout: 'lesson' | 'challenge'
   pages: LessonPage[]
 }
 
@@ -78,7 +79,7 @@ function parseFrontmatter(raw: string): { data: Record<string, string>; content:
 }
 
 export const lessons: Lesson[] = Object.entries(rawLessonFiles)
-  .map(([path, raw]) => {
+  .map<Lesson>(([path, raw]) => {
     const { data, content } = parseFrontmatter(raw)
     return {
       slug: slugFromPath(path),
@@ -86,6 +87,7 @@ export const lessons: Lesson[] = Object.entries(rawLessonFiles)
       goal: data.goal ?? '',
       order: Number(data.order ?? 0),
       section: data.section || UNSECTIONED,
+      layout: data.layout === 'challenge' ? 'challenge' : 'lesson',
       pages: splitIntoPages(content),
     }
   })
@@ -121,12 +123,41 @@ export function nextLesson(slug: string): Lesson | undefined {
   return index === -1 ? undefined : lessons[index + 1]
 }
 
+export interface JavaPlaygroundSpec {
+  code: string
+  initialInput?: string
+}
+
 // Drives the playground panel: a page's first ```java fence is what gets
 // loaded into it. Pages can still show other code samples in their prose;
-// only this one is treated as "the" runnable snippet for the page.
+// only this one is treated as "the" runnable snippet for the page. An optional
+// input="..." attribute opts the page into the runner's program-input field.
+const JAVA_FENCE = /```java(?:[ \t]+([^\r\n]*))?\r?\n([\s\S]*?)```/
+
+export function firstJavaPlayground(markdown: string): JavaPlaygroundSpec | null {
+  const match = JAVA_FENCE.exec(markdown)
+  if (!match) return null
+
+  const metadata = match[1] ?? ''
+  const input = /\binput=(?:"([^"]*)"|'([^']*)'|(\S+))/.exec(metadata)
+  const initialInput = input ? (input[1] ?? input[2] ?? input[3]) : undefined
+
+  return {
+    code: match[2].trimEnd(),
+    ...(initialInput !== undefined ? { initialInput } : {}),
+  }
+}
+
+// Kept as the simple code-only helper for callers that do not need fence
+// metadata.
 export function firstJavaSnippet(markdown: string): string | null {
-  const match = /```java\r?\n([\s\S]*?)```/.exec(markdown)
-  return match ? match[1].trimEnd() : null
+  return firstJavaPlayground(markdown)?.code ?? null
+}
+
+// Challenge layouts put the editable runner first, so remove its source fence
+// from the supporting prose rather than showing a read-only duplicate.
+export function stripFirstJavaFence(markdown: string): string {
+  return markdown.replace(JAVA_FENCE, '').replace(/\n{3,}/g, '\n\n').trim()
 }
 
 // A page can swap the Java playground for the visual block editor with a

@@ -2,7 +2,7 @@
 title: "Writing your own methods"
 goal: "Package steps into a named method and hand back a result with return."
 order: 110
-section: "Java Fundamentals"
+section: "Java Fundamentals: Part 2"
 ---
 
 # The program shell, revealed

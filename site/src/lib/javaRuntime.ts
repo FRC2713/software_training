@@ -78,8 +78,9 @@ export interface RunOutcome {
 }
 
 // Bare statements are wrapped in a main-method shell so early lessons can run
-// `System.out.println("hi");` without meeting class boilerplate (lesson 11
-// reveals the shell). Snippets that declare their own class/enum run as-is.
+// `System.out.println("hi");` without meeting class boilerplate ("Writing your
+// own methods" reveals the shell). Snippets that declare their own class/enum
+// run as-is.
 // The blanket java.util import lets ArrayList/HashMap snippets work before
 // imports are taught.
 const WRAP_PREFIX = 'import java.util.*;\npublic class Main {\npublic static void main(String[] args) {\n'
@@ -95,15 +96,16 @@ interface PreparedSource {
 function prepareSource(code: string): PreparedSource {
   // Ignore `class`/`interface`/`enum` mentions inside line comments when
   // deciding whether the snippet is already a full compilation unit. An
-  // interface-only snippet (lesson 29) must not fall through to the wrap
-  // path below — a top-level `interface` inside a method body is illegal.
+  // interface-only snippet ("Interfaces in code") must not fall through to
+  // the wrap path below — a top-level `interface` inside a method body is illegal.
   const withoutComments = code.replace(/\/\/[^\n]*/g, '')
   const declarations = [...withoutComments.matchAll(/\b(?:class|enum|interface)\s+(\w+)/g)]
   if (declarations.length > 0) {
     // Run the class that owns main(): the last type declared before the main
-    // method (snippets can hold several classes, e.g. lesson 21). The public
-    // class must also match the filename, and in our lessons that is always
-    // the class with main. A snippet with no main still compiles for feedback.
+    // method (snippets can hold several classes, e.g. "State machines in code").
+    // The public class must also match the filename, and in our lessons that
+    // is always the class with main. A snippet with no main still compiles for
+    // feedback.
     const mainIndex = withoutComments.search(/\bstatic\s+void\s+main\b/)
     const before = declarations.filter((d) => d.index! < mainIndex)
     const mainClass = (before.length > 0 ? before[before.length - 1] : declarations[0])[1]
@@ -145,7 +147,7 @@ function simplifyRuntimeError(text: string): string {
   return kept.join('\n').trim()
 }
 
-async function compileAndRun(code: string): Promise<RunOutcome> {
+async function compileAndRun(code: string, programArgs: string[] = []): Promise<RunOutcome> {
   const { source, mainClass, lineOffset } = prepareSource(code)
   const out = consoleElement!
   out.textContent = ''
@@ -161,7 +163,7 @@ async function compileAndRun(code: string): Promise<RunOutcome> {
     return { ok: false, output: simplifyCompileErrors(out.textContent ?? '', lineOffset, mainClass) }
   }
   out.textContent = ''
-  await cheerpjRunMain(mainClass, CLASS_PATH)
+  await cheerpjRunMain(mainClass, CLASS_PATH, ...programArgs)
   // Console writes land asynchronously; give the DOM a beat to settle.
   await new Promise((resolve) => setTimeout(resolve, 150))
   const output = out.textContent ?? ''
@@ -179,10 +181,11 @@ async function compileAndRun(code: string): Promise<RunOutcome> {
 // code blocks are queued rather than racing each other's console capture.
 let runQueue: Promise<unknown> = Promise.resolve()
 
-export function runJava(code: string): Promise<RunOutcome> {
+export function runJava(code: string, programArgs: string[] = []): Promise<RunOutcome> {
+  const args = [...programArgs]
   const run = async (): Promise<RunOutcome> => {
     await loadCheerpjOnce()
-    return compileAndRun(code)
+    return compileAndRun(code, args)
   }
 
   const result = runQueue.then(run, run)

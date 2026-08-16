@@ -5,13 +5,14 @@ import type { Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import {
   blocksPreset,
-  firstJavaSnippet,
+  firstJavaPlayground,
   getLesson,
   hasMaze,
   mazeSolver,
   lessonNumber,
   nextLesson,
   stripBlocksFence,
+  stripFirstJavaFence,
 } from '@/lib/lessons'
 import { JavaRunner } from '@/components/JavaRunner'
 import { CodeBlock } from '@/components/CodeBlock'
@@ -93,8 +94,11 @@ export function LessonView() {
   const maze = hasMaze(currentPage.markdown)
   const prose =
     preset || maze ? stripBlocksFence(currentPage.markdown) : currentPage.markdown
-  const javaSnippet = firstJavaSnippet(currentPage.markdown)
-  const hasPlayground = preset != null || maze || javaSnippet != null
+  const javaPlayground = firstJavaPlayground(currentPage.markdown)
+  const hasPlayground = preset != null || maze || javaPlayground != null
+  const isChallengeLesson = lesson.layout === 'challenge'
+  const isChallengePage = isChallengeLesson && javaPlayground != null
+  const renderedProse = isChallengePage ? stripFirstJavaFence(prose) : prose
 
   const goTo = (index: number) => navigate(`/lesson/${lesson.slug}/${index + 1}`)
 
@@ -103,52 +107,89 @@ export function LessonView() {
 
   return (
     <div className="mx-auto w-full max-w-[1240px] px-5 pt-8 pb-20">
-      <div className="mb-6">
+      <div className={isChallengeLesson ? 'mb-8' : 'mb-6'}>
         <Link className="mb-5 inline-block text-sm text-primary no-underline hover:underline" to="/">
           ← All lessons
         </Link>
-        <p className="rounded-lg bg-primary/10 px-4 py-3 text-[15px] text-foreground">
-          <strong>Goal:</strong> {lesson.goal}
-        </p>
-      </div>
-      <div className={`flex flex-col items-start gap-8 ${hasPlayground ? 'lg:flex-row' : ''}`}>
-        <article key={`${lesson.slug}-${pageIndex}`} className={`min-w-0 flex-1 ${PROSE_CLASSES}`}>
-          <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-            {prose}
-          </ReactMarkdown>
-        </article>
-        {hasPlayground && (
-          <div className="w-full min-w-0 flex-1 lg:sticky lg:top-20 lg:min-w-[320px]">
-            {maze ? (
-              <>
-                <h2 className="mb-3 text-base font-semibold text-primary">▶ Maze</h2>
-                <MazePlayground
-                  key={`${lesson.slug}-${pageIndex}`}
-                  solver={mazeSolver(currentPage.markdown)}
-                />
-              </>
-            ) : preset && isStatePreset(preset) ? (
-              <>
-                <h2 className="mb-3 text-base font-semibold text-primary">▶ State machine</h2>
-                <StatePlayground key={`${lesson.slug}-${pageIndex}-${preset}`} preset={preset} />
-              </>
-            ) : preset ? (
-              <>
-                <h2 className="mb-3 text-base font-semibold text-primary">▶ Block editor</h2>
-                <BlockPlayground key={`${lesson.slug}-${pageIndex}-${preset}`} preset={preset} />
-              </>
-            ) : (
-              <>
-                <JavaRunner
-                  key={`${lesson.slug}-${pageIndex}`}
-                  initialCode={javaSnippet as string}
-                  storageKey={`frc2713-playground:${lesson.slug}:${pageIndex + 1}`}
-                />
-              </>
-            )}
+        {isChallengeLesson ? (
+          <div>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+              Skills challenge
+            </p>
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+              {lesson.title}
+            </h1>
+            <p className="mt-3 max-w-3xl text-base text-muted-foreground sm:text-lg">
+              {lesson.goal}
+            </p>
           </div>
+        ) : (
+          <p className="rounded-lg bg-primary/10 px-4 py-3 text-[15px] text-foreground">
+            <strong>Goal:</strong> {lesson.goal}
+          </p>
         )}
       </div>
+      {isChallengePage ? (
+        <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
+          <div className="min-w-0 lg:sticky lg:top-20">
+            <JavaRunner
+              key={`${lesson.slug}-${pageIndex}`}
+              initialCode={javaPlayground.code}
+              initialInput={javaPlayground.initialInput}
+              storageKey={`frc2713-playground:${lesson.slug}:${pageIndex + 1}`}
+              variant="challenge"
+            />
+          </div>
+          <article
+            key={`${lesson.slug}-${pageIndex}`}
+            className={`min-w-0 rounded-xl border bg-card p-5 shadow-sm sm:p-6 ${PROSE_CLASSES}`}
+          >
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+              {renderedProse}
+            </ReactMarkdown>
+          </article>
+        </div>
+      ) : (
+        <div className={`flex flex-col items-start gap-8 ${hasPlayground ? 'lg:flex-row' : ''}`}>
+          <article key={`${lesson.slug}-${pageIndex}`} className={`min-w-0 flex-1 ${PROSE_CLASSES}`}>
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+              {renderedProse}
+            </ReactMarkdown>
+          </article>
+          {hasPlayground && (
+            <div className="w-full min-w-0 flex-1 lg:sticky lg:top-20 lg:min-w-[320px]">
+              {maze ? (
+                <>
+                  <h2 className="mb-3 text-base font-semibold text-primary">▶ Maze</h2>
+                  <MazePlayground
+                    key={`${lesson.slug}-${pageIndex}`}
+                    solver={mazeSolver(currentPage.markdown)}
+                  />
+                </>
+              ) : preset && isStatePreset(preset) ? (
+                <>
+                  <h2 className="mb-3 text-base font-semibold text-primary">▶ State machine</h2>
+                  <StatePlayground key={`${lesson.slug}-${pageIndex}-${preset}`} preset={preset} />
+                </>
+              ) : preset ? (
+                <>
+                  <h2 className="mb-3 text-base font-semibold text-primary">▶ Block editor</h2>
+                  <BlockPlayground key={`${lesson.slug}-${pageIndex}-${preset}`} preset={preset} />
+                </>
+              ) : (
+                <>
+                  <JavaRunner
+                    key={`${lesson.slug}-${pageIndex}`}
+                    initialCode={javaPlayground?.code ?? ''}
+                    initialInput={javaPlayground?.initialInput}
+                    storageKey={`frc2713-playground:${lesson.slug}:${pageIndex + 1}`}
+                  />
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      )}
       <PageNav
         index={pageIndex}
         total={pageCount}

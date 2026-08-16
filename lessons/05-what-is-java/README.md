@@ -2,7 +2,7 @@
 title: "What is Java?"
 goal: "Recognize Java's basic punctuation and program shape before writing or running any code."
 order: 50
-section: "Java Fundamentals"
+section: "Java Fundamentals: Part 1"
 ---
 
 # A language, not a magic spell

@@ -2,7 +2,7 @@
 title: "true, false, and combining conditions"
 goal: "Treat yes/no answers as real values and combine them with &&, ||, and ! to make safe decisions."
 order: 160
-section: "Java Fundamentals"
+section: "Java Fundamentals: Part 2"
 ---
 
 # Yes and no are values too

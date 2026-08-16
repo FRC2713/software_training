@@ -2,7 +2,7 @@
 title: "Naming things"
 goal: "Store a value under a typed name so you can reuse it and change it in one place."
 order: 70
-section: "Java Fundamentals"
+section: "Java Fundamentals: Part 1"
 ---
 
 # A name for a value

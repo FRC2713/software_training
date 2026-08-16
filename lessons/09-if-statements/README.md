@@ -2,7 +2,7 @@
 title: "Decisions in code"
 goal: "Use if, else if, and else to make a program choose between paths."
 order: 90
-section: "Java Fundamentals"
+section: "Java Fundamentals: Part 2"
 ---
 
 # The decision diamond, in text

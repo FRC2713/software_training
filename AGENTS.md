@@ -36,12 +36,17 @@ folder until it's restarted.
   See `lessons/README.md` for the full authoring convention before adding or
   editing a lesson. Key rules baked into the site's parsing logic:
   - Frontmatter (`title`, `goal`, `order`) is required and drives sorting/display.
+    `layout: "challenge"` opts a skills check into the code-first challenge UI;
+    its runnable Java fence becomes the dominant editor and is removed from the
+    supporting prose.
   - Every top-level `# heading` starts a new page in the site — anything
     smaller (`##`, `###`) stays within the current page. This is not a
     markdown convention, it's what `splitIntoPages` in `site/src/lib/lessons.ts`
     literally parses on.
   - ` ```java ` fences are live/runnable, not decoration — only the first one
-    per page becomes "the" runnable snippet (`firstJavaSnippet`). Use
+    per page becomes "the" runnable snippet (`firstJavaPlayground`). An optional
+    `input="..."` info attribute enables the runner's Program input field and
+    supplies `args[0]`. Use
     ` ```text ` for output samples or pseudocode that shouldn't be executable.
     Snippets without a `class`/`enum`/`interface` declaration are auto-wrapped
     in a `Main`-class shell (with `import java.util.*;`) by the runtime;
@@ -56,13 +61,15 @@ folder until it's restarted.
     render the state-machine playground (`StatePlayground`) instead — same
     fence, different renderer, chosen by `isStatePreset`.
     Lessons 1–4 are the pre-Java block series (arithmetic → conditionals →
-    loops → functions); Java starts at lesson 5; the "Objects" section
-    (classes, multiple objects, encapsulation) runs 17–19; state machines
-    run 20–25 (ending in Capstone 1, lesson 25, where students design their
-    own mechanism); the "Advanced Java" section (switch/ternary, enums with
+    loops → functions); Java starts at lesson 5; Java Fundamentals is split
+    into Part 1 (ending in the Making change skills check) and Part 2 (starting
+    with Decisions in code); the "Objects" section (classes, multiple objects,
+    encapsulation) runs 19–21; the Algorithms section runs 22–25; state
+    machines run 26–31 (ending in Capstone 1, lesson 31, where students design
+    their own mechanism); the "Advanced Java" section (switch/ternary, enums with
     fields, interfaces → the AdvantageKit IO pattern, access modifiers,
     lambdas, the builder pattern → PhoenixLib-style fluent config, and
-    Capstone 2 — upgrading that same Capstone 1 mechanism) runs 26–34.
+    Capstone 2 — upgrading that same Capstone 1 mechanism) runs 32–40.
   - `lessons/parked/` holds withdrawn drafts. The site's glob only matches
     `lessons/*/README.md`, so anything nested a level deeper never renders.
 - `site/` — the React + TypeScript + Vite app. See `site/README.md` for the
@@ -85,6 +92,9 @@ folder until it's restarted.
   `site/public/`) and runs the resulting class — all inside the in-browser JVM.
   Bare-statement snippets are auto-wrapped in a `Main` shell (`prepareSource`),
   and compile diagnostics are rewritten to the student's own line numbers.
+  Java fences with `input="..."` metadata render an input field whose value is
+  forwarded as the first program argument; wrapped lessons read it from
+  `args[0]`.
   Runtime stack traces have no line numbers under CheerpJ (`Unknown Source`)
   and the JVM exits 0 even on uncaught exceptions, so run failures are detected
   by scanning output for `Exception in thread `/`Error: `. Concurrent runs are
@@ -134,7 +144,7 @@ folder until it's restarted.
     number fields), not wired in — the loop's internal logic lives inside the
     block, matching the mentor-facing metaphor of "a block with its own logic
     that repeats N times and outputs a number."
-  - **Lesson 28** (interfaces) and **lesson 32** (builder pattern) add five
+  - **Interfaces as diagrams** and **Builder pattern as diagrams** add five
     more node types on top of the original eight: `contract`/`impl`/`declare`
     and `configStart`/`withStep`. A `contract` is a legend card with a source
     handle; an `impl` (tagged SIM/REAL) only reveals its `getSpeed` field once
@@ -153,8 +163,8 @@ folder until it's restarted.
     any exhaustive switch over `Value` need both — check when touching the
     evaluator.
 - **State-machine playground** (`site/src/components/StatePlayground.tsx` +
-  `site/src/lib/statePresets.ts`): a sibling to the block editor for the state
-  machine lessons (14+). Instead of evaluating a dataflow graph, the student
+  `site/src/lib/statePresets.ts`): a sibling to the block editor for the State
+  Machines section. Instead of evaluating a dataflow graph, the student
   *drives* the machine: it sits in one active state and follows an
   event-labelled transition when the matching event button is pressed;
   unmatched events are reported as ignored. Presets come in the same

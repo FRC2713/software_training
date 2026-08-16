@@ -314,7 +314,7 @@
   text-align: center;
 }
 
-/* ---- Interface contract + implementations + declare (lesson 28) ---------- */
+/* ---- Interface contract + implementations + declare ---------------------- */
 
 .blk-contract {
   border-style: dashed;
@@ -368,7 +368,7 @@
   color: #e5484d;
 }
 
-/* ---- Builder chain: configStart + withStep (lesson 32) -------------------- */
+/* ---- Builder chain: configStart + withStep -------------------------------- */
 
 .blk-config-start {
   border-style: dashed;

@@ -14,7 +14,7 @@ it's the exact content the [training site](../site) renders, page by page.
    title: "Lesson 2: Variables"
    goal: "Explain what a variable is and why programs need them."
    order: 2
-   section: "Java Fundamentals"
+   section: "Java Fundamentals: Part 1"
    ---
 
    # A heading starts a new page
@@ -40,6 +40,11 @@ it's the exact content the [training site](../site) renders, page by page.
   sharing a `section` value are grouped together (under that heading) in the
   index and sidebar, with sections ordered by their first lesson; lessons
   without one fall under a default "Lessons" group.
+- **Skills checks can use `layout: "challenge"`** in frontmatter. On a page with
+  a Java fence, this makes the editable solution the large primary panel and
+  moves the remaining Markdown into a compact challenge brief. The runnable
+  fence is omitted from that brief so the student's editable copy is not
+  duplicated.
 - **Every top-level `#` heading starts a new page.** Don't use `#` for anything
   except a page break — use `##` and smaller for in-page structure.
 - **` ```java ` code fences are live**, not decoration. Students can edit and
@@ -53,8 +58,14 @@ it's the exact content the [training site](../site) renders, page by page.
   so early lessons can run `System.out.println("hi");` directly (and use
   `ArrayList`/`HashMap` before imports are taught). A snippet that declares its
   own class or enum runs **as written** — the class containing `main` is the
-  one executed. Lessons 6–10 rely on wrap mode; lesson 11 reveals the shell and
-  everything from there uses full files.
+  one executed. The lessons from "Hello, World!" through "Loops in code" rely
+  on wrap mode; "Writing your own methods" reveals the shell and everything
+  from there uses full files.
+- **A Java fence can opt into program input** with an `input="..."` attribute,
+  for example ` ```java input="53" `. The value seeds a "Program input" field
+  in the runner and is passed to Java as the first main-method argument, so a
+  wrapped snippet can read it with `Integer.parseInt(args[0])`. Plain
+  ` ```java ` fences keep the input-free runner.
 - **` ```blocks ` fences swap the Java playground for the visual block
   editor** (drag-and-drop flowcharts). The fence body is a directive, not
   content — it names a starter graph, e.g. `preset: sequence`, and never renders
@@ -72,8 +83,8 @@ it's the exact content the [training site](../site) renders, page by page.
   [`site/src/lib/statePresets.ts`](../site/src/lib/statePresets.ts) are routed to
   `StatePlayground` (a drivable state diagram with event buttons) rather than the
   dataflow block editor. They follow the same demo → edit → build arc:
-  `sm-demo` (traffic light, lesson 20), `sm-edit` (game-piece handler), and
-  `sm-build` (wire up a climber yourself).
+  `sm-demo` (traffic light), `sm-edit` (game-piece handler), and `sm-build`
+  (wire up a climber yourself).
 - Keep the `goal` to one sentence. It's shown on the lesson card and at the top
   of the lesson — it should tell a student what they'll be able to do
   afterwards, not just what topic it covers.

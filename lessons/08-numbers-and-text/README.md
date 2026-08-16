@@ -2,7 +2,7 @@
 title: "Types — numbers and text"
 goal: "Tell the basic kinds of data apart, and convert between them."
 order: 80
-section: "Java Fundamentals"
+section: "Java Fundamentals: Part 1"
 ---
 
 # Numbers are not text

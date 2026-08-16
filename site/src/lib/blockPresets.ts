@@ -101,7 +101,7 @@ const result = (id: string, x: number, y: number): Node => ({
   data: { active: false, shown: null },
 })
 
-// ---- Lesson 28: interfaces --------------------------------------------------
+// ---- Interfaces as diagrams ------------------------------------------------
 
 // The contract: a name and one method signature. Wires out to any number of
 // `impl` blocks — that connection is what grants each one its method.
@@ -132,7 +132,7 @@ const declareObject = (id: string, x: number, y: number): Node => ({
   data: { active: false, shown: null },
 })
 
-// ---- Lesson 32: builder pattern ---------------------------------------------
+// ---- Builder pattern as diagrams --------------------------------------------
 
 // `new Config()` — the start of a fluent chain. Always an empty config.
 const configStart = (id: string, x: number, y: number): Node => ({
@@ -404,7 +404,7 @@ const fnBuild: BlockPreset = {
   edges: [],
 }
 
-// ---- Lesson 28: interfaces ---------------------------------------------------
+// ---- Interfaces as diagrams -------------------------------------------------
 
 // MotorIO: one method, two implementations, and a swap that decides which one
 // answers — the whole "same call, different behavior" idea, before any Java.
@@ -461,7 +461,7 @@ const ifaceBuild: BlockPreset = {
   edges: [],
 }
 
-// ---- Lesson 32: builder pattern ----------------------------------------------
+// ---- Builder pattern as diagrams --------------------------------------------
 
 // new Config().withMaxSpeed(80).withCurrentLimit(40) — each step merges one
 // field into the config flowing through it.
