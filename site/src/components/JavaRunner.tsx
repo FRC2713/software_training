@@ -10,22 +10,26 @@ import { cn } from '@/lib/utils'
 
 export function JavaRunner({
   initialCode,
-  initialInput,
+  initialInputs = [],
   storageKey,
   variant = 'default',
 }: {
   initialCode: string
-  initialInput?: string
+  initialInputs?: Array<{ label: string; value: string }>
   storageKey: string
   variant?: 'default' | 'challenge'
 }) {
   const originalCode = initialCode.trimEnd()
-  const inputStorageKey = `${storageKey}:input`
-  const hasProgramInput = initialInput !== undefined
+  const inputStorageKey = (index: number) =>
+    index === 0 ? `${storageKey}:input` : `${storageKey}:input:${index}`
+  const hasProgramInput = initialInputs.length > 0
   const isChallenge = variant === 'challenge'
   const [code, setCode] = useState(() => localStorage.getItem(storageKey) ?? originalCode)
-  const [programInput, setProgramInput] = useState(
-    () => localStorage.getItem(inputStorageKey) ?? initialInput ?? '',
+  const [programInputs, setProgramInputs] = useState(
+    () =>
+      initialInputs.map(
+        (input, index) => localStorage.getItem(inputStorageKey(index)) ?? input.value,
+      ),
   )
   const [output, setOutput] = useState<string | null>(null)
   const [ok, setOk] = useState(true)
@@ -38,7 +42,7 @@ export function JavaRunner({
     const label = getJavaRuntimeStatus() === 'ready' ? 'Running…' : 'Loading Java…'
     setRunning(true)
     setOutput(label)
-    const result = await runJava(code, hasProgramInput ? [programInput] : [])
+    const result = await runJava(code, programInputs)
     setOk(result.ok)
     setOutput(result.output || '(no output)')
     setRunning(false)
@@ -49,17 +53,17 @@ export function JavaRunner({
     localStorage.setItem(storageKey, value)
   }
 
-  const handleInputChange = (value: string) => {
-    setProgramInput(value)
-    localStorage.setItem(inputStorageKey, value)
+  const handleInputChange = (index: number, value: string) => {
+    setProgramInputs((current) => current.map((input, i) => (i === index ? value : input)))
+    localStorage.setItem(inputStorageKey(index), value)
   }
 
   const handleReset = () => {
     setCode(originalCode)
-    setProgramInput(initialInput ?? '')
+    setProgramInputs(initialInputs.map((input) => input.value))
     setOutput(null)
     localStorage.removeItem(storageKey)
-    localStorage.removeItem(inputStorageKey)
+    initialInputs.forEach((_, index) => localStorage.removeItem(inputStorageKey(index)))
   }
 
   return (
@@ -97,16 +101,23 @@ export function JavaRunner({
         />
         <div className="flex flex-wrap items-end justify-end gap-3 border-t px-2.5 py-2">
           {hasProgramInput && (
-            <label className="mr-auto flex min-w-48 flex-col gap-1 text-xs font-medium text-muted-foreground">
-              Program input
-              <Input
-                type="text"
-                value={programInput}
-                onChange={(event) => handleInputChange(event.target.value)}
-                disabled={running}
-                className="h-8 bg-background text-foreground"
-              />
-            </label>
+            <div className="mr-auto flex min-w-48 flex-1 flex-wrap gap-2">
+              {initialInputs.map((input, index) => (
+                <label
+                  key={`${input.label}-${index}`}
+                  className="flex min-w-36 flex-1 flex-col gap-1 text-xs font-medium text-muted-foreground"
+                >
+                  {input.label}
+                  <Input
+                    type="text"
+                    value={programInputs[index] ?? ''}
+                    onChange={(event) => handleInputChange(index, event.target.value)}
+                    disabled={running}
+                    className="h-8 bg-background text-foreground"
+                  />
+                </label>
+              ))}
+            </div>
           )}
           <Button
             type="button"
@@ -119,7 +130,7 @@ export function JavaRunner({
                 'border-primary/40 bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary',
             )}
           >
-            {running ? 'Running…' : '▶ Run'}
+            {running ? 'Running…' : isChallenge ? '▶ Test solution' : '▶ Run'}
           </Button>
         </div>
         {output !== null && (

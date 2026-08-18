@@ -114,13 +114,16 @@ export function LessonView() {
         {isChallengeLesson ? (
           <div>
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-              Skills challenge
+              Hands-on challenge
             </p>
             <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
               {lesson.title}
             </h1>
             <p className="mt-3 max-w-3xl text-base text-muted-foreground sm:text-lg">
               {lesson.goal}
+            </p>
+            <p className="mt-2 text-sm font-medium text-primary/90">
+              Start small. Run often. Make one solution pass every test.
             </p>
           </div>
         ) : (
@@ -135,7 +138,7 @@ export function LessonView() {
             <JavaRunner
               key={`${lesson.slug}-${pageIndex}`}
               initialCode={javaPlayground.code}
-              initialInput={javaPlayground.initialInput}
+              initialInputs={javaPlayground.inputs}
               storageKey={`frc2713-playground:${lesson.slug}:${pageIndex + 1}`}
               variant="challenge"
             />
@@ -181,7 +184,7 @@ export function LessonView() {
                   <JavaRunner
                     key={`${lesson.slug}-${pageIndex}`}
                     initialCode={javaPlayground?.code ?? ''}
-                    initialInput={javaPlayground?.initialInput}
+                    initialInputs={javaPlayground?.inputs}
                     storageKey={`frc2713-playground:${lesson.slug}:${pageIndex + 1}`}
                   />
                 </>

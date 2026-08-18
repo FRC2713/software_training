@@ -40,7 +40,7 @@ it's the exact content the [training site](../site) renders, page by page.
   sharing a `section` value are grouped together (under that heading) in the
   index and sidebar, with sections ordered by their first lesson; lessons
   without one fall under a default "Lessons" group.
-- **Skills checks can use `layout: "challenge"`** in frontmatter. On a page with
+- **Challenges can use `layout: "challenge"`** in frontmatter. On a page with
   a Java fence, this makes the editable solution the large primary panel and
   moves the remaining Markdown into a compact challenge brief. The runnable
   fence is omitted from that brief so the student's editable copy is not
@@ -62,10 +62,10 @@ it's the exact content the [training site](../site) renders, page by page.
   on wrap mode; "Writing your own methods" reveals the shell and everything
   from there uses full files.
 - **A Java fence can opt into program input** with an `input="..."` attribute,
-  for example ` ```java input="53" `. The value seeds a "Program input" field
-  in the runner and is passed to Java as the first main-method argument, so a
-  wrapped snippet can read it with `Integer.parseInt(args[0])`. Plain
-  ` ```java ` fences keep the input-free runner.
+  for example ` ```java input="53" `. Named attributes such as
+  `input-message="Hello" input-shift="2"` create multiple labelled fields.
+  Values are passed to Java as `args[0]`, `args[1]`, and so on in attribute
+  order. Plain ` ```java ` fences keep the input-free runner.
 - **` ```blocks ` fences swap the Java playground for the visual block
   editor** (drag-and-drop flowcharts). The fence body is a directive, not
   content — it names a starter graph, e.g. `preset: sequence`, and never renders

@@ -36,7 +36,7 @@ folder until it's restarted.
   See `lessons/README.md` for the full authoring convention before adding or
   editing a lesson. Key rules baked into the site's parsing logic:
   - Frontmatter (`title`, `goal`, `order`) is required and drives sorting/display.
-    `layout: "challenge"` opts a skills check into the code-first challenge UI;
+    `layout: "challenge"` opts a challenge into the code-first challenge UI;
     its runnable Java fence becomes the dominant editor and is removed from the
     supporting prose.
   - Every top-level `# heading` starts a new page in the site — anything
@@ -44,9 +44,9 @@ folder until it's restarted.
     markdown convention, it's what `splitIntoPages` in `site/src/lib/lessons.ts`
     literally parses on.
   - ` ```java ` fences are live/runnable, not decoration — only the first one
-    per page becomes "the" runnable snippet (`firstJavaPlayground`). An optional
-    `input="..."` info attribute enables the runner's Program input field and
-    supplies `args[0]`. Use
+    per page becomes "the" runnable snippet (`firstJavaPlayground`). Optional
+    `input="..."` or named `input-<label>="..."` info attributes enable one or
+    more runner input fields and supply `args` in attribute order. Use
     ` ```text ` for output samples or pseudocode that shouldn't be executable.
     Snippets without a `class`/`enum`/`interface` declaration are auto-wrapped
     in a `Main`-class shell (with `import java.util.*;`) by the runtime;
@@ -62,14 +62,17 @@ folder until it's restarted.
     fence, different renderer, chosen by `isStatePreset`.
     Lessons 1–4 are the pre-Java block series (arithmetic → conditionals →
     loops → functions); Java starts at lesson 5; Java Fundamentals is split
-    into Part 1 (ending in the Making change skills check) and Part 2 (starting
-    with Decisions in code); the "Objects" section (classes, multiple objects,
-    encapsulation) runs 19–21; the Algorithms section runs 22–25; state
-    machines run 26–31 (ending in Capstone 1, lesson 31, where students design
+    into Part 1 (ending in the Making Change challenge) and Part 2 (starting
+    with Decisions in code and ending in the Custom Coin Changer challenge);
+    the Data Structures section begins with Arrays and follows it immediately
+    with the array-based Shift Cipher challenge; the "Objects" section
+    (classes, multiple objects, encapsulation) runs 21–23; the Algorithms
+    section runs 24–27; state machines run 28–33 (ending in Capstone 1, lesson
+    33, where students design
     their own mechanism); the "Advanced Java" section (switch/ternary, enums with
     fields, interfaces → the AdvantageKit IO pattern, access modifiers,
     lambdas, the builder pattern → PhoenixLib-style fluent config, and
-    Capstone 2 — upgrading that same Capstone 1 mechanism) runs 32–40.
+    Capstone 2 — upgrading that same Capstone 1 mechanism) runs 34–42.
   - `lessons/parked/` holds withdrawn drafts. The site's glob only matches
     `lessons/*/README.md`, so anything nested a level deeper never renders.
 - `site/` — the React + TypeScript + Vite app. See `site/README.md` for the
@@ -92,9 +95,9 @@ folder until it's restarted.
   `site/public/`) and runs the resulting class — all inside the in-browser JVM.
   Bare-statement snippets are auto-wrapped in a `Main` shell (`prepareSource`),
   and compile diagnostics are rewritten to the student's own line numbers.
-  Java fences with `input="..."` metadata render an input field whose value is
-  forwarded as the first program argument; wrapped lessons read it from
-  `args[0]`.
+  Java fences with input metadata render one or more labelled fields whose
+  values are forwarded as program arguments; wrapped lessons read them from
+  `args[0]`, `args[1]`, and so on.
   Runtime stack traces have no line numbers under CheerpJ (`Unknown Source`)
   and the JVM exits 0 even on uncaught exceptions, so run failures are detected
   by scanning output for `Exception in thread `/`Error: `. Concurrent runs are

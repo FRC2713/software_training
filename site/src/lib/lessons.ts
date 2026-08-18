@@ -126,24 +126,38 @@ export function nextLesson(slug: string): Lesson | undefined {
 export interface JavaPlaygroundSpec {
   code: string
   initialInput?: string
+  inputs: Array<{ label: string; value: string }>
 }
 
 // Drives the playground panel: a page's first ```java fence is what gets
 // loaded into it. Pages can still show other code samples in their prose;
-// only this one is treated as "the" runnable snippet for the page. An optional
-// input="..." attribute opts the page into the runner's program-input field.
+// only this one is treated as "the" runnable snippet for the page. Optional
+// input="..." and input-<label>="..." attributes add program-argument fields.
 const JAVA_FENCE = /```java(?:[ \t]+([^\r\n]*))?\r?\n([\s\S]*?)```/
+
+function inputLabel(name: string | undefined): string {
+  if (!name) return 'Program input'
+  return name
+    .split('-')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ')
+}
 
 export function firstJavaPlayground(markdown: string): JavaPlaygroundSpec | null {
   const match = JAVA_FENCE.exec(markdown)
   if (!match) return null
 
   const metadata = match[1] ?? ''
-  const input = /\binput=(?:"([^"]*)"|'([^']*)'|(\S+))/.exec(metadata)
-  const initialInput = input ? (input[1] ?? input[2] ?? input[3]) : undefined
+  const inputPattern = /\binput(?:-([a-zA-Z][\w-]*))?=(?:"([^"]*)"|'([^']*)'|(\S+))/g
+  const inputs = [...metadata.matchAll(inputPattern)].map((input) => ({
+    label: inputLabel(input[1]),
+    value: input[2] ?? input[3] ?? input[4],
+  }))
+  const initialInput = inputs[0]?.value
 
   return {
     code: match[2].trimEnd(),
+    inputs,
     ...(initialInput !== undefined ? { initialInput } : {}),
   }
 }

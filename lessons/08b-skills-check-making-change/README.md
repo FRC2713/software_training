@@ -1,5 +1,5 @@
 ---
-title: "Skills Check: Making Change"
+title: "Challenge: Making Change"
 goal: "Apply variables, integer math, and printed output to make the fewest U.S. coins for an amount in cents."
 order: 88
 section: "Java Fundamentals: Part 1"
@@ -91,13 +91,9 @@ one penny.
 Print one more line containing the total number of coins. You already have the
 four counts, so no new kind of math is required.
 
-## A bigger bonus for later
+## Save one question for later
 
-What if the user could supply any list of coin denominations? Choosing the
-largest coin first would no longer always give the fewest coins. With coins
-worth `4`, `3`, and `1`, making `6` largest-first gives `4 + 1 + 1`, but the
-better answer is `3 + 3`.
-
-Solving that version for every possible list needs decisions, loops, arrays,
-and a more advanced algorithm. After you learn those tools, this is a good
-challenge to return to.
+What if the user could supply any number of coin denominations instead of the
+four names built into this program? Keep that question in mind. At the end of
+Part 2, you will return to this machine with loops, arrays, and decisions—and
+discover why some sets of coins need a more advanced strategy.
