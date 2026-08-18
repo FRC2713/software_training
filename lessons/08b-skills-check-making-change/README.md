@@ -95,5 +95,5 @@ four counts, so no new kind of math is required.
 
 What if the user could supply any number of coin denominations instead of the
 four names built into this program? Keep that question in mind. At the end of
-Part 2, you will return to this machine with loops, arrays, and decisions—and
-discover why some sets of coins need a more advanced strategy.
+Part 2, you will return to this machine with loops and arrays so the same
+program can work with a list of any length.
