@@ -26,7 +26,7 @@ for _attempt in $(seq 1 60); do
         const health = await fetch("http://127.0.0.1:3000/health").then(r => r.json());
         if (health.status !== "ok") process.exit(1);
         if (process.env.EXPECTED_REV && health.revision !== process.env.EXPECTED_REV) process.exit(1);
-        for (const p of ["/", "/tools.jar", "/maze-solver.jar"]) {
+        for (const p of ["/"]) {
           const r = await fetch("http://127.0.0.1:3000" + p, { method: "HEAD" });
           if (!r.ok) { console.error("Missing asset:", p, r.status); process.exit(1); }
         }

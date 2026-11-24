@@ -1,21 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import CodeMirror, { EditorView } from '@uiw/react-codemirror'
-import { java } from '@codemirror/lang-java'
 import { python } from '@codemirror/lang-python'
 import { oneDark } from '@codemirror/theme-one-dark'
-import { getJavaRuntimeStatus, runJava } from '@/lib/javaRuntime'
 import { runPythonMaze } from '@/lib/pythonRuntime'
 import type { SolverMode as LessonSolverMode } from '@/lib/lessons'
 import { editorTheme, usePrefersDark } from '@/lib/editorTheme'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import {
-  buildMazeHarness,
-  mazeGridLiteral,
-  parseTrail,
-  retargetErrorLines,
-  studentLineOffset,
-} from '@/lib/mazeHarness'
 
 // NOTE: the `maze-generator` npm package is broken — its internal `shuffle` is
 // written as `for (...; ...; update) return o`, so it returns on the first
@@ -81,23 +72,13 @@ const MOVES: Record<'up' | 'down' | 'left' | 'right', { bit: number; dx: number;
 const cx = (x: number) => PAD + x * CELL + CELL / 2
 const cy = (y: number) => PAD + y * CELL + CELL / 2
 
-// Serialize the maze as a ready-to-paste Java `int[][]` literal, wired into the
-// maze-solver library so it runs without any bitmask arithmetic. Each cell is
-// the same N/S/E/W bitmask the grid uses, but the library reads it for you.
-function serializeToJava(grid: number[][]): string {
-  const rows = mazeGridLiteral(grid)
-  return `import com.frc2713.mazesolver.*;
-
-// The maze as a grid of numbers (each cell an N/S/E/W bitmask). Hand it to a
-// GridMaze and you get a robot on the start cell — no bitmask math needed.
-int[][] grid = {
+// Serialize the maze as a ready-to-paste Python 2D list of bitmasks.
+function serializeToPython(grid: number[][]): string {
+  const rows = grid.map((row) => `    [${row.join(', ')}],`).join('\n')
+  return `# The maze as a grid of numbers (each cell an UP/DOWN/RIGHT/LEFT bitmask).
+grid = [
 ${rows}
-};
-
-Maze maze = new GridMaze(grid);
-Robot robot = maze.robot();
-// Now drive it: robot.readWallSensor(Direction.UP), robot.drive(Direction.RIGHT),
-// robot.facing(), robot.atGoal(), robot.row(), robot.col().`
+]`
 }
 
 // Headings for the wall follower, clockwise: 0=up, 1=right, 2=down, 3=left.
@@ -123,112 +104,6 @@ const SOLVER_LABEL: Record<CannedMode, string> = {
   naive: 'Run the naive rule',
   wall: 'Run wall follower',
 }
-
-// The editor's starting point for `solver: java`: a right-hand wall follower,
-// the same algorithm the maze lessons build up to — written against the
-// library's Robot API, using the facing() the robot remembers for itself.
-const DEFAULT_JAVA_SOLVE = `// Drive the robot from start (green) to goal (red). Your robot can:
-//   robot.readWallSensor(Direction.UP/DOWN/LEFT/RIGHT) — is that side a wall?
-//   robot.drive(Direction.UP/DOWN/LEFT/RIGHT)          — move one cell that way
-//   robot.facing()                                     — the way it last drove
-//   robot.atGoal(), robot.row(), robot.col()
-//
-// This starter is the "keep your right hand on the wall" follower.
-void solve(Robot robot) {
-    int maxSteps = 1000;
-    for (int i = 0; i < maxSteps && !robot.atGoal(); i++) {
-        // Relative to the way we're facing, try right, straight, left, then
-        // back — and drive the first opening. drive() updates facing() for us.
-        Direction ahead = robot.facing();
-        Direction[] order = {
-            ahead.clockwise(), ahead, ahead.counterClockwise(), ahead.opposite()
-        };
-        for (Direction dir : order) {
-            if (!robot.readWallSensor(dir)) {
-                robot.drive(dir);
-                break;
-            }
-        }
-    }
-}`
-
-// The editor's starting point for `solver: astar`. Unlike the reactive wall
-// follower, A* is a *planner*: it gets the whole `Maze` (random access to every
-// cell via maze.cellAt) plus java.util.* imports, computes the shortest path
-// from start (0,0) to the goal (bottom-right), then drives the robot along it.
-const DEFAULT_ASTAR_SOLVE = `// A* finds the SHORTEST path, then drives it. You get the whole map:
-//   maze.rows(), maze.cols()             — the grid size
-//   maze.cellAt(r, c).wall(dir)          — is there a wall on that side of (r,c)?
-//   robot.drive(Direction.UP/DOWN/LEFT/RIGHT) — move the robot one cell
-// Start is (0, 0) top-left; the goal is the bottom-right cell.
-void solve(Maze maze, Robot robot) {
-    int rows = maze.rows(), cols = maze.cols();
-    int goalR = rows - 1, goalC = cols - 1;
-
-    // Cheapest known cost to reach each cell from the start (g), and the cell we
-    // arrived from, so we can rebuild the path once we get to the goal.
-    int[][] g = new int[rows][cols];
-    int[][] cameFrom = new int[rows][cols];
-    for (int[] row : g) Arrays.fill(row, Integer.MAX_VALUE);
-    for (int[] row : cameFrom) Arrays.fill(row, -1);
-    g[0][0] = 0;
-
-    // The frontier: cells still to explore, cheapest estimated total cost first.
-    // Each entry is {row, col, f} where f = g + heuristic. Pack a cell as r*cols+c.
-    PriorityQueue<int[]> frontier = new PriorityQueue<>((a, b) -> a[2] - b[2]);
-    frontier.add(new int[] { 0, 0, heuristic(0, 0, goalR, goalC) });
-
-    while (!frontier.isEmpty()) {
-        int[] cur = frontier.poll();
-        int r = cur[0], c = cur[1];
-        if (r == goalR && c == goalC) break; // reached the goal — done exploring
-
-        Cell cell = maze.cellAt(r, c);
-        for (Direction dir : Direction.values()) {
-            if (cell.wall(dir)) continue; // can't step through a wall
-            int nr = r, nc = c;
-            if (dir == Direction.UP) nr--;
-            else if (dir == Direction.DOWN) nr++;
-            else if (dir == Direction.LEFT) nc--;
-            else nc++;
-
-            int tentative = g[r][c] + 1; // every step costs 1
-            if (tentative < g[nr][nc]) {  // found a cheaper way to this neighbour
-                g[nr][nc] = tentative;
-                cameFrom[nr][nc] = r * cols + c;
-                frontier.add(new int[] { nr, nc, tentative + heuristic(nr, nc, goalR, goalC) });
-            }
-        }
-    }
-
-    // Walk cameFrom backwards from the goal to the start, then reverse it.
-    List<int[]> path = new ArrayList<>();
-    for (int cell = goalR * cols + goalC; cell != -1; ) {
-        int r = cell / cols, c = cell % cols;
-        path.add(new int[] { r, c });
-        cell = cameFrom[r][c];
-    }
-    Collections.reverse(path);
-
-    // Drive the robot cell by cell along the path A* found.
-    for (int i = 1; i < path.size(); i++) {
-        robot.drive(step(path.get(i - 1), path.get(i)));
-    }
-}
-
-// Manhattan distance: cells away if there were no walls. It never over-estimates
-// the real distance, which is exactly what lets A* trust it and stay optimal.
-int heuristic(int r, int c, int goalR, int goalC) {
-    return Math.abs(r - goalR) + Math.abs(c - goalC);
-}
-
-// The direction that steps from one cell to its neighbour.
-Direction step(int[] from, int[] to) {
-    if (to[0] < from[0]) return Direction.UP;
-    if (to[0] > from[0]) return Direction.DOWN;
-    if (to[1] < from[1]) return Direction.LEFT;
-    return Direction.RIGHT;
-}`
 
 const DEFAULT_PYTHON_SOLVE = `# Drive the robot from start (green) to goal (red). Your robot can:
 #   robot.read_wall_sensor(Direction.UP/DOWN/LEFT/RIGHT) — is that side a wall?
@@ -315,32 +190,20 @@ export function MazePlayground({ solver = null }: { solver?: SolverMode | null }
   // `solver: java`/`astar` state — the editable Java solver and its run output.
   // Both modes share the editor; `astar` differs only in its starter code and in
   // the harness it runs through (it's handed the whole Maze, not just a Robot).
-  const isJava = solver === 'java'
-  const isAstar = solver === 'astar'
   const isPython = solver === 'python'
   const isPythonAstar = solver === 'python-astar'
-  const isPythonMode = isPython || isPythonAstar
-  const isEditable = isJava || isAstar || isPythonMode
-  const harnessMode = isAstar || isPythonAstar ? 'astar' : 'wall'
-  const starterCode = isPythonAstar
-    ? DEFAULT_PYTHON_ASTAR_SOLVE
-    : isPython
-      ? DEFAULT_PYTHON_SOLVE
-      : isAstar
-        ? DEFAULT_ASTAR_SOLVE
-        : DEFAULT_JAVA_SOLVE
+  const isEditable = isPython || isPythonAstar
+  const harnessMode = isPythonAstar ? 'astar' : 'wall'
+  const starterCode = isPythonAstar ? DEFAULT_PYTHON_ASTAR_SOLVE : DEFAULT_PYTHON_SOLVE
   const [code, setCode] = useState(starterCode)
-  const [javaOutput, setJavaOutput] = useState<string | null>(null)
-  const [javaOk, setJavaOk] = useState(true)
+  const [solverOutput, setSolverOutput] = useState<string | null>(null)
+  const [solverOk, setSolverOk] = useState(true)
   const dark = usePrefersDark()
-  const editorExtensions = useMemo(
-    () => [isPythonMode ? python() : java(), editorTheme, EditorView.lineWrapping],
-    [isPythonMode],
-  )
+  const editorExtensions = useMemo(() => [python(), editorTheme, EditorView.lineWrapping], [])
 
-  const copyForJava = () => {
-    const java = serializeToJava(grid)
-    navigator.clipboard?.writeText(java).then(
+  const copyForPython = () => {
+    const text = serializeToPython(grid)
+    navigator.clipboard?.writeText(text).then(
       () => {
         setCopied(true)
         setTimeout(() => setCopied(false), 1500)
@@ -457,63 +320,34 @@ export function MazePlayground({ solver = null }: { solver?: SolverMode | null }
     [stopSolver],
   )
 
-  const runJavaSolver = useCallback(async () => {
+  const runCodeSolver = useCallback(async () => {
     stopSolver()
     setStuck(false)
     setRobot(START)
-    setJavaOk(true)
-    if (isPythonMode) {
-      setJavaOutput('Running…')
-      const result = await runPythonMaze(code, grid, harnessMode)
-      if (!result.ok) {
-        setJavaOk(false)
-        setJavaOutput(result.output || '(error)')
-        return
-      }
-      if (!result.trail) {
-        setJavaOk(false)
-        setJavaOutput(
-          'Ran, but produced no Maze Trail. Make sure solve(robot) moves the robot.',
-        )
-        return
-      }
-      setJavaOk(true)
-      setJavaOutput(result.output || null)
-      animateTrail(result.trail)
-      return
-    }
-    setJavaOutput(getJavaRuntimeStatus() === 'ready' ? 'Running…' : 'Loading Java…')
-    const harness = buildMazeHarness(grid, code, harnessMode)
-    const result = await runJava(harness)
+    setSolverOk(true)
+    setSolverOutput('Running…')
+    const result = await runPythonMaze(code, grid, harnessMode)
     if (!result.ok) {
-      const offset = studentLineOffset(grid, harnessMode)
-      setJavaOk(false)
-      setJavaOutput(retargetErrorLines(result.output, offset) || '(error)')
+      setSolverOk(false)
+      setSolverOutput(result.output || '(error)')
       return
     }
-    const trail = parseTrail(result.output)
-    if (!trail) {
-      setJavaOk(false)
-      setJavaOutput(
+    if (!result.trail) {
+      setSolverOk(false)
+      setSolverOutput(
         'Ran, but produced no Maze Trail. Make sure solve(robot) moves the robot.',
       )
       return
     }
-    // Show any debug output the student printed, minus the sentinel line.
-    const debug = result.output
-      .split('\n')
-      .filter((l) => !l.startsWith('__TRAIL__ '))
-      .join('\n')
-      .trim()
-    setJavaOk(true)
-    setJavaOutput(debug || null)
-    animateTrail(trail.cells)
-  }, [grid, code, harnessMode, isPythonMode, stopSolver, animateTrail])
+    setSolverOk(true)
+    setSolverOutput(result.output || null)
+    animateTrail(result.trail)
+  }, [grid, code, harnessMode, stopSolver, animateTrail])
 
   const generate = () => {
     stopSolver()
     setStuck(false)
-    setJavaOutput(null)
+    setSolverOutput(null)
     setGrid(generateMaze(SIZE))
     setRobot(START)
   }
@@ -678,10 +512,10 @@ export function MazePlayground({ solver = null }: { solver?: SolverMode | null }
         {!isEditable && (
           <button
             type="button"
-            onClick={copyForJava}
+            onClick={copyForPython}
             className="rounded-md border border-border px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-primary hover:text-primary-foreground"
           >
-            {copied ? 'Copied!' : 'Copy for Java'}
+            {copied ? 'Copied!' : 'Copy for Python'}
           </button>
         )}
       </div>
@@ -710,7 +544,7 @@ export function MazePlayground({ solver = null }: { solver?: SolverMode | null }
                 variant="outline"
                 onClick={() => {
                   setCode(starterCode)
-                  setJavaOutput(null)
+                  setSolverOutput(null)
                 }}
                 disabled={running}
               >
@@ -720,20 +554,20 @@ export function MazePlayground({ solver = null }: { solver?: SolverMode | null }
                 type="button"
                 size="sm"
                 variant="outline"
-                onClick={running ? stopSolver : runJavaSolver}
+                onClick={running ? stopSolver : runCodeSolver}
                 className="border-primary/40 bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary"
               >
                 {running ? 'Stop' : '▶ Run in the maze'}
               </Button>
             </div>
-            {javaOutput !== null && (
+            {solverOutput !== null && (
               <pre
                 className={cn(
                   'm-0 whitespace-pre-wrap break-words border-t bg-background px-3.5 py-3 font-mono text-sm text-foreground',
-                  !javaOk && 'text-destructive',
+                  !solverOk && 'text-destructive',
                 )}
               >
-                {javaOutput}
+                {solverOutput}
               </pre>
             )}
           </div>

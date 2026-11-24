@@ -142,7 +142,6 @@ export function LessonView() {
                 <JavaRunner
                   key={`${lesson.slug}-${pageIndex}`}
                   initialCode={snippet!.code}
-                  language={snippet!.language}
                   storageKey={`frc2713-playground:${lesson.slug}:${pageIndex + 1}`}
                 />
               </>

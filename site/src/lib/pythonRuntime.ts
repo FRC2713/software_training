@@ -1,4 +1,7 @@
-import type { RunOutcome } from './javaRuntime'
+export interface RunOutcome {
+  ok: boolean
+  output: string
+}
 
 export interface RunnerResponse {
   ok: boolean

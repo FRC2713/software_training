@@ -7,11 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview",
-    "vendor:maze-solver": "bash scripts/vendor-maze-solver.sh"
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@codemirror/lang-java": "^6.0.2",
     "@codemirror/lang-python": "^6.2.1",
     "@codemirror/theme-one-dark": "^6.1.3",
     "@radix-ui/react-dialog": "^1.1.18",

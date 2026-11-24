@@ -1,12 +1,4 @@
 # syntax=docker/dockerfile:1
-FROM maven:3.9-eclipse-temurin-21-alpine AS maze-solver
-ARG MAZE_SOLVER_REPO=https://github.com/FRC2713/maze-solver-java.git
-ARG MAZE_SOLVER_REF=main
-RUN apk add --no-cache git \
-  && git clone --depth 1 --branch "${MAZE_SOLVER_REF}" "${MAZE_SOLVER_REPO}" /maze-solver \
-  && cd /maze-solver \
-  && mvn -B -q -DskipTests package
-
 FROM node:24-bookworm-slim AS builder
 WORKDIR /app/site
 COPY site/package.json site/package-lock.json ./
@@ -14,7 +6,6 @@ RUN npm ci
 WORKDIR /app
 COPY lessons ./lessons
 COPY site ./site
-COPY --from=maze-solver /maze-solver/target/maze-solver.jar ./site/public/maze-solver.jar
 WORKDIR /app/site
 RUN npm run build
 
