@@ -3,9 +3,9 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
-// Project page on GitHub Pages: https://frc2713.github.io/software_training/
+// Hosted via Hawk Suite at https://learn.redhawkrobotics.org/
 export default defineConfig({
-  base: '/software_training/',
+  base: '/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
