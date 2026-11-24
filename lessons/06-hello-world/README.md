@@ -2,72 +2,44 @@
 title: "Hello, World!"
 goal: "Explain what a program actually is, then write and run your first one."
 order: 60
-section: "Java Fundamentals"
+section: "Python Fundamentals"
 ---
 
 # What is a program?
 
-You've already been building programs — as flowcharts of blocks. Everything you
-did there carries over: doing steps in order ([lesson {n}](#/lesson/01-flowcharts)), making decisions
-([lesson {n}](#/lesson/02-conditionals)), repeating steps ([lesson {n}](#/lesson/03-loops)), and packaging steps into reusable pieces
-([lesson {n}](#/lesson/04-functions)). From here on we write those same ideas as **text** instead of wiring
-boxes together. The concepts don't change; only the notation does — and
-[last lesson](#/lesson/05-what-is-java) you already met that notation: braces,
-parentheses, commas, semicolons, quotes.
+You've already been building programs as flowcharts of blocks. Everything you did there carries over: doing steps in order ([lesson {n}](#/lesson/01-flowcharts)), making decisions ([lesson {n}](#/lesson/02-conditionals)), repeating steps ([lesson {n}](#/lesson/03-loops)), and packaging steps into reusable pieces ([lesson {n}](#/lesson/04-functions)). From here on we write those same ideas as **text** instead of wiring boxes together. The concepts don't change, only the notation does, and [last lesson](#/lesson/05-what-is-java) you met that notation: colons, indentation, parentheses, commas, and quotes.
 
-A **program** is just a list of instructions, written in a language a computer
-can follow exactly, step by step, in order.
+A **program** is a list of instructions, written in a language a computer can follow step by step, in order.
 
-That's it. Not magic — a recipe. "Crack two eggs. Whisk them. Pour into a hot
-pan." A computer program is the same idea, except the "kitchen" is the
-computer's memory and screen, and the "chef" is the computer itself, which
-will follow your instructions *exactly* as written, including your mistakes.
+That's it. Not magic, just a recipe: "Crack two eggs. Whisk them. Pour into a hot pan." A computer program is the same idea, except the kitchen is the computer's memory and screen, and the chef is the computer itself, which follows your instructions *exactly* as written, including your mistakes.
 
-The robot framework we use, **WPILib**, is a big library of Java code, so
-everything you learn here is exactly what you'll use to make a real robot
-move.
+Everything you learn here builds the foundation you'll use for FRC robot software, simulations, and team tools.
 
 # Your first program
 
-Here is a complete, one-line Java instruction:
+Here is a complete, one-line Python program:
 
-```java
-System.out.println("Hello, world!");
+```python
+print("Hello, world!")
 ```
 
-`System.out.println` is an instruction that means "show this on the screen."
-The text in quotes is exactly what gets shown — computers don't know that
-`Hello, world!` is a greeting, they just do what they're told with the data
-they're given. The semicolon at the end marks where the instruction stops,
-like a period at the end of a sentence — every Java instruction needs one.
+`print` is a function that means "show this on the screen." The text in quotes is exactly what gets shown. Computers don't know that `Hello, world!` is a greeting; they just do what they're told with the data they're given. Each instruction sits on its own line, with no semicolon needed at the end.
 
 Two things to know about the playground before you press Run:
 
-- The **first Run downloads a real Java compiler** into your browser, so it
-  takes a few extra seconds. After that, runs are quick.
-- Java instructions normally live inside a small "program shell" of wrapper
-  code. The playground writes that shell for you so you can focus on the
-  instructions themselves — you'll learn to write the shell yourself in
-  [lesson {n}](#/lesson/11-writing-methods).
+- The **first Run loads Python** in your browser, so it can take a few extra seconds. After that, runs are quick.
+- A single `print(...)` line is already a complete Python program. Later, in [lesson {n}](#/lesson/11-writing-methods), you'll learn how to package instructions into your own functions.
 
 Press **Run** and watch the output panel below the code.
 
-Now break it on purpose. Try changing the text between the quotes, or deleting
-the semicolon, or removing a parenthesis, and hit Run again each time. Reading
-error messages without panicking is one of the most useful skills in
-programming — you'll see a lot of them, and every one is the computer telling
-you exactly what it didn't understand.
+Now break it on purpose. Try changing the text between the quotes, removing a quote, or deleting a parenthesis, and hit Run again each time. Reading error messages without panicking is one of the most useful skills in programming. You'll see plenty of them, and every one is Python telling you what it didn't understand.
 
 # Your turn
 
-Edit the code below so it prints a greeting with **your own name** in it,
-instead of `world`. Run it to check.
+Edit the code below so it prints a greeting with **your own name** in it, instead of `world`. Run it to check.
 
-```java
-System.out.println("Hello, world!");
+```python
+print("Hello, world!")
 ```
 
-Once that works, try adding a second line that prints something else about
-yourself — your favorite subject, a hobby, anything. Each
-`System.out.println(...)` line runs in order, top to bottom, and produces its
-own line of output.
+Once that works, add a second line that prints something else about yourself, like your favorite subject or a hobby. Each `print(...)` line runs in order, top to bottom, and produces its own line of output.

@@ -1,137 +1,100 @@
 ---
 title: "Interfaces, in code"
-goal: "Write an interface as a contract with no body, implement it two ways, and see one method work unchanged against either implementation."
+goal: "Write a Protocol as a contract with no body, implement it two ways, and see one function work unchanged against either implementation."
 order: 290
-section: "Advanced Java"
+section: "Advanced Python"
 ---
 
 # A contract with no body
 
-[Last lesson](#/lesson/28-interfaces-as-diagrams) you dragged a contract and
-two implementations around by hand. In Java, the contract is an
-**`interface`** — it lists a method's name and return type, but never says
-*how*:
+[Last lesson](#/lesson/28-interfaces-as-diagrams) you dragged a contract and two implementations around by hand. In Python, you write that contract with **`Protocol`** from the `typing` module. It lists a method's name, parameters, and return type, without saying *how* it works:
 
-```java
-interface MotorIO {
-    double getSpeed();
-}
+```python
+from typing import Protocol
 
-public class Main {
-    public static void main(String[] args) {
-    }
-}
+
+class MotorIO(Protocol):
+    def get_speed(self) -> float: ...
 ```
 
-(Nothing to run yet — an interface alone has no behavior. `main` is here
-empty on purpose; the first real output shows up once something
-`implements` it, below.)
+Nothing prints when you run this, because a protocol alone has no behavior. The first real output shows up once a class satisfies it below.
 
-That's it — no `{ }` body on `getSpeed()`, just a signature ending in a
-semicolon, like a method header from [lesson {n}](#/lesson/11-writing-methods)
-with the body torn off. `MotorIO` is a promise: "whatever `implements` me can
-answer `getSpeed()`" — nothing about *how* it answers.
+Notice the `...` (three dots) in place of a method body. Like a function header from [lesson {n}](#/lesson/11-writing-methods) with the body torn off, `MotorIO` is purely a promise: "whatever matches me has a `get_speed()` method that returns a `float`." It says nothing about *how* that speed is measured.
 
 # Two things that keep the promise
 
-A class **implements** an interface with the `implements` keyword, and then
-*must* provide a body for every method the interface listed:
+In Python, a class satisfies a `Protocol` simply by having methods with the right names and types. You don't even need a special `implements` keyword. Here are two classes that both keep `MotorIO`'s promise, `SimMotorIO` and `RealMotorIO`:
 
-```java
-interface MotorIO {
-    double getSpeed();
-}
+```python
+from typing import Protocol
 
-class MotorIOSim implements MotorIO {
-    public double getSpeed() {
-        System.out.println("SIM: getSpeed()");
-        return 0.4;
-    }
-}
 
-class MotorIOReal implements MotorIO {
-    public double getSpeed() {
-        System.out.println("REAL: getSpeed()");
-        return 0.55;
-    }
-}
+class MotorIO(Protocol):
+    def get_speed(self) -> float: ...
 
-public class Main {
-    public static void main(String[] args) {
-        MotorIO io = new MotorIOSim();
-        System.out.println(io.getSpeed());
-    }
-}
+
+class SimMotorIO:
+    def get_speed(self) -> float:
+        print("SIM: get_speed()")
+        return 0.4
+
+
+class RealMotorIO:
+    def get_speed(self) -> float:
+        print("REAL: get_speed()")
+        return 0.55
+
+
+io: MotorIO = SimMotorIO()
+print(io.get_speed())
 ```
 
-Run it — you'll see `SIM: getSpeed()` printed by the method itself, then
-`0.4` printed by `main`. Now change `new MotorIOSim()` to `new MotorIOReal()`
-and run again: same variable type, same `io.getSpeed()` call, completely
-different implementation running underneath. `MotorIO io = ...` is the key
-line — `io`'s **type** is the interface, so anything implementing `MotorIO`
-can be stored in it and called through it, exactly the declare block from
-last lesson.
+Run it. You'll see `SIM: get_speed()` printed by the method itself, then `0.4` printed below it. Now change `SimMotorIO()` to `RealMotorIO()` and run again: same type annotation, same `io.get_speed()` call, completely different implementation running underneath.
+
+`io: MotorIO = ...` is the key line. It declares that `io` must satisfy `MotorIO`, so anything with a matching `get_speed` method fits right in, just like the `declare` block from last lesson.
 
 # The pattern real robot code uses
 
-An interface isn't limited to one method — add a second, `setSpeed`, and
-every implementation has to answer for both. Watch what happens when a method
-also takes the *interface* as its parameter type, not a specific class:
+A `Protocol` isn't limited to one method. Add a second, `set_speed`, and every implementation must answer for both. Watch what happens when a function takes the *protocol* as its parameter type instead of a specific class:
 
-```java
-interface MotorIO {
-    double getSpeed();
-    void setSpeed(double target);
-}
+```python
+from typing import Protocol
 
-class MotorIOSim implements MotorIO {
-    public double getSpeed() {
-        System.out.println("SIM: getSpeed()");
-        return 0.4;
-    }
 
-    public void setSpeed(double target) {
-        System.out.println("SIM: setSpeed(" + target + ")");
-    }
-}
+class MotorIO(Protocol):
+    def get_speed(self) -> float: ...
+    def set_speed(self, target: float) -> None: ...
 
-class MotorIOReal implements MotorIO {
-    public double getSpeed() {
-        System.out.println("REAL: getSpeed()");
-        return 0.55;
-    }
 
-    public void setSpeed(double target) {
-        System.out.println("REAL: setSpeed(" + target + ")");
-    }
-}
+class SimMotorIO:
+    def get_speed(self) -> float:
+        print("SIM: get_speed()")
+        return 0.4
 
-public class Main {
-    static void report(MotorIO io) {
-        io.setSpeed(0.8);
-        System.out.println("current speed: " + io.getSpeed());
-    }
+    def set_speed(self, target: float) -> None:
+        print(f"SIM: set_speed({target})")
 
-    public static void main(String[] args) {
-        report(new MotorIOSim());
-        report(new MotorIOReal());
-    }
-}
+
+class RealMotorIO:
+    def get_speed(self) -> float:
+        print("REAL: get_speed()")
+        return 0.55
+
+    def set_speed(self, target: float) -> None:
+        print(f"REAL: set_speed({target})")
+
+
+def report(io: MotorIO) -> None:
+    io.set_speed(0.8)
+    print(f"current speed: {io.get_speed()}")
+
+
+report(SimMotorIO())
+report(RealMotorIO())
 ```
 
-`report` never mentions `MotorIOSim` or `MotorIOReal` by name — it only knows
-about `MotorIO`. Run it: both calls print a `SIM:`/`REAL:` pair from inside
-`setSpeed()` and `getSpeed()`, then `report`'s own line, unchanged either way.
+`report` never mentions `SimMotorIO` or `RealMotorIO` by name. It only knows about `MotorIO`. Run it: both calls print a `SIM:`/`REAL:` pair from inside `set_speed()` and `get_speed()`, then `report`'s own line, unchanged either way.
 
-This is the **exact** pattern AdvantageKit uses for every subsystem: an
-`XxxIO` interface plus an `XxxIOSim` and an `XxxIOReal`. The subsystem code —
-the stuff that decides *when* to spin a motor or check its speed — is written
-once against the interface, and never has to change depending on whether the
-robot is a physical machine on the field or a simulation running on a
-laptop. Swapping `new MotorIOSim()` for `new MotorIOReal()` in one place
-(usually `RobotContainer`) is the only thing that changes.
+This is the **exact** AdvantageKit IO pattern used in FRC subsystems: an `XxxIO` contract plus a `SimXxxIO` and a `RealXxxIO`. The subsystem code that decides *when* to spin a motor or check its speed is written once against the protocol, and never has to change depending on whether the robot is physical hardware on the field or a simulation running on a laptop. Swapping `SimMotorIO()` for `RealMotorIO()` in one place (usually `RobotContainer`) is the only thing that changes.
 
-Your turn: add a third method to `MotorIO`, `boolean isStalled()`, and
-implement it in both classes — `MotorIOSim` should always return `false`,
-`MotorIOReal` should always return `true` (just to tell them apart). Call it
-from `report` and print its result alongside the speed.
+Your turn: add a third method to `MotorIO`, `def is_stalled(self) -> bool: ...`, and implement it in both classes. `SimMotorIO` should return `False`, and `RealMotorIO` should return `True` just to tell them apart. Call it from `report` and print its result alongside the speed.

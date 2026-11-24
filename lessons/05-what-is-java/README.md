@@ -1,93 +1,60 @@
 ---
-title: "What is Java?"
-goal: "Recognize Java's basic punctuation and program shape before writing or running any code."
+title: "What is Python?"
+goal: "Recognize Python's basic punctuation, indentation, and program shape before writing or running any code."
 order: 50
-section: "Java Fundamentals"
+section: "Python Fundamentals"
 ---
 
 # A language, not a magic spell
 
-You've been building programs already — as flowcharts of blocks
-([lesson {n}](#/lesson/01-flowcharts) onward). From here on we write those same
-ideas as **text**, in a language called **Java**. It's the language FRC robot
-code is written in, and one of the most widely used languages in the world.
+You've been building programs already, as flowcharts of blocks ([lesson {n}](#/lesson/01-flowcharts) onward). From here on we write those same ideas as **text**, in a language called **Python**.
 
-A programming language is just a very strict set of grammar rules. English is
-forgiving — "computer the on it run" is garbled but a person can still guess
-what you meant. Java isn't. Every instruction has to be spelled and punctuated
-exactly one way, or the computer refuses to run any of it and reports back
-exactly what confused it. That's not the computer being difficult — it's the
-computer being honest about not understanding you yet.
+Why does FRC 2713 teach software fundamentals in Python? Python reads close to plain English and keeps extra boilerplate out of your way, so you can focus on the core ideas: variables, decisions, loops, functions, objects, and state machines. Those concepts carry straight over to any language you use on the team later, including Java for robot code, and Python itself is useful for scripts, data analysis, and team tools.
 
-Two habits fall out of that strictness, right from the start:
+A programming language is a strict set of grammar rules. English is forgiving. "Computer the on it run" is garbled, yet a person can still guess what you meant. Python won't guess. Every instruction has to follow the rules, or Python stops and points to the exact line that confused it. That isn't the computer being difficult; it's the computer telling you what it needs fixed.
 
-- **Java is case-sensitive.** `System` and `system` are different words to
-  Java, the same way "Rex" and "rex" are different words if one's a dog's name
-  and the other isn't. Spelling has to match exactly, capital letters included.
-- **Whitespace mostly doesn't matter.** Spaces, blank lines, and indentation
-  make code easier for *you* to read, but Java doesn't require them to be any
-  particular way. What *does* matter is a small set of punctuation marks that
-  show up in almost every line you'll write. That's the rest of this lesson.
+Two habits matter right from the start:
+
+- **Python is case-sensitive.** `Print` and `print` are different words to Python, just like "Rex" and "rex" are different if one is a name and the other isn't. Spelling has to match, capital letters included.
+- **Indentation matters.** Python uses spaces at the start of a line to group steps that belong together. Lining code up isn't just for neatness here; it's part of the grammar.
 
 # The punctuation you'll see everywhere
 
-Before you write a single instruction, it helps to recognize the marks Java
-uses to hold instructions together — the same way knowing what a period or a
-comma does helps you read a sentence you've never seen before.
+Before you write a single instruction, it helps to recognize the symbols Python uses to hold instructions together, the same way knowing what a period or a comma does helps you read a new sentence.
 
 ```text
-{ }   curly braces   - group a bunch of steps into one block
-( )   parentheses    - hold the "ingredients" an instruction needs
-,     comma          - separates ingredients when there's more than one
-;     semicolon       - marks the end of one instruction
+:     colon          - starts an indented block of steps
+( )   parentheses    - hold the "ingredients" a function needs
+,     comma          - separates ingredients when there is more than one
 " "   quotes         - mark exact text, called a "string"
+#     hash           - starts a comment (a note for humans)
 ```
 
-- **Curly braces `{ }`** group steps that belong together, the way a folder
-  groups pages. Everything between a `{` and its matching `}` is treated as one
-  bundle — you already saw this idea as the box drawn around the steps inside
-  an `if` or a repeat block.
-- **Parentheses `( )`** hold what an instruction needs to do its job. Some
-  instructions need nothing (empty parentheses, `()`), some need one thing,
-  some need several.
-- **Commas `,`** separate those things when an instruction needs more than
-  one — the same job a comma does in "eggs, milk, and flour."
-- **Semicolons `;`** mark where one instruction ends, like a period at the end
-  of a sentence. Forget one and Java will tell you it expected to see it.
-- **Quotes `" "`** mark exact text for Java to use as-is — a run of characters
-  called a **string**. Anything inside the quotes is data, not instructions;
-  Java won't try to run it.
+- **Colons `:`** sit at the end of a header line to say "an indented block of steps comes next." You'll see them on `if` statements, loops, and functions.
+- **Parentheses `( )`** hold what an instruction needs to do its job. Some instructions need nothing (`()`), some need one thing, and some need several.
+- **Commas `,`** separate those things when an instruction needs more than one, the same job a comma does in "eggs, milk, and flour."
+- **Quotes `" "`** mark exact text for Python to use as-is, called a **string**. Anything inside the quotes is data, not instructions, so Python won't try to run it.
+- **Hash `#`** starts a **comment**. Anything after `#` on a line is a note for humans, and Python skips right over it.
 
 # Reading a program's shape
 
-Every Java program you run needs to live inside a shell like this one:
+Here is a tiny Python program so you can see those symbols working together:
 
 ```text
-public class Main {
-    public static void main(String[] args) {
-        // your instructions go here
-    }
-}
+# a short Python program
+def greet(name):
+    print("Hello, " + name)
+
+greet("Ada")
 ```
 
-Don't worry about memorizing this — the playground writes it for you for now,
-and you'll learn to write it yourself in
-[lesson {n}](#/lesson/11-writing-methods). For today, just recognize the shapes
-in it with the vocabulary from above:
+Don't worry about memorizing this yet. You'll learn to write your own functions in [lesson {n}](#/lesson/11-writing-methods). For today, just spot the pieces using the vocabulary above:
 
-- `public class Main { ... }` — a **class** named `Main`, with everything it
-  owns held between its curly braces.
-- `public static void main(String[] args) { ... }` — inside that class, a
-  block named `main`. This is the one Java looks for first and runs — every
-  program's very first instruction lives inside `main`'s braces. The
-  parentheses hold what `main` needs to do its job, but you can ignore
-  `String[] args` for now.
-- `// your instructions go here` — a **comment**. Anything after `//` on a
-  line is a note for humans; Java skips right over it.
+- `# a short Python program` is a comment that Python ignores.
+- `def greet(name):` defines a reusable block named `greet` that expects one input, `name`. The colon at the end tells Python an indented block is coming next.
+- `    print("Hello, " + name)` is indented by four spaces, so it belongs *inside* `greet`.
+- `greet("Ada")` is back at the left edge, outside `greet`, so Python runs it and hands `"Ada"` into the function.
 
-Notice the braces nest: `main`'s `{ }` sits inside `Main`'s `{ }`, like a small
-folder inside a bigger one. That nesting is how Java knows what belongs to
-what — you'll see it again every time a block sits inside another block.
+Notice how indentation shows what belongs to what, just like a box drawn around steps in a flowchart. Python doesn't require an outer wrapper class to start running code, so a one-line script is already a valid program.
 
-You now know enough vocabulary to read Java without panicking at the
-punctuation. Next lesson, you'll write and run your first real instruction.
+You now know enough vocabulary to read Python without getting tripped up by the syntax. Next lesson, you'll write and run your first real instruction.

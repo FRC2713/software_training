@@ -1,99 +1,88 @@
 ---
 title: "Enums, revisited"
-goal: "Loop over every value an enum can hold, and give an enum a field so each state carries its own number."
+goal: "Loop over every member of an Enum, and give each member its own attributes and methods."
 order: 270
-section: "Advanced Java"
+section: "Advanced Python"
 ---
 
 # Every value an enum can hold
 
-You've had `HandlerState` since [lesson {n}](#/lesson/23-organizing-a-machine)
-— four fixed values, nothing else legal. Here's a trick you haven't seen yet:
-an enum can hand you **every value it has**, with `.values()`.
+You've had `HandlerState` since [lesson {n}](#/lesson/23-organizing-a-machine), four fixed states and nothing else legal. Here is a trick you haven't seen yet: in Python, an `Enum` class is directly iterable, so you can loop over **every member it has**.
 
-```java
-enum HandlerState { EMPTY, INTAKING, LOADED, SHOOTING }
+```python
+from enum import Enum
 
-public class Main {
-    public static void main(String[] args) {
-        for (HandlerState state : HandlerState.values()) {
-            System.out.println(state);
-        }
-    }
-}
+
+class HandlerState(Enum):
+    EMPTY = "empty"
+    INTAKING = "intaking"
+    LOADED = "loaded"
+    SHOOTING = "shooting"
+
+
+for state in HandlerState:
+    print(state.name)
 ```
 
-Run it — all four states print, in the order they were declared. `.values()`
-returns an array of every constant ([lesson {n}'s](#/lesson/12-arrays) array
-and for-each) — handy anywhere you'd otherwise
-have to list the states yourself and hope you didn't forget one. If you add a
-fifth state to the enum, this loop picks it up automatically; a hand-written
-list would silently miss it.
+Run it. All four states print in the order they were declared. Looping directly over `HandlerState` works just like looping over a list from [lesson {n}](#/lesson/12-arrays), and you can even write `list(HandlerState)` if you need an actual list. If you add a fifth state to the enum later, this loop picks it up automatically. A hand-written list would silently miss it.
 
-# Giving an enum a field
+# Giving an enum attributes and methods
 
-So far an enum constant has only ever been a name. But a constant can also
-carry its **own data** — say, the motor speed each state should run at. Give
-`HandlerState` a field and a constructor, the same way [lesson {n}](#/lesson/17-classes-and-objects)
-gave `Flywheel` one:
+So far an enum member has only been a name and a simple value. Because a Python `Enum` is a real class, each member can also carry its **own attributes** and **methods**, just like `Flywheel` in [lesson {n}](#/lesson/17-classes-and-objects).
 
-```java
-enum HandlerState {
-    EMPTY(0.0),
-    INTAKING(0.5),
-    LOADED(0.0),
-    SHOOTING(1.0);
+Suppose every `HandlerState` knows the motor speed it should run at, plus a method that reports whether the motor is spinning:
 
-    final double motorSpeed;
+```python
+from enum import Enum
 
-    HandlerState(double motorSpeed) {
-        this.motorSpeed = motorSpeed;
-    }
-}
 
-public class Main {
-    public static void main(String[] args) {
-        for (HandlerState state : HandlerState.values()) {
-            System.out.println(state + " -> " + state.motorSpeed);
-        }
-    }
-}
+class HandlerState(Enum):
+    EMPTY = 0.0
+    INTAKING = 0.5
+    LOADED = 0.0
+    SHOOTING = 1.0
+
+    def __init__(self, motor_speed: float) -> None:
+        self.motor_speed = motor_speed
+
+    def is_spinning(self) -> bool:
+        return self.motor_speed > 0.0
+
+
+for state in HandlerState:
+    print(f"{state.name} -> speed={state.motor_speed}, spinning={state.is_spinning()}")
 ```
 
-Run it. Each constant now calls the constructor with its own number —
-`INTAKING(0.5)` means "build the `INTAKING` constant, passing `0.5` to its
-constructor" — exactly like `new Flywheel(0.5)` would, just written before the
-semicolon that ends the constant list. `this.motorSpeed = motorSpeed;` inside
-the constructor is the same assignment pattern from [lesson {n}](#/lesson/17-classes-and-objects); it just runs
-once per constant instead of once per `new`.
+Run it. Each member passes its value into `__init__` when the class is defined. `INTAKING = 0.5` sets `self.motor_speed = 0.5` on `HandlerState.INTAKING`, and `SHOOTING = 1.0` sets `self.motor_speed = 1.0` on `HandlerState.SHOOTING`. Wait, look closely at `EMPTY` and `LOADED` in that output!
 
-Two details worth naming:
+Did `LOADED` disappear from the loop? Yes! In Python, if two enum members have the exact same value (`0.0`), Python treats the second one (`LOADED`) as an **alias** for the first (`EMPTY`) instead of a distinct state. When two states share a speed, give each member a tuple with a unique name or ID, or a second field:
 
-- The **semicolon after `SHOOTING(1.0)`** is required — it's what separates
-  "here are the constants" from "here's everything else in the enum" (the
-  field and constructor).
-- **`final`** means `motorSpeed` is set once, in the constructor, and can
-  never change after — appropriate here, since `HandlerState.SHOOTING`
-  shouldn't be able to quietly mean a different speed partway through a
-  match.
+```python
+from enum import Enum
 
-This is exactly the real shape of state-specific setpoints in FRC code: one
-enum, one number per state, no separate lookup table to keep in sync.
 
-**A word of caution, though.** An enum's whole job is to name a **small,
-closed set of options** for a decision — `HandlerState` works because there
-are exactly four states, and every one of them matters to `update()`. One
-field like `motorSpeed` still serves that job. But it's tempting to keep
-piling more fields onto an enum once you've seen it hold one — a second
-number, then a third, then a `String` label — and that's a trap. The moment
-a constant needs several fields, or the list of constants grows past what you
-can hold in your head at once, you've stopped modeling *a choice* and started
-modeling *a small database*, and a `class` ([lesson {n}](#/lesson/17-classes-and-objects))
-or a `Map` ([lesson {n}](#/lesson/14-maps)) usually fits that better. Keep an
-enum's values doing what they're for — naming the options — and keep what
-they carry small enough that the set of options is still the point.
+class HandlerState(Enum):
+    EMPTY = ("empty", 0.0)
+    INTAKING = ("intaking", 0.5)
+    LOADED = ("loaded", 0.0)
+    SHOOTING = ("shooting", 1.0)
 
-Your turn: add a fifth state, `JAMMED(0.0)`, to `HandlerState`. Then loop over
-`.values()` again and print each state's name next to its `motorSpeed` —
-confirm your new state shows up automatically, with no other line of the loop
-needing to change.
+    def __init__(self, label: str, motor_speed: float) -> None:
+        self.label = label
+        self.motor_speed = motor_speed
+
+    def is_spinning(self) -> bool:
+        return self.motor_speed > 0.0
+
+
+for state in HandlerState:
+    print(f"{state.name} -> speed={state.motor_speed}, spinning={state.is_spinning()}")
+```
+
+Run that second snippet. Now all four states are distinct, Python unpacks the tuple into `__init__(self, label, motor_speed)` automatically, and every state carries both its own speed and the `is_spinning()` method.
+
+This is the real shape of state-specific setpoints in FRC code: one enum, one speed per state, and no separate lookup table to keep in sync.
+
+**A word of caution, though.** An enum's job is to name a **small, closed set of options** for a decision. `HandlerState` works because there are four clear states and every one of them matters to `update()`. One or two fields like `motor_speed` still serve that job. It is tempting to keep piling more attributes onto an enum once you see it hold one, like a third number, a timeout, and a sensor flag. The moment a member needs a pile of fields, or the list grows past what you can hold in your head at once, you have stopped modeling *a choice* and started modeling *a small database*. A regular `class` ([lesson {n}](#/lesson/17-classes-and-objects)) or a `dict` ([lesson {n}](#/lesson/14-maps)) fits that much better. Keep enum members focused on naming the options.
+
+Your turn: add a fifth state, `JAMMED = ("jammed", 0.0)`, to `HandlerState`. Loop over `HandlerState` again and print each state's name, `motor_speed`, and `is_spinning()`. Confirm your new state shows up automatically without changing a single line of the loop.

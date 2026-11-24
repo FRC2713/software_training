@@ -1,114 +1,78 @@
 ---
-title: "Writing your own methods"
-goal: "Package steps into a named method and hand back a result with return."
+title: "Writing your own functions"
+goal: "Package steps into a named function and hand back a result with return."
 order: 110
-section: "Java Fundamentals"
+section: "Python Fundamentals"
 ---
 
-# The program shell, revealed
+# Packaging steps with def
 
-Since [lesson {n}](#/lesson/06-hello-world), the playground has been quietly wrapping your code in a small
-"program shell." Time to see it, because the thing you're about to build — a
-reusable block of your own — has to live inside it. Here is what a complete
-Java program really looks like:
+Since [lesson {n}](#/lesson/06-hello-world), every script you wrote ran straight from top to bottom. Now you're ready to build reusable blocks of your own, just like the custom blocks in [lesson {n}](#/lesson/04-functions). In Python, a reusable block of code is called a **function**, and you create one with **`def`**:
 
-```java
-public class Main {
-    public static void main(String[] args) {
-        System.out.println("Hello from inside the shell!");
-    }
-}
+```python
+def say_hello():
+    print("Hello from inside a function!")
+
+say_hello()
+say_hello()
 ```
 
-Two layers, outside-in:
+Two parts to spot:
 
-- `public class Main { ... }` — every Java program is a **class**, a named
-  container for code. (Much more on classes in [lesson {n}](#/lesson/17-classes-and-objects).)
-- `public static void main(String[] args) { ... }` — the **main method**:
-  the agreed-upon starting point. When a Java program runs, the computer finds
-  `main` and follows its instructions top to bottom. Every line you've written
-  so far was living here.
+- **`def say_hello():`** defines a function named `say_hello`. The indented lines underneath are the steps inside it.
+- **`say_hello()`** calls the function, telling Python to run those indented steps.
 
-Run it — it behaves exactly like [lesson {n}](#/lesson/06-hello-world)'s one-liner, because it *is* that
-program, shell and all. From now on, when a snippet shows the full shell, the
-playground runs it exactly as written; you're seeing the whole truth.
+Defining a function doesn't run it; it just teaches Python the block exists. It only does its work when you *call* it, and you can call it as many times as you need. Later, in [lesson {n}](#/lesson/17-classes-and-objects), you'll also put functions inside classes, where they're called methods.
+
+Run it and notice the message prints twice from one function definition.
 
 # Define a block of your own
 
-[Lesson {n}](#/lesson/04-functions) gave you reusable blocks — a **double** block with a little flowchart
-hidden inside, that you could drop in wherever you needed it. In Java, a
-reusable block is called a **method**, and now you can build one yourself:
+[Lesson {n}](#/lesson/04-functions) gave you a **double** block with a little flowchart hidden inside that you could drop in wherever you needed it. Here is that same block in Python:
 
-```java
-public class Main {
-    static int doubleIt(int n) {
-        return n * 2;
-    }
+```python
+def double_it(n):
+    return n * 2
 
-    public static void main(String[] args) {
-        System.out.println(doubleIt(5));
-    }
-}
+print(double_it(5))
 ```
 
-Read the new method piece by piece:
+Read the function piece by piece:
 
-- `static int doubleIt(int n)` — names a new method `doubleIt` that takes one
-  input, `int n` (the arrow feeding into the block), and promises to hand back
-  an `int` — that first `int` is the **return type**. Even a method's output
-  has a type in Java.
-- `return n * 2;` is the flowchart *inside* the block: it works out the answer
-  and **hands it back** with `return`.
-- `doubleIt(5)` **calls** the method — it runs those inner steps with `n` set
-  to `5`, and the whole `doubleIt(5)` becomes the value `10`.
+- `def double_it(n):` names a new function `double_it` that takes one input, `n` (the arrow feeding into the block).
+- `return n * 2` is the flowchart *inside* the block: it works out the answer and **hands it back** with `return`.
+- `double_it(5)` **calls** the function. Python runs those inner steps with `n` set to `5`, and `double_it(5)` evaluates to `10`.
 
-Methods live inside the class, *next to* `main` — not inside it. Defining one
-doesn't run it; it just teaches Java the block exists. It only does its work
-when you *call* it. Run this, then change `5` and run again — same block,
-different input, just like [lesson {n}](#/lesson/04-functions).
+Run this, then change `5` and run again: same block, different input, just like [lesson {n}](#/lesson/04-functions).
 
-The `n` is called a **parameter** — a placeholder that gets filled in with
-whatever value you pass when you call. A method can take more than one:
+The `n` is called a **parameter**, a placeholder that gets filled in with whatever value you pass when you call the function. A function can take more than one:
 
-```java
-static int add(int a, int b) {
-    return a + b;
-}
+```python
+def add(a, b):
+    return a + b
+
+print(add(2, 3))
 ```
 
-Add that next to `doubleIt` and call `add(2, 3)` from `main`.
+Add `add` next to `double_it` in the editor above and call `add(2, 3)` inside `print(...)`.
 
 # Order matters (again)
 
-[Lesson {n}](#/lesson/04-functions) ended with the big idea that **order matters**: `add 1` then `double`
-gave a different answer than `double` then `add 1`. Let's prove it in code with
-two methods of your own:
+[Lesson {n}](#/lesson/04-functions) ended with the big idea that **order matters**: `add 1` then `double` gave a different answer than `double` then `add 1`. Let's prove it in code with two functions of your own:
 
-```java
-public class Main {
-    static int addOne(int n) {
-        return n + 1;
-    }
+```python
+def add_one(n):
+    return n + 1
 
-    static int doubleIt(int n) {
-        return n * 2;
-    }
+def double_it(n):
+    return n * 2
 
-    public static void main(String[] args) {
-        System.out.println(doubleIt(addOne(4)));
-        System.out.println(addOne(doubleIt(4)));
-    }
-}
+print(double_it(add_one(4)))
+print(add_one(double_it(4)))
 ```
 
-Trace the first line from the inside out: `addOne(4)` is `5`, then `doubleIt(5)`
-is `10`. The second line: `doubleIt(4)` is `8`, then `addOne(8)` is `9`. Same
-two blocks, same starting number, **different order, different answer** —
-exactly the [lesson-4](#/lesson/04-functions) result, now in text.
+Trace the first print line from the inside out: `add_one(4)` is `5`, then `double_it(5)` is `10`. The second line: `double_it(4)` is `8`, then `add_one(8)` is `9`. Same two blocks, same starting number, **different order, different answer**, matching the [lesson-4](#/lesson/04-functions) result.
 
 Run it and confirm you get `10` then `9`.
 
-Your challenge: write a method `square(int n)` that returns `n * n`, then use
-it together with `addOne` to compute **`(4 + 1)` squared**. Predict the answer
-before you run — and watch your call order, because `square(addOne(4))` and
-`addOne(square(4))` are *not* the same.
+Your challenge: write a function `square(n)` that returns `n * n`, then use it together with `add_one` to compute **`(4 + 1)` squared**. Predict the answer before you run, and watch your call order, because `square(add_one(4))` and `add_one(square(4))` are *not* the same.

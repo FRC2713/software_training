@@ -1,177 +1,126 @@
 ---
 title: "Lambdas"
-goal: "Write a lambda that hands back a value, then one that just does something, and pass either into a method as a parameter."
+goal: "Write one-line lambda functions, pass functions as key arguments and callbacks, and know when to use def instead."
 order: 310
-section: "Advanced Java"
+section: "Advanced Python"
 ---
 
-# A lambda that returns something
+# A lambda: a one-line function
 
-A **lambda** is a tiny, unnamed chunk of behavior you can store in a
-variable. Here's the simplest one — it just answers a yes/no question:
+A **`lambda`** is a tiny, unnamed function you can write inline on a single line. Here is the simplest kind, one that answers a yes/no question:
 
-```java
-interface Check {
-    boolean isReady();
-}
-
-public class Main {
-    public static void main(String[] args) {
-        Check ready = () -> true;
-        System.out.println(ready.isReady());
-    }
-}
+```python
+ready = lambda: True
+print(ready())
 ```
 
-Run it — `true` prints. Read `() -> true` as *"takes no arguments, returns
-`true`"*: the `()` is `isReady()`'s empty parameter list, `->` separates "the
-inputs" from "what happens," and `true` is what gets returned. Don't worry
-yet about *why* `Check` has to exist — for now, just read `Check ready = () -> true;`
-as "make a thing called `ready` whose answer is always `true`."
+Run it and `True` prints. Read `lambda: True` as *"takes no arguments, returns `True`"*. The part before the colon lists the parameters (empty here), and the expression after the colon is what gets returned. No `return` keyword is needed.
 
-The part after `->` is a real expression, evaluated fresh every time it's
-called, not just a fixed value:
+The expression after the colon runs fresh every time you call the lambda, and lambdas can take parameters just like a normal function:
 
-```java
-interface Check {
-    boolean isReady();
-}
+```python
+ready = lambda: True
+not_ready = lambda: False
+fast_enough = lambda rpm: rpm >= 4500.0
 
-public class Main {
-    public static void main(String[] args) {
-        Check ready = () -> true;
-        Check notReady = () -> false;
-        Check bigEnough = () -> 12 > 10;
-
-        System.out.println(ready.isReady());
-        System.out.println(notReady.isReady());
-        System.out.println(bigEnough.isReady());
-    }
-}
+print(ready())
+print(not_ready())
+print(fast_enough(4800.0))
+print(fast_enough(2000.0))
 ```
 
-Run it — `true`, `false`, `true`. Three completely different lambdas, each
-answering `isReady()` its own way.
+Run it: `True`, `False`, `True`, `False`.
 
-# Runnable: a lambda that just does something
+In practice, you rarely assign a `lambda` to a variable name like `fast_enough = ...` in real Python code. If a function deserves a name, `def` is cleaner and easier to debug. Lambdas exist for the places where you want to pass a tiny throwaway function directly into *another* function.
 
-A lambda doesn't have to answer a question — sometimes you just want it to
-**do** something. Java ships a ready-made type for exactly that, called
-`Runnable`, with one method, `run()`, that takes nothing and returns nothing.
-You don't have to declare it yourself — it's already part of Java:
+# Passing functions as arguments: key=...
 
-```java
-public class Main {
-    public static void main(String[] args) {
-        Runnable sayHi = () -> System.out.println("intake spinning");
-        sayHi.run();
-    }
-}
+In Python, functions are ordinary values, just like numbers or strings. That means you can pass a function into another function as an argument.
+
+One of the most common places you'll see this is sorting with `key=`. Suppose you have a list of robot motors as `(name, rpm)` tuples and want to sort them by RPM instead of alphabetically by name:
+
+```python
+motors = [("intake", 1200), ("shooter", 4800), ("climber", 600)]
+
+by_rpm = sorted(motors, key=lambda motor: motor[1])
+print(by_rpm)
 ```
 
-Run it — the message prints. `sayHi` is a lambda implementing `Runnable`,
-the exact same way `ready` above was a lambda implementing `Check` — the only
-difference is `Runnable` came from Java itself instead of a line you wrote.
-More examples, same shape:
+Run it. `sorted()` calls your lambda once for each item in `motors`, gets back `motor[1]` (the RPM), and sorts the list by those numbers. Without `lambda`, you'd have to write a separate `def get_rpm(motor): ...` just to use it once.
 
-```java
-public class Main {
-    public static void main(String[] args) {
-        Runnable spinIntake = () -> System.out.println("intake spinning");
-        Runnable spinShooter = () -> System.out.println("shooter spinning");
+The same `key=` pattern works with `min()` and `max()`, and you can pass a regular `def` function whenever the logic is clearer with a name:
 
-        spinIntake.run();
-        spinShooter.run();
-        spinIntake.run();
-    }
-}
+```python
+motors = [
+    {"name": "intake", "rpm": 1200},
+    {"name": "shooter", "rpm": 4800},
+    {"name": "climber", "rpm": 600},
+]
+
+fastest = max(motors, key=lambda motor: motor["rpm"])
+print(fastest["name"], fastest["rpm"])
 ```
 
-Run it — each `.run()` prints whatever that particular lambda says, in
-whatever order you call them.
+Run it and `shooter 4800` prints. `max()` doesn't know what a motor dictionary looks like; your lambda tells it which number to compare.
 
-# Passing a lambda into a method
+# Callbacks: handing behavior to another function
 
-Since a lambda is just a value like any other, you can hand one to a method
-as a parameter — which means you're handing over **behavior**, not just a
-number or a `String`:
+You can write your own functions that accept other functions as parameters, often called **callbacks**. Instead of handing a function a number or a string, you hand it *behavior*:
 
-```java
-interface Check {
-    boolean isReady();
-}
+```python
+from collections.abc import Callable
 
-public class Main {
-    static void checkSensor(Check sensor) {
-        if (sensor.isReady()) {
-            System.out.println("piece detected!");
-        } else {
-            System.out.println("nothing there");
-        }
-    }
 
-    public static void main(String[] args) {
-        checkSensor(() -> true);
-        checkSensor(() -> false);
-        checkSensor(() -> 12 > 10);
-    }
-}
+def check_sensor(sensor: Callable[[], bool]) -> None:
+    if sensor():
+        print("piece detected!")
+    else:
+        print("nothing there")
+
+
+check_sensor(lambda: True)
+check_sensor(lambda: False)
+check_sensor(lambda: 12 > 10)
 ```
 
-`checkSensor` doesn't know or care *how* its `sensor` decides — it just calls
-`.isReady()` once and reacts to whatever comes back ([lesson {n}'s](#/lesson/09-if-statements)
-`if`, doing exactly what it always does). Three calls, three different
-lambdas, and `checkSensor` itself never changes. A method can take a
-`Runnable` the same way:
+`Callable[[], bool]` is the type hint for "a function that takes no arguments and returns a `bool`." `check_sensor` doesn't know or care *how* `sensor` decides. It just calls `sensor()` once and reacts with the `if` from [lesson {n}](#/lesson/09-if-statements).
 
-```java
-public class Main {
-    static void doTwice(Runnable action) {
-        action.run();
-        action.run();
-    }
+A function can also take a callback that just *does* something, returning `None`:
 
-    public static void main(String[] args) {
-        doTwice(() -> System.out.println("intake spinning"));
-        doTwice(() -> System.out.println("shooter spinning"));
-    }
-}
+```python
+from collections.abc import Callable
+
+
+def do_twice(action: Callable[[], None]) -> None:
+    action()
+    action()
+
+
+do_twice(lambda: print("intake spinning"))
+do_twice(lambda: print("shooter spinning"))
 ```
 
-Run it — each lambda's line prints twice. `doTwice` doesn't know what its
-`action` actually does, only that it can `.run()` it.
+Run it, and each line prints twice. `do_twice` doesn't know what `action` does, only that it can call `action()`.
 
-One more, combining both ideas:
+Now combine both ideas, a condition callback and an action callback:
 
-```java
-interface Check {
-    boolean isReady();
-}
+```python
+from collections.abc import Callable
 
-public class Main {
-    static void runIfReady(Check ready, Runnable action) {
-        if (ready.isReady()) {
-            action.run();
-        } else {
-            System.out.println("not ready yet");
-        }
-    }
 
-    public static void main(String[] args) {
-        runIfReady(() -> true, () -> System.out.println("fire!"));
-        runIfReady(() -> false, () -> System.out.println("fire!"));
-    }
-}
+def run_if_ready(ready: Callable[[], bool], action: Callable[[], None]) -> None:
+    if ready():
+        action()
+    else:
+        print("not ready yet")
+
+
+run_if_ready(lambda: True, lambda: print("fire!"))
+run_if_ready(lambda: False, lambda: print("fire!"))
 ```
 
-Run it: the first call is ready, so `action` runs and prints `fire!`; the
-second isn't, so `action` never runs at all — the exact same lambda, simply
-never called. This is the same shape WPILib's `Trigger` and
-`Commands.run(() -> ...)` use under the hood: a lambda standing in for "the
-thing to check" or "the thing to do," handed to code that doesn't need to
-know any more about it than that.
+Run it. The first call is ready, so `action()` runs and prints `fire!`. The second isn't, so `action` never runs at all. This is the exact shape WPILib's `Trigger` and `cmd.run(lambda: ...)` use in FRC robot code: a short lambda standing in for "the thing to check" or "the thing to do," handed to code that decides *when* to run it.
 
-Your turn: write a method `describe(Check c)` that prints `"ready"` or
-`"not ready"` depending on `c.isReady()`. Call it three times with three
-different lambdas — one always `true`, one always `false`, and one that
-computes its answer from a comparison you make up (like `7 > 3`).
+One rule of thumb: reach for `lambda` when the body is a single short expression. The moment it needs two steps, an `if` statement, or a descriptive name, write a regular `def` function and pass its name (without parentheses) as the callback instead.
+
+Your turn: write a function `describe(check: Callable[[], bool]) -> None` that prints `"ready"` or `"not ready"` depending on `check()`. Call it three times with three different lambdas: one always `True`, one always `False`, and one that computes its answer from a comparison you make up (like `7 > 3`).

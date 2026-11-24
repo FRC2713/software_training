@@ -1,5 +1,5 @@
 ---
-title: "Arrays"
+title: "Lists"
 goal: "Hold many values in one place, reach any of them by position, and walk through them with a loop."
 order: 120
 section: "Data Structures"
@@ -7,100 +7,101 @@ section: "Data Structures"
 
 # One name, many values
 
-Every variable so far has held a *single* value: one number, one string. But
-real programs deal in **groups** — the six sensor readings on a robot, the names
-of everyone on the drive team, the points scored in each match. Java holds a
-group in an **array**: values in curly braces, separated by commas.
+Every variable so far has held a *single* value: one number, one string. Real
+programs deal in **groups**, like the six sensor readings on a robot, the names
+of everyone on the drive team, or the points scored in each match. Python holds
+a group in a **list**: values inside square brackets, separated by commas.
 
-```java
-int[] readings = {12, 47, 3, 88, 21};
-System.out.println(readings.length);
-System.out.println(Arrays.toString(readings));
+```python
+readings = [12, 47, 3, 88, 21]
+print(len(readings))
+print(readings)
 ```
 
-`readings` is *one* variable holding *five* numbers. Its type, `int[]`, reads
-as "array of int" — the square brackets mean "many of these." `.length` tells
-you how many are in there — run it and you'll see `5`. An array can hold text
-too — `String[] sides = {"front", "back", "left", "right"};` — and every slot
-has the type the array declared: an `int[]` holds ints, and nothing else.
+`readings` is *one* variable holding *five* numbers. `len(readings)` tells you
+how many items are inside. Run it and you will see `5`, followed by the full
+list `[12, 47, 3, 88, 21]`. A list can hold text too, like
+`sides = ["front", "back", "left", "right"]`.
 
-(`Arrays.toString(...)` is a helper that prints the whole array nicely;
-printing an array directly shows a cryptic id instead of the values.)
-
-The point: instead of `reading1`, `reading2`, `reading3`, `reading4`,
-`reading5` — five names to keep straight — you have one name for the whole
-batch. That's the whole idea of an array.
+Instead of juggling five separate names like `reading1`, `reading2`, `reading3`,
+`reading4`, and `reading5`, you keep one name for the whole batch. That is the
+whole idea of a list.
 
 # Reaching one item
 
-You pull a single value out of an array by its **position**, written in square
-brackets after the name. And here's the catch that trips up everyone: Java
-counts positions starting from **0**, not 1 — the same "programmers start at
-zero" rule the loop counter followed back in [lesson {n}](#/lesson/10-loops).
+You pull a single value out of a list by its **position**, written in square
+brackets after the name. Python counts positions starting from **0**, not 1,
+following the same "programmers start at zero" rule from
+[lesson {n}](#/lesson/10-loops).
 
-```java
-int[] readings = {12, 47, 3, 88, 21};
-System.out.println(readings[0]);
-System.out.println(readings[1]);
-System.out.println(readings[4]);
+```python
+readings = [12, 47, 3, 88, 21]
+print(readings[0])
+print(readings[1])
+print(readings[4])
 ```
 
 So `readings[0]` is the **first** item (`12`), `readings[1]` is the second
 (`47`), and `readings[4]` is the fifth and last (`21`). That number in brackets
-is called the **index**.
+is called the **index**. Python also lets you count backward from the end with
+negative numbers, so `readings[-1]` grabs the last item (`21`).
 
-Because counting starts at zero, the last index is always `length - 1`, never
-`length`. Ask for `readings[5]` and the program fails with an
-`ArrayIndexOutOfBoundsException` — there's no sixth item. Try it and read the
-error: "exception" is Java's word for "something went wrong while running,"
-and this one tells you exactly what — the index was out of the array's bounds.
-Then fix it back.
+Because forward counting starts at zero, the last positive index is always
+`len(readings) - 1`, never `len(readings)`. Ask for `readings[5]` and Python
+stops with an `IndexError: list index out of range`. There is no sixth item.
+Try it, read the error message, and then change it back.
 
-You can also *change* an item by assigning to its position, exactly like a
+You can also *change* an item by assigning to its position, just like a regular
 variable:
 
-```java
-int[] readings = {12, 47, 3, 88, 21};
-readings[0] = 99;
-System.out.println(Arrays.toString(readings));
+```python
+readings = [12, 47, 3, 88, 21]
+readings[0] = 99
+print(readings)
 ```
 
-# Walking the whole array
+# Walking the whole list
 
-[Lesson {n}'s](#/lesson/10-loops) `for` loop counted with `i`. There's a second form of `for` whose
-real job is walking an array — handing you each item, one per pass. It's
-called the **for-each** loop:
+[Lesson {n}'s](#/lesson/10-loops) `for` loop counted with `range(...)`. A `for`
+loop can also walk straight through a list, handing you each item one pass at a
+time:
 
-```java
-int[] scores = {10, 25, 5, 40};
-for (int score : scores) {
-    System.out.println("We scored " + score);
-}
+```python
+scores = [10, 25, 5, 40]
+for score in scores:
+    print(f"We scored {score}")
 ```
 
-No indexes, no counting — the loop takes care of visiting every item in order.
-Read the colon as "in": "for each `score` in `scores`, print it." Run it and
-you get one line per match.
+No indexes, no manual counting. The loop visits every item in order. Read the
+header like English: "for each `score` in `scores`, print it." Run it and you
+get one line per match.
 
-Now combine it with the **running total** from [lesson {n}](#/lesson/10-loops) to add an array up:
+Now combine it with the **running total** from [lesson {n}](#/lesson/10-loops)
+to add a list up:
 
-```java
-int[] scores = {10, 25, 5, 40};
-int total = 0;
-for (int score : scores) {
-    total = total + score;
-}
-System.out.println("Total points: " + total);
+```python
+scores = [10, 25, 5, 40]
+total = 0
+for score in scores:
+    total = total + score
+print(f"Total points: {total}")
 ```
 
-Same pattern as always — declare a total *before* the loop, update it *inside*.
+Same pattern as before. Start a total *before* the loop and update it *inside*.
 
-One thing an array **can't** do is grow: it's created with a fixed number of
-slots and keeps them forever. [Next lesson](#/lesson/13-arraylists) covers
-`ArrayList`, Java's group that grows and shrinks — but nail down arrays first:
-a fixed row of numbered slots.
+## Fixed sequences: tuples
 
-Your turn: make an array of five sensor `readings`, then loop through and print
-only the ones **above 20** (you'll need an `if` inside the `for` — [lesson {n}](#/lesson/09-if-statements)
-meets [lesson {n}](#/lesson/12-arrays)). Then use the running-total pattern and `.length` to print the
-**average**. Predict it first, then check.
+Sometimes you have a small group of values that should never change, like an
+`(x, y)` field position or an RGB color. Python calls that a **tuple**, written
+with parentheses instead of square brackets: `position = (3.5, 1.2)`. You can
+index it with `position[0]` and check `len(position)` just like a list, but
+trying to change a slot with `position[0] = 5.0` raises a `TypeError`. Use a
+list when the items can change, and a tuple when they are fixed.
+
+[Next lesson](#/lesson/13-arraylists) shows how to grow, shrink, and slice lists
+while a program runs.
+
+Your turn: make a list of five sensor `readings`, then loop through and print
+only the ones **above 20** (combining [lesson {n}](#/lesson/09-if-statements)
+and [lesson {n}](#/lesson/12-arrays)). Then use the running-total pattern and
+`len()` to print the **average**. Predict the answer first, then check.
