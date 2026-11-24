@@ -8,6 +8,16 @@ const distDir = path.resolve(process.env.DIST_DIR || path.join(rootDir, 'site', 
 const host = process.env.HOST || '0.0.0.0'
 const port = Number(process.env.PORT || 3000)
 const revision = process.env.APP_REVISION || 'development'
+const runnerUrl = (process.env.RUNNER_URL || '').replace(/\/+$/, '')
+const trustProxy = process.env.HAWK_SUITE_TRUST_PROXY === 'true'
+const expectedTeamId = process.env.HAWK_SUITE_TEAM_ID || ''
+
+const MAX_BODY_BYTES = 64 * 1024
+const RATE_LIMIT_BURST = 5
+const RATE_LIMIT_REFILL_PER_SEC = 0.5 // 30 runs/minute per user
+const MAX_CONCURRENT_RUNS = 4
+const MAX_QUEUED_RUNS = 16
+const RUNNER_FETCH_TIMEOUT_MS = 10_000
 
 const MIME_TYPES = {
   '.css': 'text/css; charset=utf-8',
@@ -27,6 +37,173 @@ const MIME_TYPES = {
   '.webp': 'image/webp',
   '.woff': 'font/woff',
   '.woff2': 'font/woff2',
+}
+
+// Per-user token bucket for /api/run*.
+const buckets = new Map()
+
+function takeRateLimitToken(userKey) {
+  const now = Date.now()
+  let bucket = buckets.get(userKey)
+  if (!bucket) {
+    bucket = { tokens: RATE_LIMIT_BURST, updatedAt: now }
+    buckets.set(userKey, bucket)
+  } else {
+    const elapsedSec = (now - bucket.updatedAt) / 1000
+    bucket.tokens = Math.min(RATE_LIMIT_BURST, bucket.tokens + elapsedSec * RATE_LIMIT_REFILL_PER_SEC)
+    bucket.updatedAt = now
+  }
+  if (bucket.tokens < 1) {
+    const retryAfter = Math.ceil((1 - bucket.tokens) / RATE_LIMIT_REFILL_PER_SEC)
+    return { allowed: false, retryAfter }
+  }
+  bucket.tokens -= 1
+  return { allowed: true, retryAfter: 0 }
+}
+
+// Bounded FIFO semaphore for runner requests.
+let activeRuns = 0
+const runWaiters = []
+
+function acquireRunSlot() {
+  if (activeRuns < MAX_CONCURRENT_RUNS) {
+    activeRuns += 1
+    return Promise.resolve(true)
+  }
+  if (runWaiters.length >= MAX_QUEUED_RUNS) {
+    return Promise.resolve(false)
+  }
+  return new Promise((resolve) => {
+    runWaiters.push(() => {
+      activeRuns += 1
+      resolve(true)
+    })
+  })
+}
+
+function releaseRunSlot() {
+  activeRuns -= 1
+  const next = runWaiters.shift()
+  if (next) next()
+}
+
+function sendJson(res, status, payload, extraHeaders = {}) {
+  const body = JSON.stringify(payload)
+  res.writeHead(status, {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Content-Length': Buffer.byteLength(body),
+    'Cache-Control': 'no-store',
+    ...extraHeaders,
+  })
+  res.end(body)
+}
+
+function readJsonBody(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = []
+    let total = 0
+    req.on('data', (chunk) => {
+      total += chunk.length
+      if (total > MAX_BODY_BYTES) {
+        reject(Object.assign(new Error('Request body too large'), { status: 413 }))
+        req.destroy()
+        return
+      }
+      chunks.push(chunk)
+    })
+    req.on('end', () => {
+      try {
+        const text = Buffer.concat(chunks).toString('utf8')
+        resolve(JSON.parse(text))
+      } catch {
+        reject(Object.assign(new Error('Invalid JSON'), { status: 400 }))
+      }
+    })
+    req.on('error', () => {
+      reject(Object.assign(new Error('Failed to read request body'), { status: 400 }))
+    })
+  })
+}
+
+function resolveUserKey(req) {
+  if (!trustProxy) return 'local-dev'
+  const user = String(req.headers['x-hawk-slack-user'] || '').trim()
+  const team = String(req.headers['x-hawk-slack-team'] || '').trim()
+  if (!user) return null
+  if (expectedTeamId && team !== expectedTeamId) return null
+  return `${team}:${user}`
+}
+
+async function handleRunApi(req, res, isMaze) {
+  const userKey = resolveUserKey(req)
+  if (!userKey) {
+    sendJson(res, 401, { error: 'Sign in with Hawk Suite to run code.' })
+    return
+  }
+
+  if (!runnerUrl) {
+    sendJson(res, 503, { error: 'Python code runner is not configured.' })
+    return
+  }
+
+  let body
+  try {
+    body = await readJsonBody(req)
+  } catch (err) {
+    sendJson(res, err.status || 400, { error: err.message || 'Bad request' })
+    return
+  }
+
+  if (!body || typeof body !== 'object' || typeof body.code !== 'string') {
+    sendJson(res, 400, { error: 'Field `code` (string) is required.' })
+    return
+  }
+
+  const payload = { code: body.code }
+  if (isMaze) {
+    if (!Array.isArray(body.grid) || (body.mode !== 'wall' && body.mode !== 'astar')) {
+      sendJson(res, 400, { error: 'Fields `grid` (array) and `mode` ("wall" | "astar") are required.' })
+      return
+    }
+    payload.maze = { grid: body.grid, mode: body.mode }
+  }
+
+  const rate = takeRateLimitToken(userKey)
+  if (!rate.allowed) {
+    sendJson(
+      res,
+      429,
+      { error: 'Too many runs. Wait a moment and try again.' },
+      { 'Retry-After': String(rate.retryAfter) },
+    )
+    return
+  }
+
+  const acquired = await acquireRunSlot()
+  if (!acquired) {
+    sendJson(res, 429, { error: 'Runner is busy. Try again in a moment.' }, { 'Retry-After': '2' })
+    return
+  }
+
+  try {
+    const upstream = await fetch(`${runnerUrl}/execute`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(RUNNER_FETCH_TIMEOUT_MS),
+    })
+    const text = await upstream.text()
+    res.writeHead(upstream.status, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Content-Length': Buffer.byteLength(text),
+      'Cache-Control': 'no-store',
+    })
+    res.end(text)
+  } catch {
+    sendJson(res, 502, { error: 'Code runner is temporarily unavailable.' })
+  } finally {
+    releaseRunSlot()
+  }
 }
 
 function sendFile(res, filePath, method, cacheControl) {
@@ -56,11 +233,6 @@ function tryFile(filePath) {
 
 const server = http.createServer((req, res) => {
   const method = req.method || 'GET'
-  if (method !== 'GET' && method !== 'HEAD') {
-    res.writeHead(405, { Allow: 'GET, HEAD', 'Content-Type': 'text/plain; charset=utf-8' })
-    res.end('Method Not Allowed')
-    return
-  }
 
   let pathname
   try {
@@ -68,6 +240,22 @@ const server = http.createServer((req, res) => {
   } catch {
     res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' })
     res.end('Bad Request')
+    return
+  }
+
+  if (pathname === '/api/run' || pathname === '/api/run/maze') {
+    if (method !== 'POST') {
+      res.writeHead(405, { Allow: 'POST', 'Content-Type': 'text/plain; charset=utf-8' })
+      res.end('Method Not Allowed')
+      return
+    }
+    void handleRunApi(req, res, pathname === '/api/run/maze')
+    return
+  }
+
+  if (method !== 'GET' && method !== 'HEAD') {
+    res.writeHead(405, { Allow: 'GET, HEAD', 'Content-Type': 'text/plain; charset=utf-8' })
+    res.end('Method Not Allowed')
     return
   }
 

@@ -14,6 +14,9 @@ export default defineConfig({
   },
   server: {
     port: process.env.PORT ? Number(process.env.PORT) : 5173,
+    proxy: {
+      '/api': 'http://127.0.0.1:3000',
+    },
     fs: {
       // allow the dev server to read lesson content from ../lessons
       allow: ['..'],

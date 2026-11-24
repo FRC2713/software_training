@@ -27,3 +27,5 @@ jobs:
         working-directory: site
       - name: Validate Hawk app contract
         run: node scripts/deploy-check.mjs --contract >/dev/null
+      - name: Test Python runner
+        run: python3 -m unittest discover -t . -s runner -p "test_*.py" -v

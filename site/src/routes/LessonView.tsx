@@ -5,7 +5,7 @@ import type { Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import {
   blocksPreset,
-  firstJavaSnippet,
+  firstRunnableSnippet,
   getLesson,
   hasMaze,
   mazeSolver,
@@ -93,8 +93,8 @@ export function LessonView() {
   const maze = hasMaze(currentPage.markdown)
   const prose =
     preset || maze ? stripBlocksFence(currentPage.markdown) : currentPage.markdown
-  const javaSnippet = firstJavaSnippet(currentPage.markdown)
-  const hasPlayground = preset != null || maze || javaSnippet != null
+  const snippet = firstRunnableSnippet(currentPage.markdown)
+  const hasPlayground = preset != null || maze || snippet != null
 
   const goTo = (index: number) => navigate(`/lesson/${lesson.slug}/${index + 1}`)
 
@@ -141,7 +141,8 @@ export function LessonView() {
               <>
                 <JavaRunner
                   key={`${lesson.slug}-${pageIndex}`}
-                  initialCode={javaSnippet as string}
+                  initialCode={snippet!.code}
+                  language={snippet!.language}
                   storageKey={`frc2713-playground:${lesson.slug}:${pageIndex + 1}`}
                 />
               </>

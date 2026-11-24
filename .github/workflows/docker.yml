@@ -1,7 +1,9 @@
 name: Publish container
 
 # Build and smoke test run alongside CI; only the push waits for it.
-# The steps live in FRC2713/hawk_suite/.github/workflows/publish-app.yml.
+# The hawk-learn steps live in FRC2713/hawk_suite/.github/workflows/publish-app.yml.
+# hawk-learn-runner is built, smoke-tested under hardened sandbox flags, and
+# published to ghcr.io/frc2713/hawk-learn-runner on the same sha-<commit> tag.
 
 on:
   workflow_dispatch:
@@ -15,6 +17,7 @@ permissions:
 jobs:
   verify:
     uses: ./.github/workflows/ci.yml
+
   build:
     uses: FRC2713/hawk_suite/.github/workflows/publish-app.yml@main
     permissions:
@@ -23,6 +26,7 @@ jobs:
     with:
       app: hawk-learn
       stage: build
+
   push:
     needs: [verify, build]
     uses: FRC2713/hawk_suite/.github/workflows/publish-app.yml@main
@@ -32,3 +36,84 @@ jobs:
     with:
       app: hawk-learn
       stage: push
+
+  build-runner:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      CANDIDATE: hawk-learn-runner-candidate:${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build runner candidate
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: runner/Dockerfile
+          load: true
+          platforms: linux/amd64
+          tags: ${{ env.CANDIDATE }}
+          build-args: APP_REVISION=${{ github.sha }}
+          cache-from: type=gha,scope=runner
+          cache-to: type=gha,mode=max,scope=runner
+      - name: Smoke test runner candidate
+        env:
+          IMAGE: ${{ env.CANDIDATE }}
+        run: bash scripts/smoke-runner.sh
+      - name: Save tested runner image
+        run: docker save "$CANDIDATE" -o "$RUNNER_TEMP/runner-candidate.tar"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hawk-learn-runner-candidate
+          path: ${{ runner.temp }}/runner-candidate.tar
+          retention-days: 1
+          compression-level: 1
+          if-no-files-found: error
+
+  push-runner:
+    needs: [verify, build-runner]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      packages: write
+    env:
+      CANDIDATE: hawk-learn-runner-candidate:${{ github.sha }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: hawk-learn-runner-candidate
+          path: ${{ runner.temp }}
+      - name: Load tested runner image
+        run: docker load -i "$RUNNER_TEMP/runner-candidate.tar"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish tested runner image
+        env:
+          REVISION: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [[ $GITHUB_REF != refs/heads/main && $GITHUB_REF != refs/tags/v* ]]; then
+            echo "Refusing to publish from $GITHUB_REF; run from main or a v* tag." >&2
+            exit 1
+          fi
+          image="ghcr.io/frc2713/hawk-learn-runner"
+          docker tag "$CANDIDATE" "$image:sha-$REVISION"
+          docker push "$image:sha-$REVISION"
+          digest=$(docker buildx imagetools inspect "$image:sha-$REVISION" --format '{{.Manifest.Digest}}')
+          [[ $digest =~ ^sha256:[a-f0-9]{64}$ ]]
+          echo "Published $image@$digest from $REVISION" >> "$GITHUB_STEP_SUMMARY"
+          if [[ $GITHUB_REF == refs/heads/main ]]; then
+            aliases=(main latest)
+          else
+            aliases=("${GITHUB_REF#refs/tags/v}")
+          fi
+          for tag in "${aliases[@]}"; do
+            docker tag "$CANDIDATE" "$image:$tag"
+            docker push "$image:$tag"
+          done

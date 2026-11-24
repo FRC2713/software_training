@@ -121,9 +121,25 @@ export function nextLesson(slug: string): Lesson | undefined {
   return index === -1 ? undefined : lessons[index + 1]
 }
 
-// Drives the playground panel: a page's first ```java fence is what gets
-// loaded into it. Pages can still show other code samples in their prose;
+export type RunnableLanguage = 'python' | 'java'
+
+export interface RunnableSnippet {
+  language: RunnableLanguage
+  code: string
+}
+
+// Drives the playground panel: a page's first ```python or ```java fence is
+// what gets loaded into it. Pages can still show other code samples in prose;
 // only this one is treated as "the" runnable snippet for the page.
+export function firstRunnableSnippet(markdown: string): RunnableSnippet | null {
+  const match = /```(python|java)\r?\n([\s\S]*?)```/.exec(markdown)
+  if (!match) return null
+  return {
+    language: match[1] as RunnableLanguage,
+    code: match[2].trimEnd(),
+  }
+}
+
 export function firstJavaSnippet(markdown: string): string | null {
   const match = /```java\r?\n([\s\S]*?)```/.exec(markdown)
   return match ? match[1].trimEnd() : null
@@ -167,11 +183,11 @@ export function hasMaze(markdown: string): boolean {
 // writes their own reactive solver in real Java, run through the maze round-trip.
 // The fifth, `astar`, is the same editor but its harness also hands the student
 // the whole Maze so they can plan a global shortest path (the A* lesson).
-export type SolverMode = 'random' | 'naive' | 'wall' | 'java' | 'astar'
+export type SolverMode = 'random' | 'naive' | 'wall' | 'java' | 'astar' | 'python' | 'python-astar'
 
 export function mazeSolver(markdown: string): SolverMode | null {
   const match = MAZE_FENCE.exec(markdown)
   if (!match) return null
-  const m = /solver:\s*(random|naive|wall|java|astar)/.exec(match[1])
+  const m = /solver:\s*(python-astar|python|random|naive|wall|java|astar)/.exec(match[1])
   return m ? (m[1] as SolverMode) : null
 }
