@@ -1,122 +1,117 @@
 ---
-title: "true, false, and combining conditions"
-goal: "Treat yes/no answers as real values and combine them with &&, ||, and ! to make safe decisions."
+title: "True, False, and combining conditions"
+goal: "Treat yes/no answers as real values and combine them with and, or, and not to make safe decisions."
 order: 160
-section: "Java Fundamentals"
+section: "Python Fundamentals"
 ---
 
 # Yes and no are values too
 
-Back in [lesson {n}](#/lesson/09-if-statements), an `if` asked a question like `score > 10` and acted on the
-answer. That answer is a real value with a type of its own: a **`boolean`**,
-which is either `true` or `false` — the only two it can ever be. Every
-comparison *produces* one:
+Back in [lesson {n}](#/lesson/09-if-statements), an `if` asked a question like
+`score > 10` and acted on the answer. That answer is a real value with a type of
+its own: a **`bool`**, which is either `True` or `False`. Those are the only two
+boolean values in Python, and both start with a capital letter. Every comparison
+*produces* one:
 
-```java
-int score = 15;
-System.out.println(score > 10);
-System.out.println(score == 20);
-System.out.println(score < 5);
+```python
+score = 15
+print(score > 10)
+print(score == 20)
+print(score < 5)
 ```
 
-Run it: `true`, `false`, `false`. So `score > 10` isn't magic that only works
-inside an `if` — it's an expression that evaluates to `true` or `false`, and
-you can store it in a variable just like a number:
+Run it: `True`, `False`, `False`. So `score > 10` is not magic that only works
+inside an `if`. It is an expression that evaluates to `True` or `False`, and you
+can store it in a variable just like a number:
 
-```java
-boolean enabled = true;
-boolean atLimit = false;
-System.out.println(enabled);
+```python
+enabled = True
+at_limit = False
+print(enabled)
 ```
 
-Booleans are how a robot represents every yes/no fact about itself: *is the
-robot enabled? is the arm at its limit? is the button pressed?* Each is one
-`true`/`false` value. An `if` simply runs its block when the boolean is `true`.
+Booleans are how a robot represents every yes/no fact about itself. Is the robot
+enabled? Is the arm at its limit? Is the button pressed? Each is one
+`True`/`False` value, and an `if` runs its block when the boolean is `True`.
 
-# Two questions at once: && / ||
+# Two questions at once: and / or
 
-Real decisions rarely hinge on a single fact. "Run the shooter **only if** it's
-spun up **and** we have a game piece." Java joins conditions with **`&&`**
-(and) and **`||`** (or):
+Real decisions rarely hinge on a single fact. "Run the shooter **only if** it is
+spun up **and** we have a game piece." Python joins conditions with the words
+**`and`** and **`or`**:
 
-- `a && b` is `true` only when **both** are true.
-- `a || b` is `true` when **at least one** is true.
+- `a and b` is `True` only when **both** are true.
+- `a or b` is `True` when **at least one** is true.
 
-```java
-boolean spunUp = true;
-boolean hasPiece = true;
-System.out.println(spunUp && hasPiece);
+```python
+spun_up = True
+has_piece = True
+print(spun_up and has_piece)
 
-double battery = 11.5;
-System.out.println(battery > 12 || battery > 11);
+battery = 11.5
+print(battery > 12 or battery > 11)
 ```
 
-The first prints `true` — both facts hold, so the shooter's clear to fire. In
-the second, the battery isn't above 12, but it *is* above 11, and `||` only
-needs one side to be true, so you get `true`.
+The first prints `True` because both facts hold, so the shooter is clear to
+fire. In the second, the battery is not above 12, but it *is* above 11, and `or`
+only needs one side to be true, so you get `True`.
 
-Put it to work in a real safety check — a motor that should only run when the
-system is enabled **and** hasn't hit its limit:
+Put it to work in a real safety check: a motor that should only run when the
+system is enabled **and** has not hit its limit:
 
-```java
-boolean enabled = true;
-boolean atLimit = false;
-if (enabled && atLimit == false) {
-    System.out.println("Motor running");
-} else {
-    System.out.println("Motor held");
-}
+```python
+enabled = True
+at_limit = False
+if enabled and at_limit == False:
+    print("Motor running")
+else:
+    print("Motor held")
 ```
 
-# !: flipping an answer
+# not: flipping an answer
 
-`atLimit == false` works, but there's a cleaner way to say "the opposite of
-this." **`!`** (read it as "not") flips a boolean: `!true` is `false`, and
-`!false` is `true`.
+`at_limit == False` works, but there is a cleaner way to say "the opposite of
+this." **`not`** flips a boolean: `not True` is `False`, and `not False` is
+`True`.
 
-```java
-boolean atLimit = false;
-System.out.println(!atLimit);
+```python
+at_limit = False
+print(not at_limit)
 ```
 
-So `!atLimit` reads as "not at the limit" — which is exactly the English you
+So `not at_limit` reads as "not at the limit," which is the exact English you
 meant. Rewrite the safety check with it and it reads like a sentence:
 
-```java
-boolean enabled = true;
-boolean atLimit = false;
-if (enabled && !atLimit) {
-    System.out.println("Motor running");
-} else {
-    System.out.println("Motor held");
-}
+```python
+enabled = True
+at_limit = False
+if enabled and not at_limit:
+    print("Motor running")
+else:
+    print("Motor held")
 ```
 
-"If enabled and not at the limit, run." That's the goal of good conditions:
-code that says what it means. Flip `enabled` to `false`, or `atLimit` to
-`true`, and confirm the motor is held every time either safety fails.
+"If enabled and not at the limit, run." That is the goal of good conditions:
+code that says what it means. Flip `enabled` to `False`, or `at_limit` to
+`True`, and confirm the motor is held every time either safety fails.
 
-## Comparing text: use .equals, not ==
+## Comparing text
 
-One trap to disarm before the next lessons, where programs start making
-decisions based on text. `==` is for comparing **numbers and booleans**. For
-**Strings**, always ask with **`.equals(...)`**:
+In Python, `==` compares **strings** the same way it compares numbers and
+booleans:
 
-```java
-String mode = "climb";
-System.out.println(mode.equals("climb"));
-System.out.println(mode.equals("shoot"));
+```python
+mode = "climb"
+print(mode == "climb")
+print(mode == "shoot")
+print(mode == "Climb")
 ```
 
-That prints `true` then `false`. Writing `mode == "climb"` will sometimes
-*look* like it works and then silently fail in a real program, because `==` on
-Strings asks "are these the exact same object in memory?" rather than "do
-these spell the same thing?" — a distinction you don't want your robot's
-behavior hanging on. The habit to build now: **numbers use `==`, text uses
-`.equals`**.
+That prints `True`, `False`, `False`. Watch that last line: string comparisons
+are case-sensitive, so `"climb"` and `"Climb"` do not match.
 
-Your turn: a climber should only extend when `enabled` is true, `atLimit` is
-false, **and** the match timer `timeLeft` is under 30 seconds. Write the single
-`if` (using `&&` and `!`) that prints `"Climb!"` only when all three hold. Set
-up variables and test it with a few combinations — especially the ones that
-should *refuse* to climb.
+Your turn: a climber should only extend when `enabled` is `True`, `at_limit` is
+`False`, **and** the match timer `time_left` is under 30 seconds. Write the
+single `if` (using `and` and `not`) that prints `"Climb!"` only when all three
+hold. Set up variables and test it with a few combinations, especially the ones
+that should *refuse* to climb.

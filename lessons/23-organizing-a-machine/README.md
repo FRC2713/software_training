@@ -7,140 +7,136 @@ section: "State Machines"
 
 # Name your states with an enum
 
-Our machines used bare strings like `"shooting"` for state names. That works
-until you make a typo — and typos in strings are a nasty, silent bug:
+In the last lesson we used bare strings like `"shooting"` for state names. That
+works until you make a typo, and typos in strings are a nasty, silent bug:
 
-```java
-String state = "loaded";
-if (state.equals("loded")) {
-    System.out.println("this never runs, and Java never warns you");
-}
-System.out.println("done");
+```python
+state = "loaded"
+if state == "loded":
+    print("this never runs, and Python never warns you")
+print("done")
 ```
 
-Run it. Java happily compares `"loaded"` to the misspelled `"loded"`, decides
-they're not equal, and moves on — no error, just a branch that mysteriously
-never fires. In a robot, that's a mechanism that silently refuses to shoot.
+Run it. Python happily compares `"loaded"` to the misspelled `"loded"`, decides
+they're not equal, and moves on. There's no error, just a branch that
+mysteriously never fires. In a robot, that's a mechanism that silently refuses
+to shoot.
 
-Java has a purpose-built fix: an **`enum`** — a type you define yourself, whose
-only possible values are the ones you list:
+You saw the fix back in [lesson {n}](#/lesson/21-state-machines-in-code): an **`Enum`**, a type you define
+yourself whose only possible values are the ones you list:
 
-```java
-enum HandlerState { EMPTY, INTAKING, LOADED, SHOOTING }
+```python
+from enum import Enum
 
-public class Main {
-    public static void main(String[] args) {
-        HandlerState state = HandlerState.LOADED;
-        if (state == HandlerState.LODED) {
-            System.out.println("ready to shoot!");
-        }
-    }
-}
+class HandlerState(Enum):
+    EMPTY = "empty"
+    INTAKING = "intaking"
+    LOADED = "loaded"
+    SHOOTING = "shooting"
+
+state = HandlerState.LOADED
+if state == HandlerState.LOADED:
+    print("ready to shoot!")
 ```
 
-Run *that* and it doesn't even compile — the error points straight at the
-misspelled `LODED` before the program takes a single step. That's the whole
-point: a misspelled string fails silently at the worst possible moment, but a
-misspelled **enum value** fails loudly before the code can run at all. Fix
-`LODED` to `LOADED` and it works.
+Run it, then change `HandlerState.LOADED` in the `if` line to
+`HandlerState.LODED` and run it again. Python stops right away with an
+`AttributeError` pointing straight at the misspelled `LODED`. That's the whole
+point: a misspelled string fails silently at the worst possible moment, while a
+misspelled **enum value** fails loudly right where the typo is. Fix `LODED`
+back to `LOADED` and it works.
 
 Two details worth noticing:
 
-- `HandlerState` is a **type**, like `int` or `String` — but one *you*
-  invented, and a variable of that type can only ever hold one of the four
-  listed values. The machine's rule "you're always in exactly one of these
-  states" is now enforced by the compiler.
-- Enums are compared with `==` — the one place text-like values get to use it
-  safely, because there's exactly one `HandlerState.LOADED` in the whole
-  program. (Strings still need `.equals`, as [lesson {n}](#/lesson/16-booleans) warned.)
+- `HandlerState` is a **type** you invented, and its members are the only legal
+  states. The machine's rule "you're always in one of these states" is spelled
+  out in one place.
+- Enums are compared with `==` (from [lesson {n}](#/lesson/16-booleans)), or matched with `match`,
+  so your conditions stay short and readable.
 
-This is exactly how real FRC robot code names its states, so everything from
-here on is the real-world shape.
+This is how real robot code names its states, so everything from here on uses
+this shape.
 
 # Do something the moment you enter a state
 
-Often a state needs an action to happen **once, right as you enter it** — spin
-the shooter up, start the intake motor, reset a timer. That's an **enter
-action**. Keep it separate from the transition logic:
+Often a state needs an action to happen **once, right as you enter it**, like
+spinning the shooter up, starting the intake motor, or resetting a timer.
+That's an **enter action**. Keep it separate from the transition logic:
 
-```java
-enum HandlerState { EMPTY, INTAKING, LOADED, SHOOTING }
+```python
+from enum import Enum
 
-public class Main {
-    static void onEnter(HandlerState state) {
-        if (state == HandlerState.INTAKING) {
-            System.out.println("  -> intake motor ON");
-        } else if (state == HandlerState.SHOOTING) {
-            System.out.println("  -> shooter spinning up!");
-        } else if (state == HandlerState.EMPTY) {
-            System.out.println("  -> motors off, waiting");
-        }
-    }
+class HandlerState(Enum):
+    EMPTY = "empty"
+    INTAKING = "intaking"
+    LOADED = "loaded"
+    SHOOTING = "shooting"
 
-    public static void main(String[] args) {
-        // When a transition happens, run the enter action for the new state:
-        HandlerState newState = HandlerState.SHOOTING;
-        onEnter(newState);
-    }
-}
+def on_enter(state):
+    if state == HandlerState.INTAKING:
+        print("  -> intake motor ON")
+    elif state == HandlerState.SHOOTING:
+        print("  -> shooter spinning up!")
+    elif state == HandlerState.EMPTY:
+        print("  -> motors off, waiting")
+
+# When a transition happens, run the enter action for the new state:
+new_state = HandlerState.SHOOTING
+on_enter(new_state)
 ```
 
 Run it and you'll see the shooter spin-up message. The idea: transitions decide
 *where* you go; enter actions decide *what fires* when you get there. Doing the
-spin-up on **enter** means it happens exactly once per shot, not every tick
-while you sit in `SHOOTING` — a distinction that matters a lot on a real robot.
+spin-up on **enter** means it happens once per shot, not every tick while you
+sit in `SHOOTING`. That distinction matters a lot on a real robot.
 
 # Bundle it into a class
 
-Right now the state lives in a loose variable and the logic in loose methods.
-You already know the fix for that from [the Objects lessons](#/lesson/17-classes-and-objects): a
-**field** for the data, a **constructor** to set its starting value, and
-**methods** that read and write it through `this`. Applied to a state
-machine, it looks like this:
+Right now the state lives in a loose variable and the logic in loose functions.
+You already know the fix for that from [the Objects lessons](#/lesson/17-classes-and-objects): an
+**attribute** for the data, an `__init__` method to set its starting value, and
+**methods** that read and write it through `self`. Applied to a state machine,
+it looks like this:
 
-```java
-enum HandlerState { EMPTY, INTAKING, LOADED, SHOOTING }
+```python
+from enum import Enum
 
-class GamePieceHandler {
-    HandlerState state;
+class HandlerState(Enum):
+    EMPTY = "empty"
+    INTAKING = "intaking"
+    LOADED = "loaded"
+    SHOOTING = "shooting"
 
-    GamePieceHandler() {
-        this.state = HandlerState.EMPTY;
-    }
+class GamePieceHandler:
+    def __init__(self):
+        self.state = HandlerState.EMPTY
 
-    void update(String event) {
-        if (this.state == HandlerState.EMPTY && event.equals("button")) {
-            this.state = HandlerState.INTAKING;
-        } else if (this.state == HandlerState.INTAKING && event.equals("sensor")) {
-            this.state = HandlerState.LOADED;
-        } else if (this.state == HandlerState.LOADED && event.equals("button")) {
-            this.state = HandlerState.SHOOTING;
-        } else if (this.state == HandlerState.SHOOTING && event.equals("done")) {
-            this.state = HandlerState.EMPTY;
-        }
-    }
-}
+    def update(self, event):
+        if self.state == HandlerState.EMPTY and event == "button":
+            self.state = HandlerState.INTAKING
+        elif self.state == HandlerState.INTAKING and event == "sensor":
+            self.state = HandlerState.LOADED
+        elif self.state == HandlerState.LOADED and event == "button":
+            self.state = HandlerState.SHOOTING
+        elif self.state == HandlerState.SHOOTING and event == "done":
+            self.state = HandlerState.EMPTY
 
-public class Main {
-    public static void main(String[] args) {
-        GamePieceHandler handler = new GamePieceHandler();
-        System.out.println(handler.state);
-        handler.update("button");
-        handler.update("sensor");
-        System.out.println(handler.state);
-    }
-}
+handler = GamePieceHandler()
+print(handler.state.name)
+handler.update("button")
+handler.update("sensor")
+print(handler.state.name)
 ```
 
-Nothing here is new — `HandlerState state;` is a field, `GamePieceHandler()`
-is a constructor, `this.state` reads and writes that field — just aimed at an
-enum instead of the plain data you practiced on earlier. Run it: the handler
-starts `EMPTY`, and after a `button` then a `sensor` it's `LOADED` — and it
-stayed `LOADED` between the two calls because the object remembers its own
-state. That memory is why a class beats loose variables once you have more
-than one machine — which is exactly where we go next.
+Nothing here is new. `self.state` is an attribute, `__init__` sets its starting
+value, and `update` reads and writes `self.state`. We just aimed it at an enum
+instead of the plain data you practiced on earlier. Run it: the handler starts
+`EMPTY`, and after a `button` then a `sensor` it's `LOADED`. It stayed `LOADED`
+between the two calls because the object remembers its own state. That memory
+is why a class beats loose variables once you have more than one machine, which
+is where we go next.
 
-Your turn: add a `report()` method to the class that prints the current state
-with a friendly label (an `if/else if` over `this.state`). Create a handler
-and drive it through a full load-and-shoot cycle, calling `report()` after
-each event.
+Your turn: add a `report(self)` method to the class that prints the current
+state with a friendly label (an `if`/`elif` over `self.state`). Create a
+handler and drive it through a full load-and-shoot cycle, calling `report()`
+after each event.

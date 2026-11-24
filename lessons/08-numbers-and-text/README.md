@@ -1,83 +1,49 @@
 ---
-title: "Types — numbers and text"
+title: "Types: numbers and text"
 goal: "Tell the basic kinds of data apart, and convert between them."
 order: 80
-section: "Java Fundamentals"
+section: "Python Fundamentals"
 ---
 
 # Numbers are not text
 
-The block editor quietly hid something from you: it only ever dealt with
-numbers. Real programs juggle different **kinds** of data — [lesson {n}](#/lesson/07-variables) already
-made you name the kind every time you declared a variable. That kind is the
-**type**, and the two you'll meet first are:
+The block editor quietly hid something from you: it only ever dealt with numbers. Real programs juggle different **kinds** of data. Every value in Python has a **type** ([lesson {n}](#/lesson/07-variables)), and the two you'll meet first are:
 
-- **`int`** — a whole number you can do math with: `7`, `42`, `-3`.
-- **`String`** — text: a run of characters wrapped in quotes: `"7"`, `"hello"`,
-  `"FRC 2713"`.
+- **`int`**: a whole number you can do math with, like `7`, `42`, `-3`.
+- **`str`**: text, a run of characters wrapped in quotes, like `"7"`, `"hello"`, `"FRC 2713"`.
 
-They look similar but behave completely differently. Watch:
+They look similar but behave differently. Watch:
 
-```java
-System.out.println(3 + 4);
-System.out.println("3" + "4");
+```python
+print(3 + 4)
+print("3" + "4")
 ```
 
-The first line prints `7` — that's math. The second prints `34`, because with
-text, `+` means **stick these together** (you used it that way in [lesson {n}](#/lesson/07-variables)),
-not "add." `"3"` and `"4"` aren't numbers to Java; they're just characters that
-happen to look like digits, so it glues them into `"34"`.
+The first line prints `7`, which is math. The second prints `34`, because with text, `+` means **stick these together** (you used it that way in [lesson {n}](#/lesson/07-variables)), not "add." `"3"` and `"4"` aren't numbers to Python; they're characters that happen to look like digits, so Python glues them into `"34"`.
 
-Run it. The lesson: the *quotes* decide everything. `7` is a number you can add;
-`"7"` is text you can only join. Getting these mixed up is one of the most
-common early bugs, so whenever something misbehaves, ask: *is this a number, or
-text that looks like a number?*
+Run it. The lesson: the *quotes* decide everything. `7` is a number you can add; `"7"` is text you can join. Getting these mixed up is one of the most common early bugs, so whenever something misbehaves, ask: *is this a number, or text that looks like a number?*
 
 # Text that looks like a number
 
-Sometimes a value *looks* like a number but is really text — because it's
-wrapped in quotes. Here's the trap, and it's sneakier than a crash:
+Sometimes a value *looks* like a number but is really text because it's wrapped in quotes, like `"24"`. If you try `"24" + 1` in Python, it stops with a `TypeError` because Python refuses to guess whether you meant `"241"` or `25`.
 
-```java
-String age = "24";
-System.out.println(age + 1);
+The fix is to **convert** the text into a real number with `int(...)`:
+
+```python
+age_text = "24"
+age = int(age_text)
+print(f"Next year you will be {age + 1}")
 ```
 
-Run that. It doesn't fail — it prints `241`. Java saw text on the left of the
-`+`, so it treated the `1` as text too and **glued** instead of adding. No
-error, no warning, just a silently wrong answer — which in a program is far
-more dangerous than a crash, because nothing tells you to go looking for it.
+Using a separate name for the converted number (`age_text` for the `str`, `age` for the `int`) keeps the program easy to read. You can tell at a glance what is text and what is a number, building on the naming habit from [lesson {n}](#/lesson/07-variables). Inside the f-string, Python evaluates `age + 1` first before inserting the result, just like inner-first evaluation in [lesson {n}](#/lesson/01-flowcharts).
 
-The fix is to **convert** the text into a real number with
-`Integer.parseInt(...)`:
+Conversion goes the other way too: `str(42)` turns a number into the text `"42"`, which is handy whenever you want to join a number onto a string with `+` instead of an f-string.
 
-```java
-String ageText = "24";
-int age = Integer.parseInt(ageText);
-System.out.println("Next year you will be " + (age + 1));
+One more type while we're here: numbers with a decimal point, like a motor voltage of `12.5`, use the type **`float`** (short for *floating-point number*):
+
+```python
+voltage = 12.5
+print(f"Battery: {voltage} volts")
 ```
 
-Notice we needed a **second variable**. `ageText` is a `String` and its type
-can never change — that's the deal Java made with you in [lesson {n}](#/lesson/07-variables). So the
-converted number gets its own name, `age`, with its own type, `int`. One name
-per kind of thing keeps the program honest: you can always tell what's text
-and what's a number just by reading the declarations. (The parentheses around
-`(age + 1)` make the math happen *before* the joining — remember inner-first
-from [lesson {n}](#/lesson/01-flowcharts).)
-
-Conversion goes the other way too: `String.valueOf(42)` turns a number into
-text — though as you saw, gluing a number onto a string with `+` usually does
-that for you.
-
-One more type while we're here: numbers with a decimal point, like a motor
-voltage of `12.5`, use the type **`double`**:
-
-```java
-double voltage = 12.5;
-System.out.println("Battery: " + voltage + " volts");
-```
-
-Your turn: start with the text `"9"`, convert it with `Integer.parseInt`, and
-print that number **plus 5**. If you see `95` instead of `14`, you've just
-met the glue-instead-of-add bug from the top of this page — look at where the
-conversion happens.
+Your turn: start with the text `"9"`, convert it with `int(...)`, and print that number **plus 5**. Then try removing `int(...)` for a moment and running it to see the `TypeError` Python gives when you mix text and numbers.

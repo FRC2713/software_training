@@ -1,5 +1,5 @@
 ---
-title: "Capstone 1 — design a state machine"
+title: "Capstone 1: design a state machine"
 goal: "Take a real mechanism from words to a diagram to working code you can simulate."
 order: 250
 section: "State Machines"
@@ -7,8 +7,8 @@ section: "State Machines"
 
 # From a mechanism to a diagram
 
-Everything so far handed you the states and transitions. The real skill — the
-one you'll use all season — is **designing** them yourself. It's a repeatable
+Everything so far handed you the states and transitions. The real skill, the
+one you'll use all season, is **designing** them yourself. It's a repeatable
 process, and it starts on paper, not in code.
 
 Take a **climber**: it stows flat, extends a hook up to the bar, hangs there,
@@ -26,119 +26,111 @@ EXTENDED   --button--->  RETRACTING
 RETRACTING --at_bottom-> STOWED
 ```
 
-That's the exact diagram you'd build with blocks in [lesson {n}](#/lesson/20-state-machines) — states, events,
-arrows, and (just as important) *no* arrow for anything unsafe. Notice there's
-no way to go straight from `STOWED` to `EXTENDED`: you must pass through
-`EXTENDING`. The design forbids the dangerous shortcut.
+That's the exact diagram you'd build with blocks in [lesson {n}](#/lesson/20-state-machines): states,
+events, arrows, and (just as important) *no* arrow for anything unsafe. Notice
+there's no way to go straight from `STOWED` to `EXTENDED`. You must pass
+through `EXTENDING`. The design forbids the dangerous shortcut.
 
 # Translate the diagram to code
 
-Now it's mechanical — the diagram maps straight onto the class shape from
-[lesson {n}](#/lesson/23-organizing-a-machine): an enum for the states, a constructor for the start, an `update`
-with one branch per arrow, and enter actions for what should fire once.
+Now it's mechanical. The diagram maps straight onto the class shape from
+[lesson {n}](#/lesson/23-organizing-a-machine): an enum for the states, an `__init__` for the start, an
+`update` with one branch per arrow, and enter actions for what should fire once.
 
-```java
-enum ClimberState { STOWED, EXTENDING, EXTENDED, RETRACTING }
+```python
+from enum import Enum
 
-class Climber {
-    ClimberState state;
+class ClimberState(Enum):
+    STOWED = "stowed"
+    EXTENDING = "extending"
+    EXTENDED = "extended"
+    RETRACTING = "retracting"
 
-    Climber() {
-        this.state = ClimberState.STOWED;
-    }
+class Climber:
+    def __init__(self):
+        self.state = ClimberState.STOWED
 
-    void update(String event) {
-        ClimberState old = this.state;
-        if (this.state == ClimberState.STOWED && event.equals("button")) {
-            this.state = ClimberState.EXTENDING;
-        } else if (this.state == ClimberState.EXTENDING && event.equals("at_top")) {
-            this.state = ClimberState.EXTENDED;
-        } else if (this.state == ClimberState.EXTENDED && event.equals("button")) {
-            this.state = ClimberState.RETRACTING;
-        } else if (this.state == ClimberState.RETRACTING && event.equals("at_bottom")) {
-            this.state = ClimberState.STOWED;
-        }
-        if (this.state != old) {
-            onEnter();
-        }
-    }
+    def update(self, event):
+        old = self.state
+        if self.state == ClimberState.STOWED and event == "button":
+            self.state = ClimberState.EXTENDING
+        elif self.state == ClimberState.EXTENDING and event == "at_top":
+            self.state = ClimberState.EXTENDED
+        elif self.state == ClimberState.EXTENDED and event == "button":
+            self.state = ClimberState.RETRACTING
+        elif self.state == ClimberState.RETRACTING and event == "at_bottom":
+            self.state = ClimberState.STOWED
+        if self.state != old:
+            self.on_enter()
 
-    void onEnter() {
-        if (this.state == ClimberState.EXTENDING) {
-            System.out.println("  -> motor up");
-        } else if (this.state == ClimberState.RETRACTING) {
-            System.out.println("  -> motor down, hang on!");
-        }
-    }
-}
+    def on_enter(self):
+        if self.state == ClimberState.EXTENDING:
+            print("  -> motor up")
+        elif self.state == ClimberState.RETRACTING:
+            print("  -> motor down, hang on!")
 
-public class Main {
-    public static void main(String[] args) {
-        Climber climber = new Climber();
-        climber.update("button");
-        System.out.println(climber.state);
-    }
-}
+climber = Climber()
+climber.update("button")
+print(climber.state.name)
 ```
 
 Read `update`: it remembers the `old` state, tries each transition, and if the
-state actually changed, fires `onEnter` for the new one. Every line traces back
-to a piece of the diagram. Run it — one `button` moves `STOWED → EXTENDING`
+state actually changed, fires `on_enter` for the new one. Every line traces
+back to a piece of the diagram. Run it: one `button` moves `STOWED → EXTENDING`
 and prints the motor-up action.
 
 # Simulate it, then build your own
 
-Drive your machine with an array of events, the way a match would, and print
+Drive your machine with a list of events, the way a match would, and print
 each step:
 
-```java
-enum ClimberState { STOWED, EXTENDING, EXTENDED, RETRACTING }
+```python
+from enum import Enum
 
-class Climber {
-    ClimberState state = ClimberState.STOWED;
+class ClimberState(Enum):
+    STOWED = "stowed"
+    EXTENDING = "extending"
+    EXTENDED = "extended"
+    RETRACTING = "retracting"
 
-    void update(String event) {
-        if (this.state == ClimberState.STOWED && event.equals("button")) {
-            this.state = ClimberState.EXTENDING;
-        } else if (this.state == ClimberState.EXTENDING && event.equals("at_top")) {
-            this.state = ClimberState.EXTENDED;
-        } else if (this.state == ClimberState.EXTENDED && event.equals("button")) {
-            this.state = ClimberState.RETRACTING;
-        } else if (this.state == ClimberState.RETRACTING && event.equals("at_bottom")) {
-            this.state = ClimberState.STOWED;
-        }
-    }
-}
+class Climber:
+    def __init__(self):
+        self.state = ClimberState.STOWED
 
-public class Main {
-    public static void main(String[] args) {
-        Climber climber = new Climber();
-        String[] events = {"button", "button", "at_top", "button", "at_bottom"};
-        for (String event : events) {
-            climber.update(event);
-            System.out.println(event + " -> " + climber.state);
-        }
-    }
-}
+    def update(self, event):
+        if self.state == ClimberState.STOWED and event == "button":
+            self.state = ClimberState.EXTENDING
+        elif self.state == ClimberState.EXTENDING and event == "at_top":
+            self.state = ClimberState.EXTENDED
+        elif self.state == ClimberState.EXTENDED and event == "button":
+            self.state = ClimberState.RETRACTING
+        elif self.state == ClimberState.RETRACTING and event == "at_bottom":
+            self.state = ClimberState.STOWED
+
+climber = Climber()
+events = ["button", "button", "at_top", "button", "at_bottom"]
+for event in events:
+    climber.update(event)
+    print(f"{event} -> {climber.state.name}")
 ```
 
-Watch the second `"button"` do nothing — while `EXTENDING`, the climber
-ignores the button and waits for `at_top`, just like the diagram says. That's
-the safety you designed in, running in code.
+Watch the second `"button"` do nothing. While `EXTENDING`, the climber ignores
+the button and waits for `at_top`, just like the diagram says. That's the
+safety you designed in, running in code.
 
-**Your Capstone 1.** Pick a real mechanism from this year's robot — an arm, a
-turret, an indexer, whatever your team is building. Then:
+**Your Capstone 1.** Pick a real mechanism from this year's robot, like an arm,
+a turret, or an indexer. Then:
 
 1. Write its states, its events, and its arrows as a diagram (page 1's three
    questions).
 2. Turn it into an enum and a class with an `update` and at least one enter
    action.
-3. Simulate it with an event array and confirm it does the right thing —
-   including *ignoring* the events that would be unsafe.
+3. Simulate it with an event list and confirm it does the right thing, including
+   *ignoring* the events that would be unsafe.
 
-Do that, and you haven't just finished the lessons — you've written the kind of
+Do that, and you haven't just finished the lessons. You've written the kind of
 code your robot will actually run this season.
 
 Keep this mechanism around. Once you've picked up a few more tools in the
-Advanced Java section, Capstone 2 will have you come back and upgrade this
+Advanced Python section, Capstone 2 will have you come back and upgrade this
 exact class.

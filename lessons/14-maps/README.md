@@ -1,5 +1,5 @@
 ---
-title: "Maps"
+title: "Dictionaries"
 goal: "Store values under names you choose instead of numbered positions, and look them up by those names."
 order: 140
 section: "Data Structures"
@@ -7,104 +7,94 @@ section: "Data Structures"
 
 # Labels instead of positions
 
-An array is great when order is all you need. But `motors[2]` doesn't tell you
-*what* motor that is — you just have to remember that position 2 is the intake.
-Wouldn't it be nicer to say `motors.get("intake")`?
+A list is great when order is all you need. But `motors[2]` does not tell you
+*which* motor that is. You just have to remember that position 2 is the intake.
+It is much clearer to write `motor_speeds["intake"]`.
 
-That's a **map**: a group of values where each one is filed under a **label you
-pick** (called a **key**) instead of a numbered position. Java's everyday map
-is the **`HashMap`**, and you put entries in with `put` and read them back
-with `get`:
+That is a **dictionary** (`dict`): a group of values where each one is filed
+under a **label you pick**, called a **key**, instead of a numbered position.
+You write a dictionary with curly braces and `key: value` pairs:
 
-```java
-HashMap<String, Double> motorSpeeds = new HashMap<>();
-motorSpeeds.put("intake", 0.8);
-motorSpeeds.put("shooter", 1.0);
-motorSpeeds.put("climber", 0.5);
-System.out.println(motorSpeeds.get("shooter"));
-System.out.println(motorSpeeds.get("intake"));
+```python
+motor_speeds = {
+    "intake": 0.8,
+    "shooter": 1.0,
+    "climber": 0.5,
+}
+print(motor_speeds["shooter"])
+print(motor_speeds["intake"])
 ```
 
-The type `HashMap<String, Double>` names both halves: keys are `String`s,
-values are `Double`s (that's `double` from [lesson {n}](#/lesson/08-numbers-and-text), dressed up so it can
-live in a collection — same idea as `ArrayList<Integer>` in [lesson {n}](#/lesson/13-arraylists)).
-`motorSpeeds.get("shooter")` hands back `1.0`. It reads like plain English, and
-you never have to remember which position is which. A map is perfect for
-**robot configuration**: settings filed under names you'll recognize six
-months from now.
+Here the keys are strings (`"intake"`, `"shooter"`, `"climber"`) and the values
+are floats from [lesson {n}](#/lesson/08-numbers-and-text). Looking up
+`motor_speeds["shooter"]` hands back `1.0`. It reads like plain English, and you
+never have to memorize which slot is which. Dictionaries are a natural fit for
+**robot configuration**, where settings live under names you will still
+recognize six months later.
 
-Ask for a key that isn't there — `motorSpeeds.get("drive")` — and you get back
-**`null`**, Java's word for "no value here." It doesn't crash on the spot,
-which is a mixed blessing: the `null` travels onward and blows up *later* if
-you try to use it, so check your spelling of keys carefully.
-
-One housekeeping note: `HashMap` and `ArrayList` live in Java's utility
-toolbox, which real programs bring in with a line at the top of the file —
-`import java.util.*;`. The playground adds that line to its shell for you, so
-these snippets just work.
+Ask for a key that does not exist with square brackets, like
+`motor_speeds["drive"]`, and Python stops with a `KeyError`. If a key might be
+missing, use `.get(...)` instead: `motor_speeds.get("drive")` returns `None`,
+Python's value for "nothing here." You can also pass a fallback value, like
+`motor_speeds.get("drive", 0.0)`, which returns `0.0` when `"drive"` is missing.
 
 # Reading, changing, adding
 
-You change a value the same way you added it — `put` to the same key replaces
-what was there:
+You change a value the same way you update a list slot, using its key in square
+brackets:
 
-```java
-HashMap<String, Double> config = new HashMap<>();
-config.put("maxSpeed", 3.0);
-config.put("rampTime", 0.25);
-
-config.put("maxSpeed", 4.5);
-System.out.println(config.get("maxSpeed"));
+```python
+config = {"max_speed": 3.0, "ramp_time": 0.25}
+config["max_speed"] = 4.5
+print(config["max_speed"])
 ```
 
-And `put` on a key that **doesn't exist yet** *adds* a new entry — the same
-call does double duty:
+Assigning to a key that **does not exist yet** adds a new entry. The same syntax
+does both jobs:
 
-```java
-HashMap<String, Double> config = new HashMap<>();
-config.put("maxSpeed", 3.0);
-config.put("shooterSpeed", 1.0);
-System.out.println(config);
+```python
+config = {"max_speed": 3.0}
+config["shooter_speed"] = 1.0
+print(config)
 ```
 
 `config` started with one entry and now has two. To check whether a key exists
-before you reach for it — avoiding that sneaky `null` — ask with
-`containsKey`:
+before you look it up, use `in` or `.get(...)`:
 
-```java
-HashMap<String, Double> config = new HashMap<>();
-config.put("maxSpeed", 3.0);
-System.out.println(config.containsKey("maxSpeed"));
-System.out.println(config.containsKey("shooter"));
+```python
+config = {"max_speed": 3.0}
+print("max_speed" in config)
+print("shooter" in config)
+print(config.get("shooter", 0.0))
 ```
 
-That prints `true` then `false`. It's the safe way to look before you leap.
+That prints `True`, `False`, and `0.0`. Checking with `in` or providing a
+default with `.get(...)` keeps missing keys from crashing your program.
 
-# Looping over a map
+# Looping over a dictionary
 
-Like an array, a map can be walked with a for-each loop ([lesson {n}](#/lesson/12-arrays)). Loop
-over its `keySet()` — the collection of every key — and use each key to fetch
-its value:
+Like a list in [lesson {n}](#/lesson/12-arrays), you can walk through a
+dictionary with a `for` loop. Call `.items()` to get each key and its matching
+value together:
 
-```java
-HashMap<String, Double> motorSpeeds = new HashMap<>();
-motorSpeeds.put("intake", 0.8);
-motorSpeeds.put("shooter", 1.0);
-motorSpeeds.put("climber", 0.5);
-
-for (String name : motorSpeeds.keySet()) {
-    System.out.println(name + " runs at " + motorSpeeds.get(name));
+```python
+motor_speeds = {
+    "intake": 0.8,
+    "shooter": 1.0,
+    "climber": 0.5,
 }
+
+for name, speed in motor_speeds.items():
+    print(f"{name} runs at {speed}")
 ```
 
-Each pass fills `name` with one key, and `get(name)` fetches the matching
-value — a tidy report of the whole config in a few lines. This is how you'd
-dump every setting on the robot to the console to check it before a match.
-(One heads-up: a `HashMap` doesn't promise to keep entries in the order you
-added them — it files things for fast lookup, not for tidy printing.)
+Each pass fills `name` with the key and `speed` with the value, giving you a
+clean report of the whole config in two lines. This is how you dump every
+setting on a robot to the console before a match. Python dictionaries also
+remember the order you added keys, so the output stays predictable.
 
-Your turn: build a map called `sensors` with three named readings — `"front"`
-→ `12.0`, `"left"` → `30.0`, `"back"` → `8.0`. Then loop over its keys and
-print a warning line only for sensors reading **below 10** (an `if` inside the
-`for` again). Which combination from the last few lessons is this? A map, a
-loop, and a condition working together — that's what real programs look like.
+Your turn: build a dictionary called `sensors` with three named readings:
+`"front"` at `12.0`, `"left"` at `30.0`, and `"back"` at `8.0`. Loop over
+`sensors.items()` and print a warning line only for sensors reading **below 10**
+(an `if` inside the `for` again). A dictionary, a loop, and a condition working
+together is what real programs look like.

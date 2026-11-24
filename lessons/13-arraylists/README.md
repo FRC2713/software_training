@@ -1,122 +1,108 @@
 ---
-title: "ArrayLists"
-goal: "Hold a group that grows and shrinks while the program runs, instead of a fixed number of slots."
+title: "Growing and changing lists"
+goal: "Build lists while a program runs, add and remove items, and pull out slices."
 order: 130
 section: "Data Structures"
 ---
 
-# A row that can grow
+# Building a list as you go
 
-[Last lesson's](#/lesson/12-arrays) array is great, but it commits to a size up
-front: the five values you write between the braces are five slots, forever.
-That's a problem the moment you
-don't know the count ahead of time — how many game pieces will you score this
-match? You don't know until the match is over.
+In [last lesson](#/lesson/12-arrays) you wrote every value in the list up front.
+That breaks down the moment you do not know the count ahead of time. How many
+game pieces will your robot score this match? You do not know until the match is
+over.
 
-Java's answer is `ArrayList`: a list that grows one slot at a time as you add
-to it.
+Python lists can start **empty** (`[]`) and grow one item at a time with
+`.append(...)`:
 
-```java
-ArrayList<Integer> scores = new ArrayList<>();
-scores.add(10);
-scores.add(25);
-scores.add(15);
-System.out.println(scores);
-System.out.println(scores.size());
+```python
+scores = []
+scores.append(10)
+scores.append(25)
+scores.append(15)
+print(scores)
+print(len(scores))
 ```
 
-Run it. `scores` starts **empty** — no size decided up front — and each
-`.add(...)` grows it by one. `System.out.println(scores)` prints the whole
-list at once: `[10, 25, 15]`. And instead of the array's `.length`
-*property*, a list has a `.size()` *method* — one of those small differences
-that trips people up, so it's worth saying out loud: arrays use `.length`, no
-parentheses; lists use `.size()`, with parentheses.
+Run it. `scores` starts with zero items, and each `.append(...)` tacks a new
+value onto the end. `print(scores)` shows `[10, 25, 15]`, and `len(scores)` is
+`3`.
 
-Notice the type in the brackets is `Integer`, capitalized — not the lowercase
-`int` from every lesson before this one. An `ArrayList` can only hold
-**objects**, not raw numbers, so Java uses a boxed stand-in type for each
-primitive (`Integer` for `int`, `Double` for `double`, and so on). You'll
-mostly just write `Integer` where you mean "a group of `int`s" and Java quietly
-boxes and unboxes the values for you — `scores.add(10)` just works even
-though `10` is a plain `int`.
+This shines inside a loop. You can walk through one list and build a brand-new
+list with only the values you want to keep:
 
-# Reaching, changing, removing
-
-Like an array, you reach one item by index with square brackets — except an
-`ArrayList` uses a method instead of brackets:
-
-```java
-ArrayList<Integer> scores = new ArrayList<>();
-scores.add(10);
-scores.add(25);
-scores.add(15);
-System.out.println(scores.get(1));
+```python
+readings = [12, 47, 3, 88, 21]
+high_readings = []
+for reading in readings:
+    if reading > 20:
+        high_readings.append(reading)
+print(high_readings)
 ```
 
-`.get(1)` is the second item (`25`) — indexes still start at **0**, same rule
-as [lesson {n}](#/lesson/12-arrays). To change a slot without touching the
-others, use `.set(index, value)`:
+Start with an empty list before the loop, then append inside the `if`. You will
+use this pattern all the time to filter sensor data or collect match events.
 
-```java
-ArrayList<Integer> scores = new ArrayList<>();
-scores.add(10);
-scores.add(25);
-scores.add(15);
-scores.set(0, 99);
-System.out.println(scores);
+# Removing items with pop and remove
+
+Python gives you two main ways to take items out of a list. When you know the
+**position** you want to remove, use `.pop(index)`. It deletes that slot, shifts
+everything after it down, and hands the removed value back to you:
+
+```python
+scores = [10, 25, 15]
+dropped = scores.pop(1)
+print(dropped)
+print(scores)
 ```
 
-And to shrink the list, `.remove(index)` deletes a slot entirely — everything
-after it shifts down to fill the gap, and `.size()` drops by one:
+That prints `25`, then `[10, 15]`. Indexes still start at **0**, same rule as
+[lesson {n}](#/lesson/12-arrays). If you call `scores.pop()` with nothing inside
+the parentheses, it removes and returns the **last** item.
 
-```java
-ArrayList<Integer> scores = new ArrayList<>();
-scores.add(10);
-scores.add(25);
-scores.add(15);
-scores.remove(1);
-System.out.println(scores);
+When you know the **value** you want gone instead of its position, use
+`.remove(value)`:
+
+```python
+sides = ["front", "left", "back", "right"]
+sides.remove("back")
+print(sides)
 ```
 
-That prints `[10, 15]` — `25` is gone and `15` slid into its place. This is
-the move an array simply cannot make: an array's size never changes, but a
-list's does, on demand.
+`.remove(...)` finds the first matching item and deletes it. If the value is not
+in the list, Python stops with a `ValueError`, so make sure it is there first.
 
-# Looping and checking membership
+# Slicing and checking membership
 
-A for-each loop ([lesson {n}](#/lesson/12-arrays)) walks a list exactly like it
-walks an array:
+Sometimes you want a chunk of a list rather than a single item. **Slicing** uses
+a colon inside the brackets, `scores[start:stop]`, to copy from `start` up to
+(but not including) `stop`, just like `range` in
+[lesson {n}](#/lesson/10-loops):
 
-```java
-ArrayList<Integer> scores = new ArrayList<>();
-scores.add(10);
-scores.add(25);
-scores.add(15);
-int total = 0;
-for (int score : scores) {
-    total = total + score;
-}
-System.out.println("Total points: " + total);
+```python
+scores = [10, 25, 15, 40, 30]
+print(scores[1:4])
+print(scores[:2])
+print(scores[3:])
 ```
 
-One more list-only trick: `.contains(...)` asks "is this value in here
-anywhere?" without you writing a loop yourself.
+`scores[1:4]` grabs indexes `1`, `2`, and `3`, giving `[25, 15, 40]`. Leave out
+the first number (`scores[:2]`) to start from the beginning. Leave out the
+second number (`scores[3:]`) to go all the way to the end. Slicing always makes
+a new list and leaves `scores` untouched.
 
-```java
-ArrayList<Integer> scores = new ArrayList<>();
-scores.add(10);
-scores.add(25);
-System.out.println(scores.contains(25));
-System.out.println(scores.contains(99));
+One more handy check: `in` asks whether a value appears anywhere in the list,
+without writing a loop yourself:
+
+```python
+scores = [10, 25, 15]
+print(25 in scores)
+print(99 in scores)
 ```
 
-That's `true` then `false`. Between arrays and `ArrayList`, the choice comes
-down to one question: do you know the count before the program runs? If yes,
-an array is simpler. If the count depends on what happens while the program
-runs — scoring events, sensor hits, robots you've seen this match — reach for
-`ArrayList`.
+That prints `True`, then `False`.
 
-Your turn: build an empty `ArrayList<Integer>` called `climbTimes`, then
-`.add(...)` four made-up times in seconds. Remove the **slowest** one by
-index (look at the printed list and pick its position), then loop over what's
-left and print the **average** of the remaining times.
+Your turn: start with an empty list called `climb_times`, then use `.append(...)`
+to add four made-up times in seconds. Remove the **slowest** one using
+`.remove(...)` or `.pop(...)`, then loop over what is left and print the
+**average** of the remaining times.
