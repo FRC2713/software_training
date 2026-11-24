@@ -40,7 +40,9 @@ _concurrency = threading.BoundedSemaphore(MAX_CONCURRENT_RUNS)
 
 def _apply_child_limits() -> None:
     os.setsid()
-    resource.setrlimit(resource.RLIMIT_CPU, (CPU_LIMIT_SECONDS, CPU_LIMIT_SECONDS))
+    # Soft limit triggers SIGXCPU on both Linux and macOS; hard limit (+1s)
+    # enforces SIGKILL if a child ignores SIGXCPU.
+    resource.setrlimit(resource.RLIMIT_CPU, (CPU_LIMIT_SECONDS, CPU_LIMIT_SECONDS + 1))
     resource.setrlimit(resource.RLIMIT_FSIZE, (0, 0))
     if sys.platform == "linux":
         resource.setrlimit(resource.RLIMIT_AS, (MEMORY_LIMIT_BYTES, MEMORY_LIMIT_BYTES))
