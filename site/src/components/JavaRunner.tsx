@@ -1,11 +1,8 @@
 import { useMemo, useState } from 'react'
 import CodeMirror, { EditorView } from '@uiw/react-codemirror'
-import { java } from '@codemirror/lang-java'
 import { python } from '@codemirror/lang-python'
 import { oneDark } from '@codemirror/theme-one-dark'
-import { getJavaRuntimeStatus, runJava } from '@/lib/javaRuntime'
 import { runPython } from '@/lib/pythonRuntime'
-import type { RunnableLanguage } from '@/lib/lessons'
 import { editorTheme, usePrefersDark } from '@/lib/editorTheme'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -13,11 +10,9 @@ import { cn } from '@/lib/utils'
 export function JavaRunner({
   initialCode,
   storageKey,
-  language = 'java',
 }: {
   initialCode: string
   storageKey: string
-  language?: RunnableLanguage
 }) {
   const originalCode = initialCode.trimEnd()
   const [code, setCode] = useState(() => localStorage.getItem(storageKey) ?? originalCode)
@@ -26,17 +21,12 @@ export function JavaRunner({
   const [running, setRunning] = useState(false)
   const dark = usePrefersDark()
 
-  const extensions = useMemo(
-    () => [language === 'python' ? python() : java(), editorTheme, EditorView.lineWrapping],
-    [language],
-  )
+  const extensions = useMemo(() => [python(), editorTheme, EditorView.lineWrapping], [])
 
   const handleRun = async () => {
-    const label =
-      language === 'python' || getJavaRuntimeStatus() === 'ready' ? 'Running…' : 'Loading Java…'
     setRunning(true)
-    setOutput(label)
-    const result = language === 'python' ? await runPython(code) : await runJava(code)
+    setOutput('Running…')
+    const result = await runPython(code)
     setOk(result.ok)
     setOutput(result.output || '(no output)')
     setRunning(false)
