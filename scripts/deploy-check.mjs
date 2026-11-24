@@ -13,7 +13,7 @@ if (process.argv.includes("--contract")) {
     process.exit(1);
   }
   try {
-    for (const name of ["APP_URL", "HAWK_SUITE_ISSUER"]) {
+    for (const name of ["APP_URL", "HAWK_SUITE_ISSUER", "RUNNER_URL"]) {
       if (process.env[name]) {
         const url = new URL(process.env[name]);
         if (!["http:", "https:"].includes(url.protocol)) throw new Error();
