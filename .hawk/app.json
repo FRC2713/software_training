@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "hawk-learn",
+  "image": "ghcr.io/frc2713/hawk-learn",
+  "port": 3000,
+  "health": "/health",
+  "database": null,
+  "data_dir": null,
+  "required_env": [
+    "APP_URL"
+  ],
+  "optional_env": [
+    "PORT",
+    "HOST",
+    "HAWK_SUITE_ISSUER",
+    "HAWK_SUITE_TRUST_PROXY",
+    "HAWK_SUITE_TEAM_ID"
+  ],
+  "migrations": "none",
+  "rollback": "safe"
+}

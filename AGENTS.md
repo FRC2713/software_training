@@ -8,8 +8,9 @@ Software training suite for FRC 2713 — an onboarding curriculum teaching new
 students Java fundamentals (the language FRC robot code is written in).
 Content lives in `lessons/`; a React + Vite app in `site/` renders it as an
 interactive site (live Java compile+run via CheerpJ/WebAssembly, no server).
-Deployed to GitHub Pages on every push to `main` via
-`.github/workflows/deploy-pages.yml`.
+Packaged as a Hawk Suite app (`hawk-learn`, `ghcr.io/frc2713/hawk-learn`) via
+`Dockerfile` and `.github/workflows/docker.yml`, and served at
+`https://learn.redhawkrobotics.org/` behind Hawk Suite Slack sign-in.
 
 ## Commands
 

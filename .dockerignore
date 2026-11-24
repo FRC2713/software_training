@@ -1,0 +1,7 @@
+.git
+.claude
+.DS_Store
+site/node_modules
+site/dist
+site/dist-ssr
+site/public/maze-solver.jar

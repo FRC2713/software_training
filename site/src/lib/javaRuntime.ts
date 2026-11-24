@@ -10,7 +10,7 @@
 const CHEERPJ_LOADER_URL = 'https://cjrtnc.leaningtech.com/4.3/loader.js'
 
 // CheerpJ mounts the site's HTTP origin at /app/, so the vendored compiler
-// lives under the Vite base path (/software_training/ in production).
+// lives under the Vite base path (/ in production).
 const TOOLS_JAR = `/app${import.meta.env.BASE_URL}tools.jar`
 // FRC2713/maze-solver-java, built into a jar and vendored the same way. Gives
 // lesson snippets the com.frc2713.mazesolver API — the Direction enum, the
