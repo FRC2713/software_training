@@ -18,8 +18,10 @@ import { useProgress } from '@/lib/progress'
 import { JavaRunner } from '@/components/JavaRunner'
 import { CodeBlock } from '@/components/CodeBlock'
 import { BlockPlayground } from '@/components/BlockPlayground'
+import { FlowchartPlayground } from '@/components/FlowchartPlayground'
 import { MazePlayground } from '@/components/MazePlayground'
 import { StatePlayground } from '@/components/StatePlayground'
+import { isFlowchartPreset } from '@/lib/flowchartPresets'
 import { isStatePreset } from '@/lib/statePresets'
 import { PageNav } from '@/components/PageNav'
 import { Button } from '@/components/ui/button'
@@ -169,6 +171,11 @@ export function LessonView() {
               <>
                 <h2 className="mb-3 text-base font-semibold text-primary">▶ State machine</h2>
                 <StatePlayground key={`${lesson.slug}-${pageIndex}-${preset}`} preset={preset} />
+              </>
+            ) : preset && isFlowchartPreset(preset) ? (
+              <>
+                <h2 className="mb-3 text-base font-semibold text-primary">▶ Interactive Flowchart</h2>
+                <FlowchartPlayground key={`${lesson.slug}-${pageIndex}-${preset}`} preset={preset} />
               </>
             ) : preset ? (
               <>
