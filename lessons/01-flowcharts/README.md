@@ -1,85 +1,81 @@
 ---
 title: "Programs are step-by-step"
-goal: "See a program as a flowchart of blocks and watch the computer evaluate it one step at a time."
+goal: "Follow a robot flowchart from START to END and watch the computer run one instruction at a time."
 order: 10
 section: "Programming with Blocks"
 ---
 
 # One step at a time
 
-Before we write a single line of code, let's get the big idea out of the way:
-**a program is a list of steps, and the computer does them one at a time, in
-order.** It never does two things at once by accident, and it never skips
-ahead. It finishes one step, then moves to the next.
+Before we write a single line of Python, let's get the big idea out of the way:
+**a program is a list of instructions, and the computer runs them one at a time,
+in order.** It never skips ahead, and it never runs two steps at once by
+accident. It finishes one box, updates its memory, and follows the arrow to the
+next box.
 
-A good way to picture this is a **flowchart** — boxes joined by arrows. Each box
-does one small thing, and the arrows show what feeds into what. The computer
-follows the arrows.
+A **flowchart** shows that exact journey from **START** to **END**:
 
-The block editor here is exactly that: a little flowchart that does
-math. Read it from top to bottom, the same way you read code:
+- Each **box** is one instruction — like storing a number or doing math.
+- Each **arrow** shows which step runs next.
+- **Robot Memory** at the bottom shows the named values the robot is remembering
+  right now.
 
-- The **number** blocks hold values.
-- The **+** and **×** blocks each take *two* inputs (the arrows coming in from
-  the blocks above them) and produce *one* output.
-- The **result** block at the bottom shows the final answer.
+The flowchart here calculates an FRC robot's **autonomous score**: `3` coral at
+`4` points each, plus a `3`-point bonus for leaving the starting zone.
 
-Press **▶ Run step by step** and watch. The computer can't multiply until it
-knows what `3 + 4` is, so it works out the inner block first, then feeds that
-answer forward. That order — inputs before the things that use them — is the
-whole game.
+Press **▶ Run** (or click **⏭ Step** to advance one instruction at a time) and
+watch **Robot Memory** update as each box lights up. You can also click
+**Peek at Python** to see the exact same steps written as real Python code.
 
 ```blocks
 preset: sequence
 ```
 
-# Blocks carry values
+# Order matters because steps share memory
 
-So this flowchart computes `(3 + 4) × 2`. Notice the computer had to figure out
-`3 + 4 = 7` *before* it could do `7 × 2 = 14`. It literally cannot do the
-multiply first — one of its inputs doesn't exist yet. **Every block has to wait
-for its inputs to be ready.**
+Notice how `points` changed twice during the run:
 
-That waiting is why order matters, and it's the same reason the lines of a real
-program run top to bottom: later steps often depend on what earlier steps
-produced.
+1. First, `points = coral × 4` stored `12` in Robot Memory.
+2. Next, `points = points + 3` read that `12`, added `3`, and updated `points`
+   to `15`.
 
-Now make it your own. The number blocks in the editor are **editable** this
-time — click into one and change its value. Before you press Run, try to predict
-the new answer in your head. Then run it and check whether the value flowing
-into the result block matches what you expected.
+If you tried to add the bonus *before* calculating `coral × 4`, `points`
+wouldn't even exist yet! **Later steps depend on what earlier steps stored in
+memory** — that's why top-to-bottom order is the foundation of every program.
+
+Now experiment. The `coral` and `leave_bonus` boxes are **editable** — click a
+number to change it, predict the new score in your head, then **Step** through
+to check your prediction.
 
 Some things to try:
-- Set the two top numbers so their sum is `10`. What does the result become?
-- Can you make the result equal `0`? (Hint: what times anything is zero?)
-- Make the result a **negative** number.
+- Score `5` coral with a `3`-point leave bonus. What does `points` reach?
+- What if the robot didn't leave the starting zone (`leave_bonus = 0`)?
+- What if `coral = 0` and `leave_bonus = 0`?
 
 ```blocks
 preset: edit-values
 ```
 
-# Build your own math machine
+# Build your own scoring flowchart
 
-Time to build a flowchart from scratch. This canvas starts with two number
-blocks and a result block, and a toolbar for adding more.
+Time to build a flowchart yourself. Suppose our robot took `8` shots
+(`attempts`) and dropped `3` of them (`dropped`), and each scored coral is worth
+`4` points.
 
-**How to work the editor:**
+**How to build:**
+- **Drag a block** from the palette into the drop slot (or click its **`+`**
+  button to insert it).
+- Use the **↑ / ↓** arrows on any block you added to change the order, or the
+  **trash icon** to remove it.
+- Press **▶ Run** or **⏭ Step** to trace your program. **Clear run** resets only
+  the animation (your blocks stay safe); **Start over** resets the whole canvas.
 
-- Click a toolbar button — **number**, **+**, **−**, or **×** — to drop a new
-  block onto the canvas. Drag blocks around to arrange them.
-- **Connect blocks by dragging** from the little dot on the bottom of one block
-  to a dot on the top of another. An operation block has *two* dots on top
-  because it needs two inputs; the result block has one.
-- Press **▶ Run step by step** to watch your machine evaluate. **Reset** clears
-  the shown values so you can run it again.
-
-A block shows `?` when it doesn't have all of its inputs wired up yet — that's
-the computer telling you a step is missing.
-
-Your challenge: build a machine that computes **`(8 − 3) × 4`** and check that
-the result block lands on `20`. You'll need a subtract block feeding into a
-multiply block, just like the very first example — except now *you* decide the
-order the computer works in.
+Your challenge: assemble the steps so the robot computes
+**`(attempts − dropped) × 4`** and outputs `score`. Try putting the multiply
+block *before* the subtract block once just to see what happens when a step
+reads a variable that hasn't been calculated yet — then put them in the right
+order and click **✓ Check** to test your flowchart against three match
+scenarios!
 
 ```blocks
 preset: build

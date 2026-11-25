@@ -16,9 +16,12 @@ ENV APP_REVISION=${APP_REVISION}
 LABEL org.opencontainers.image.revision=${APP_REVISION}
 ENV NODE_ENV=production PORT=3000 HOST=0.0.0.0
 RUN groupadd --system --gid 1001 nodejs \
-  && useradd --system --uid 1001 --gid nodejs hawklearn
+  && useradd --system --uid 1001 --gid nodejs hawklearn \
+  && mkdir -p /data \
+  && chown hawklearn:nodejs /data
 COPY --from=builder --chown=hawklearn:nodejs /app/site/dist ./site/dist
 COPY --chown=hawklearn:nodejs server.mjs ./server.mjs
+COPY --chown=hawklearn:nodejs server ./server
 COPY --chown=hawklearn:nodejs .hawk ./.hawk
 COPY --chown=hawklearn:nodejs scripts/deploy-check.mjs ./scripts/deploy-check.mjs
 USER hawklearn

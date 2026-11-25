@@ -1,86 +1,72 @@
 ---
 title: "Making decisions"
-goal: "Use a condition to make a program choose between two paths."
+goal: "Use a condition diamond to make a program choose one path and skip the other."
 order: 20
 section: "Programming with Blocks"
 ---
 
-# When programs choose
+# When a robot has to choose
 
-So far our flowcharts always did the exact same steps in the exact same order.
-Real programs need to **make decisions**: do one thing when the weather is cold,
-another when it's warm; show "pass" when a score is high enough, "fail" when it
-isn't.
+So far our flowcharts ran every single box from **START** to **END**. Real
+robots have to **make decisions** based on sensors: slow down when the battery
+is low, shoot when the target is in range, or stop when an arm hits its limit
+switch.
 
-In a flowchart, a decision is a **diamond**. It takes two numbers, `a` and `b`,
-and asks a yes/no question about them — `a > b?` here (the question can also
-use `<`, `=`, or `≠`). Then the program follows **exactly one of the two
-arrows leaving it**: the `true` arrow when the answer is yes, the `false`
-arrow when it's no. Never both, never neither.
+In a flowchart, a decision is a **diamond** (`IF ... ?`). It asks a yes/no
+question about the robot's memory — here, `battery < 10 ?` — and then follows
+**exactly one** of its two outgoing arrows:
 
-Each arrow leads to an **answer** block — the step that runs on that path. An
-answer block has two inputs: `when` (wired from one of the diamond's arrows)
-and `value` (what to produce if its path is the one taken). The branch the
-program doesn't take simply **never runs**.
+- Follow **YES** when the condition is **True**.
+- Follow **NO** when the condition is **False**.
 
-The flowchart in the editor finds **the larger of two numbers**. The diamond
-asks `a > b?` — that's `true` here (`7 > 4`) — so the program follows the
-`true` arrow down to the answer wired to `a`, and `7` flows on to the result.
+The other branch **grays out and is completely skipped** — none of the steps on
+that side ever run. After the taken branch finishes, both paths come back
+together and continue to **OUTPUT** and **END**.
 
-Press **▶ Run step by step**. Watch the diamond answer `true` and the program
-head down the `true` arrow — while the other branch **grays out and gets
-skipped**. Those blocks never run. This fork is exactly what Python writes as
-`if / else`, and you'll type it yourself in [lesson {n}](#/lesson/09-if-statements).
+Press **▶ Run** or **⏭ Step** on this **Battery Brownout Limiter**. With
+`battery = 12`, watch the robot check `12 < 10` (False), follow the **NO**
+arrow to set `mode = "FULL POWER"` and `max_speed = 100`, and skip the entire
+**YES** branch. Click **Peek at Python** to see how this maps directly to
+`if / else` (which you'll write yourself in
+[lesson {n}](#/lesson/09-if-statements)).
 
 ```blocks
 preset: cond-demo
 ```
 
-# The road not taken
+# Testing the boundary
 
-The key idea: a decision **takes exactly one path, every time.** The other
-branch isn't "a value you don't use" — it's code that **never runs**. Watch it
-gray out during a run: the computer doesn't even look at it.
+A decision **takes exactly one path, every time.** Every step inside the untaken
+branch is skipped — the computer doesn't even touch it.
 
-The numbers are editable now. Try these and run each time:
+Now both the `battery` voltage and the `IF` condition are editable. Try these
+and **Step** through each one:
 
-- Make `a` **smaller** than `b`. Which arrow does the program follow now?
-  `a > b` is `false`, so it takes the `false` branch — and the answer wired to
-  `b` is the one that runs while the other side gets skipped.
-- Make `a` and `b` **equal**. Is `a > b` true or false when they're the same?
-  (This is a classic bug source — "greater than" is not the same as "greater
-  than or equal to.")
-
-The result always ends up being whichever number is bigger, no matter which one
-you put where. That's the whole point: the program adapts to its inputs instead
-of doing one fixed thing.
+- Set `battery` to **`9`**. Now `9 < 10` is **YES (True)** — watch the **YES**
+  branch run (`mode = "LOW POWER"`, `max_speed = 40`) while the **NO** branch
+  grays out.
+- Set `battery` to **`10`** — right on the boundary! Is `10 < 10` True or False?
+  (This is one of the most common bugs in robotics code: `<` means *strictly
+  less than*, while `≤` includes the boundary itself.)
+- Try switching `<` to `≤` in the diamond and run `battery = 10` again.
 
 ```blocks
 preset: cond-edit
 ```
 
-# Build a decision
+# Build a shooter range check
 
-Your turn. Build a flowchart that outputs **the smaller of two numbers** and
-check it against a few inputs.
+Your turn. Our robot has a distance sensor measuring how many meters away the
+target is (`distance`).
 
-**How:** you have a toolbar with number blocks, four decision diamonds
-(`if >`, `if <`, `if =`, `if ≠`), and an **answer** block. Drag from a block's
-output dot to an input dot on another block to wire things up.
+**Your challenge:**
+- If `distance < 3`, the robot should set `action = "SHOOT"`.
+- Otherwise (`NO`), the robot should set `action = "DRIVE CLOSER"`.
 
-A diamond needs `a` and `b` wired into its top. Each answer block needs two
-wires: `when` (from one of the diamond's `true`/`false` arrows) and `value`
-(the number that path should produce). Wire both answers into the result.
-
-Two ways to get the *smaller* number — see if you can find both:
-
-- Use `if <`: ask `a < b`, wire the `true` arrow's answer to `a` and the
-  `false` arrow's answer to `b`.
-- Or use `if >` and swap which number each answer is wired to.
-
-Both work, because a decision is really just "which path do I take?" — and
-each path carries its own answer. Run it with different numbers to convince
-yourself it always picks the smaller one.
+**How:** drag a block from the palette into the **YES** drop slot and another
+into the **NO** drop slot (or click **`+`**). Then click **✓ Check** — it will
+automatically test your flowchart with `distance = 2`, the boundary `distance = 3`,
+and `distance = 5`!
 
 ```blocks
 preset: cond-build

@@ -5,13 +5,14 @@
   "port": 3000,
   "health": "/health",
   "database": null,
-  "data_dir": null,
+  "data_dir": "/data",
   "required_env": [
     "APP_URL"
   ],
   "optional_env": [
     "PORT",
     "HOST",
+    "DATA_DIR",
     "RUNNER_URL",
     "HAWK_SUITE_ISSUER",
     "HAWK_SUITE_TRUST_PROXY",

@@ -1,71 +1,70 @@
 ---
 title: "Doing things over and over"
-goal: "Use a loop to repeat a step many times without copying it out by hand."
+goal: "Use a loop with a loop-back arrow to repeat instructions without copying them by hand."
 order: 30
 section: "Programming with Blocks"
 ---
 
 # Repeating without copying
 
-Imagine you want to add `3` to a number five times. You *could* drag out five
-separate `+` blocks and chain them together. But what if it were five hundred
-times? Copying a block out by hand stops working fast.
+If you slam an FRC drive motor straight from `0%` to `100%` speed in one
+instant, the wheels slip and the battery voltage drops. Instead, robot code
+**ramps** the speed up smoothly in small steps: `+20%`, `+20%`, `+20%`, `+20%`,
+`+20%`.
 
-Programs solve this with a **loop**: one block with its own logic built in,
-that runs that logic over and over. The **repeat** block in the editor takes
-just one thing from outside — **times**, how many passes to run — and it
-carries its own **start** value and **by** step right on the block, editable
-whenever you like.
+You *could* paste five identical `speed = speed + 20` boxes in a row — until you
+need to ramp in 50 steps! Programs solve this with a **loop**:
 
-This one starts at `0` and adds `3`, five times over. Press **▶ Run step by
-step** and watch the block's value climb — `0`, `3`, `6`, `9`, `12`, `15`.
-Each pass runs the *same* internal logic again, using the result so far.
+1. The **REPEAT** header tracks which pass you're on (`Pass 1 / 5`, `Pass 2 / 5`,
+   …).
+2. The computer runs the step(s) **inside** the loop body.
+3. At the bottom of the body, it follows the curved **loop-back arrow** up to the
+   top to repeat again.
+4. Once all passes finish, it exits through the **DONE** arrow.
+
+Press **▶ Run** or **⏭ Step** and watch the loop-back arrow light up on each
+pass while `speed` in **Robot Memory** climbs: `0 → 20 → 40 → 60 → 80 → 100`.
+Click **Peek at Python** to see how this becomes a `for` loop in Python.
 
 ```blocks
 preset: loop-demo
 ```
 
-# A loop keeps a running total
+# Loops update memory on every pass
 
-Notice what the repeat block is really doing: it remembers a value (its
-**start**), and each pass updates that value using its **by** step. That
-"value so far" is the heart of every loop — it's how five identical passes add
-up to something.
+The reason a loop can accomplish something different on each pass — even though
+it runs the *exact same box* — is that the box reads and updates a variable in
+**Robot Memory** every time around.
 
-This one starts at `1` and *multiplies* by `2`, four times. Before you run it,
-predict the sequence in your head — `1`, then… Run it and watch: `1`, `2`,
-`4`, `8`, `16`. Repeated multiplying grows *fast*; that's the same reason
-folding a piece of paper in half again and again gets thick so quickly.
+Here, `power` starts at `1` and **doubles** (`power = power × 2`) on each pass,
+four times: `1 → 2 → 4 → 8 → 16`.
 
-Now experiment. The **times** input is editable, and so are the block's own
-**start** and **by** fields:
-
-- Change **times** and watch how many passes the loop takes.
-- Set **start** to `10` and **by** to `10` — what running total do you get
-  after a few passes?
-- What happens with **times** set to `0`? A loop that repeats zero times just
-  hands back its **start** value, untouched.
+Experiment with the editable numbers and step through:
+- Change the repeat count to **`5`** or **`6`** — watch how fast repeated
+  doubling grows!
+- Change the repeat count to **`0`**. What happens? A loop that runs zero times
+  skips its body completely and jumps straight to the **DONE** arrow, leaving
+  `power` untouched at `1`.
+- Change the multiplier from `2` to `3` and predict the result before running.
 
 ```blocks
 preset: loop-edit
 ```
 
-# Build a loop
+# Build a flywheel spin-up loop
 
-Build a repeat block that computes **2 to the 5th power** — that's `2`
-multiplied by itself, ending on `32`.
+Your turn. Build a loop that starts with `power = 1` and ends at **`32`** (which
+is 2⁵: `1 → 2 → 4 → 8 → 16 → 32`).
 
-**How:** the toolbar has number blocks, a **repeat +**, and a **repeat ×**.
-Drop one in, wire a number into its **times** input, then set its **start**
-and **by** fields directly on the block. Send its output to the result block.
+**How:**
+- Drag the right step from the palette **inside the REPEAT loop body** (or click
+  **`+`**).
+- Set the **REPEAT** count to the right number of passes.
+- Press **▶ Run** or **⏭ Step** to watch each pass climb toward `32`, then click
+  **✓ Check** to verify!
 
-Think about which pieces you need: to keep multiplying by `2`, what should
-**start** be so the very first multiply gives you `2`? How many **times** do
-you repeat to land on `32`? Run it step by step and check the climb: `2`, `4`,
-`8`, `16`, `32`.
-
-Once that works, try a **repeat +** that counts to `100` — there's more than
-one combination of **start**, **times**, and **by** that gets there.
+Once that passes, try swapping in `power = power + 10` and adjusting the repeat
+count to see how easy it is to change what a loop does.
 
 ```blocks
 preset: loop-build
