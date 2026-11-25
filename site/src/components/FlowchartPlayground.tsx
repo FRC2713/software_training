@@ -786,10 +786,20 @@ export function FlowchartPlayground({ preset }: { preset: string }) {
   return (
     <div className="fc-shell">
       <div className="fc-header">
-        <div>
+        <div className="min-w-0">
           <div className="fc-title">{config.title}</div>
           <div className="fc-subtitle">{config.subtitle}</div>
         </div>
+        <Button
+          type="button"
+          size="xs"
+          variant={showPython ? 'secondary' : 'outline'}
+          onClick={() => setShowPython((s) => !s)}
+          className="shrink-0"
+        >
+          <Code2 className="size-3.5" />
+          {showPython ? 'Hide Python' : 'Peek at Python'}
+        </Button>
       </div>
 
       {/* Controls bar */}
@@ -838,15 +848,6 @@ export function FlowchartPlayground({ preset }: { preset: string }) {
           {fast ? '2× speed' : '1× speed'}
         </Button>
         <div className="fc-controls-spacer" />
-        <Button
-          type="button"
-          size="sm"
-          variant={showPython ? 'secondary' : 'outline'}
-          onClick={() => setShowPython((s) => !s)}
-        >
-          <Code2 className="size-4" />
-          {showPython ? 'Hide Python' : 'Peek at Python'}
-        </Button>
         {config.checks && (
           <Button type="button" size="sm" variant="outline" onClick={handleCheck}>
             <Check className="size-4" />

@@ -1,0 +1,100 @@
+/* Self-hosted Fontsource distributions for Red Hawk Robotics 2713.
+   Apps must render cleanly on a shop LAN without external font CDNs. */
+@import "@fontsource/barlow/400.css";
+@import "@fontsource/barlow/600.css";
+@import "@fontsource/barlow/700.css";
+@import "@fontsource/barlow/700-italic.css";
+@import "@fontsource/barlow-condensed/700-italic.css";
+@import "@fontsource/open-sans/400.css";
+@import "@fontsource/open-sans/600.css";
+@import "@fontsource/open-sans/700.css";
+@import "@fontsource/roboto-mono/400.css";
+@import "@fontsource/roboto-mono/500.css";
+@import "@fontsource/roboto-mono/700.css";
+
+:root {
+  /* Canonical FRC 2713 palette */
+  --hawk-red: #ba0c2f;
+  --hawk-tone-red: #c91f43;
+  --hawk-charcoal: #333333;
+  --hawk-black: #000000;
+  --hawk-grey: #a3a19e;
+  --hawk-light-grey: #f2f2f2;
+  --hawk-white: #ffffff;
+  --hawk-teal: #5fc7ba;
+
+  /* Dark-mode surface ramp */
+  --hawk-dark-background: #141414;
+  --hawk-dark-card: #1e1e1e;
+  --hawk-dark-muted: #2a2a2a;
+  --hawk-emphasis-dark: #f25c74;
+
+  /* Canonical font stacks */
+  --hawk-body-font: "Open Sans", ui-sans-serif, system-ui, sans-serif;
+  --hawk-heading-font: "Barlow", ui-sans-serif, system-ui, sans-serif;
+  --hawk-display-font: "Barlow Condensed", "Barlow", ui-sans-serif, sans-serif;
+  --hawk-figure-font: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@layer components {
+  /* Standard 2713 header lockup: 24px-high mark with 12px clear space on a flat field. */
+  .brand-mark {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px;
+    flex-shrink: 0;
+  }
+
+  .brand-mark img {
+    display: block;
+    height: 24px;
+    width: auto;
+  }
+
+  /* Numeric figures (lesson numbers, progress fractions, step counters). */
+  .brand-figures {
+    font-family: var(--hawk-figure-font);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Large display title: Barlow Condensed bold italic. */
+  .brand-display {
+    font-family: var(--hawk-display-font);
+    font-weight: 700;
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+  }
+
+  /* Major section / page headings: Barlow bold italic capitals. */
+  .brand-heading {
+    font-family: var(--hawk-heading-font);
+    font-weight: 700;
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  /* Subsections, card titles, table headers, callout labels: Barlow semibold. */
+  .brand-subheading {
+    font-family: var(--hawk-heading-font);
+    font-weight: 600;
+  }
+
+  /* Brand callout: Light Grey (dark card in dark mode), 4px rail, 12/14px padding. */
+  .brand-callout {
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left-width: 4px;
+    padding: 12px 14px;
+  }
+
+  .brand-callout-teal {
+    border-left-color: var(--hawk-teal);
+  }
+
+  .brand-callout-red {
+    border-left-color: var(--hawk-red);
+  }
+}

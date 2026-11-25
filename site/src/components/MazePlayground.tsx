@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Play, RotateCcw, Square } from 'lucide-react'
 import CodeMirror, { EditorView } from '@uiw/react-codemirror'
 import { python } from '@codemirror/lang-python'
 import { oneDark } from '@codemirror/theme-one-dark'
@@ -473,12 +474,12 @@ export function MazePlayground({ solver = null }: { solver?: SolverMode | null }
       </svg>
 
       <p className="text-sm text-muted-foreground">
-        <span className="text-[#22c55e]">■</span> start&nbsp;&nbsp;
-        <span className="text-[#ef4444]">■</span> goal&nbsp;&nbsp;
-        <span className="text-[#3b82f6]">●</span> robot
-        {solved && <strong className="ml-2 text-[#22c55e]">— solved! 🎉</strong>}
+        <span className="text-[var(--ok)]">■</span> start&nbsp;&nbsp;
+        <span className="text-[var(--emphasis)]">■</span> goal&nbsp;&nbsp;
+        <span className="text-[var(--info)]">●</span> robot
+        {solved && <strong className="ml-2 text-[var(--ok)]">Solved!</strong>}
         {stuck && !solved && (
-          <strong className="ml-2 text-[#ef4444]">— stuck in a loop 🔁</strong>
+          <strong className="ml-2 text-[var(--err)]">Stuck in a loop</strong>
         )}
       </p>
 
@@ -494,35 +495,29 @@ export function MazePlayground({ solver = null }: { solver?: SolverMode | null }
 
       <div className="flex flex-wrap justify-center gap-2">
         {solver && !isEditable && (
-          <button
+          <Button
             type="button"
+            size="sm"
+            variant="default"
             onClick={running ? stopSolver : () => runSolver(solver as CannedMode)}
-            className="rounded-md border border-primary px-4 py-2 text-sm font-semibold text-primary transition hover:bg-primary hover:text-primary-foreground"
           >
+            {running ? <Square className="size-3.5 fill-current" /> : <Play className="size-3.5 fill-current" />}
             {running ? 'Stop' : SOLVER_LABEL[solver as CannedMode]}
-          </button>
+          </Button>
         )}
-        <button
-          type="button"
-          onClick={generate}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:brightness-110"
-        >
+        <Button type="button" size="sm" variant="outline" onClick={generate}>
           Generate new maze
-        </button>
+        </Button>
         {!isEditable && (
-          <button
-            type="button"
-            onClick={copyForPython}
-            className="rounded-md border border-border px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-primary hover:text-primary-foreground"
-          >
+          <Button type="button" size="sm" variant="outline" onClick={copyForPython}>
             {copied ? 'Copied!' : 'Copy for Python'}
-          </button>
+          </Button>
         )}
       </div>
 
       {isEditable && (
         <div className="w-full">
-          <div className="overflow-hidden rounded-lg border bg-muted">
+          <div className="overflow-hidden rounded-lg border border-border bg-card focus-within:ring-2 focus-within:ring-ring/50">
             <CodeMirror
               value={code}
               onChange={setCode}
@@ -537,34 +532,39 @@ export function MazePlayground({ solver = null }: { solver?: SolverMode | null }
               }}
               className="text-[13px]"
             />
-            <div className="flex justify-between gap-2 border-t px-2.5 py-2">
+            <div className="flex justify-between gap-2 border-t border-border bg-[var(--surface)] px-3 py-2">
               <Button
                 type="button"
                 size="sm"
-                variant="outline"
+                variant="ghost"
                 onClick={() => {
                   setCode(starterCode)
                   setSolverOutput(null)
                 }}
                 disabled={running}
               >
+                <RotateCcw className="size-3.5" aria-hidden="true" />
                 Reset code
               </Button>
               <Button
                 type="button"
                 size="sm"
-                variant="outline"
+                variant="default"
                 onClick={running ? stopSolver : runCodeSolver}
-                className="border-primary/40 bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary"
               >
-                {running ? 'Stop' : '▶ Run in the maze'}
+                {running ? (
+                  <Square className="size-3.5 fill-current" aria-hidden="true" />
+                ) : (
+                  <Play className="size-3.5 fill-current" aria-hidden="true" />
+                )}
+                {running ? 'Stop' : 'Run in the maze'}
               </Button>
             </div>
             {solverOutput !== null && (
               <pre
                 className={cn(
-                  'm-0 whitespace-pre-wrap break-words border-t bg-background px-3.5 py-3 font-mono text-sm text-foreground',
-                  !solverOk && 'text-destructive',
+                  'm-0 whitespace-pre-wrap break-words border-t border-border bg-background px-3.5 py-3 font-mono text-sm text-foreground',
+                  !solverOk && 'text-[var(--err)]',
                 )}
               >
                 {solverOutput}

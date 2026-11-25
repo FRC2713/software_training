@@ -4,23 +4,40 @@ import { LessonCard } from '@/components/LessonCard'
 
 export function LessonIndex() {
   const { isCompleted, completedCount, totalLessons, user } = useProgress()
+  const pct = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-5 pt-12 pb-20">
-      <header className="mb-10">
-        <h1 className="text-3xl font-semibold text-foreground">FRC 2713 Software Training</h1>
-        <p className="mt-3 text-[17px] text-muted-foreground">
-          Learn the fundamentals of programming, one short lesson at a time. Every lesson is
-          hands-on — build and run things right in the browser.
+    <div className="mx-auto w-full max-w-3xl px-5 pt-10 pb-20">
+      <header className="mb-10 border-b border-border pb-7">
+        <p className="brand-subheading text-xs uppercase tracking-widest text-[var(--emphasis)]">
+          Red Hawk Robotics · Team 2713
+        </p>
+        <h1 className="brand-display mt-1 text-4xl text-[var(--ink)] sm:text-5xl">
+          Software Training
+        </h1>
+        <div className="mt-3 h-[3px] w-14 bg-primary" aria-hidden="true" />
+        <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
+          Learn programming fundamentals one short lesson at a time. Every lesson is hands-on, so
+          you build and run code right in the browser.
         </p>
         {user && (
-          <p className="mt-3 text-sm text-muted-foreground tabular-nums">
-            Progress:{' '}
-            <strong className="font-semibold text-foreground">
-              {completedCount} of {totalLessons}
-            </strong>{' '}
-            lessons completed
-          </p>
+          <div className="mt-5 flex flex-wrap items-center gap-3 rounded-lg border bg-[var(--surface)] px-4 py-3">
+            <span className="brand-subheading text-xs uppercase tracking-wider text-muted-foreground">
+              Progress
+            </span>
+            <div
+              className="h-2 min-w-[120px] flex-1 overflow-hidden rounded-full bg-border"
+              aria-hidden="true"
+            >
+              <div
+                className="h-full rounded-full bg-primary transition-[width] duration-300"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <span className="brand-figures text-sm font-semibold text-foreground">
+              {completedCount} / {totalLessons}
+            </span>
+          </div>
         )}
       </header>
       <div className="flex flex-col gap-10">
@@ -28,15 +45,15 @@ export function LessonIndex() {
           const doneInSection = section.lessons.filter((l) => isCompleted(l.slug)).length
           return (
             <section key={section.title}>
-              <div className="mb-3 flex items-center justify-between gap-2">
-                <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <div className="mb-4 flex items-baseline justify-between gap-2 border-b border-border pb-2">
+                <h2 className="brand-heading text-base text-[var(--ink)]">
                   {section.title}
                 </h2>
-                {user && (
-                  <span className="text-xs tabular-nums text-muted-foreground">
-                    {doneInSection} / {section.lessons.length}
-                  </span>
-                )}
+                <span className="brand-figures text-xs text-muted-foreground">
+                  {user
+                    ? `${doneInSection} / ${section.lessons.length}`
+                    : `${section.lessons.length} lessons`}
+                </span>
               </div>
               <div className="flex flex-col gap-3">
                 {section.lessons.map((lesson) => (

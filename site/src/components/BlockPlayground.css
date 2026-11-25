@@ -22,7 +22,7 @@
 
 .block-toolbar button:hover {
   border-color: var(--accent-border);
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .block-canvas {
@@ -39,22 +39,27 @@
 }
 
 .block-run {
-  border: 1px solid var(--accent-border);
-  background: var(--accent-bg);
-  color: var(--accent);
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: #ffffff;
   border-radius: 6px;
   padding: 8px 16px;
   font-weight: 600;
+  transition: opacity 0.15s ease;
+}
+
+.block-run:hover:not(:disabled) {
+  opacity: 0.9;
 }
 
 .block-run:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: default;
 }
 
 .block-reset {
   border: 1px solid var(--border);
-  background: none;
+  background: var(--card-surface);
   color: var(--text-h);
   border-radius: 6px;
   padding: 8px 16px;
@@ -121,7 +126,7 @@
 .blk-op-result {
   font-size: 13px;
   font-weight: 600;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .blk-result {
@@ -132,17 +137,17 @@
 .blk-result-value {
   font-size: 26px;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 /* A result poisoned by a type-mismatched wire feeding into it somewhere upstream */
 .blk-result-error {
-  border-color: #e5484d;
-  background: color-mix(in srgb, #e5484d 12%, transparent);
+  border-color: var(--err);
+  background: var(--err-bg);
 }
 
 .blk-result-error .blk-result-value {
-  color: #e5484d;
+  color: var(--err);
 }
 
 .blk-input-node {
@@ -192,7 +197,7 @@
   font-family: var(--sans);
   font-size: 12px;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .blk-row-label {
@@ -248,7 +253,7 @@
   font-family: var(--sans);
   font-size: 12px;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 /* ---- Skipped branch: the road not taken, rendered like code that never ran */
@@ -270,12 +275,12 @@
 /* ---- Invalid wire: something that isn't a real MotorIO, wired into declare */
 
 .react-flow__edge.edge-invalid .react-flow__edge-path {
-  stroke: #e5484d;
+  stroke: var(--err);
   stroke-dasharray: 6 4;
 }
 
 .react-flow__edge.edge-invalid .react-flow__edge-text {
-  fill: #e5484d;
+  fill: var(--err);
   font-weight: 700;
   font-size: 15px;
 }
@@ -332,11 +337,11 @@
 }
 
 .blk-impl-sim {
-  border-color: #4c9be8;
+  border-color: var(--info);
 }
 
 .blk-impl-real {
-  border-color: #e8974c;
+  border-color: var(--warn);
 }
 
 .blk-impl-hint {
@@ -356,16 +361,16 @@
 /* Wired to something that isn't a real MotorIO — a type mismatch, not a
    missing value, so it reads as an error rather than a faded/skipped block. */
 .blk-declare-invalid {
-  border-color: #e5484d;
+  border-color: var(--err);
 }
 
 .blk-declare-invalid .blk-declare-value {
-  color: #e5484d;
+  color: var(--err);
   font-weight: 700;
 }
 
 .blk-op-result-error {
-  color: #e5484d;
+  color: var(--err);
 }
 
 /* ---- Builder chain: configStart + withStep (lesson 32) -------------------- */
