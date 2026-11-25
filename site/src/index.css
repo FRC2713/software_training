@@ -1,76 +1,123 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import './styles/brand.css';
 @plugin '@tailwindcss/typography';
 
 /*
- * Dark mode follows the OS setting — there is no manual toggle — so we don't
- * redefine the shadcn `dark` variant (leaving it as Tailwind's default
- * prefers-color-scheme media query) and flip every token in the media block
- * below. Semantic tokens are layered on top of the legacy FRC palette, which
- * BlockPlayground.css and the markdown prose still read directly.
+ * Dark mode follows the OS setting (prefers-color-scheme), matching the Red Hawk
+ * Robotics 2713 branding standard. True Red (#BA0C2F) stays the fill for primary
+ * buttons, badges, rails, and active indicators in both themes. Text-only roles
+ * use --link (True Red in light, Light Teal in dark) and --emphasis (True Red in
+ * light, high-contrast red tint in dark).
  */
 :root {
-  /* Legacy brand palette — single source of truth for the FRC colors. */
-  --text: #55535a;
-  --text-h: #000000;
-  --bg: #fff;
-  --border: #dcdad9;
-  --code-bg: #f2f1f0;
-  --accent: #ba0c2f;
+  /* Semantic palette mapped from FRC 2713 brand tokens */
+  --bg: var(--hawk-white);
+  --surface: var(--hawk-light-grey);
+  --card-surface: var(--hawk-white);
+  --ink: var(--hawk-black);
+  --text-h: var(--hawk-charcoal);
+  --text: #525252;
+  --border: #d6d5d2;
+  --border-strong: var(--hawk-grey);
+  --code-bg: var(--hawk-light-grey);
+
+  /* Brand fill vs text-only accent roles */
+  --accent: var(--hawk-red);
+  --accent-text: var(--hawk-red);
   --accent-bg: rgba(186, 12, 47, 0.08);
   --accent-border: rgba(186, 12, 47, 0.45);
+  --link: var(--hawk-red);
+  --emphasis: var(--hawk-red);
+  --teal: var(--hawk-teal);
+  --teal-bg: rgba(95, 199, 186, 0.14);
+
+  /* Operational status colors (always paired with words or icons) */
   --ok: #1a7f37;
-  --err: #8a1224;
+  --ok-bg: rgba(26, 127, 55, 0.12);
+  --err: #ba0c2f;
+  --err-bg: rgba(186, 12, 47, 0.1);
+  --warn: #9a6700;
+  --warn-bg: rgba(154, 103, 0, 0.12);
+  --info: #1d4ed8;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  /* Font aliases kept for playground CSS compatibility */
+  --sans: var(--hawk-body-font);
+  --mono: var(--hawk-figure-font);
 
-  /* shadcn semantic tokens, mapped onto the palette above. `--ui-accent` is
-     shadcn's neutral hover surface — deliberately distinct from the legacy
-     `--accent` (the brand red) so the two never collide. */
-  --radius: 0.625rem;
+  /* shadcn semantic tokens */
+  --radius: 0.5rem;
   --background: var(--bg);
   --foreground: var(--text-h);
-  --card: var(--bg);
+  --card: var(--card-surface);
   --card-foreground: var(--text-h);
-  --popover: var(--bg);
+  --popover: var(--card-surface);
   --popover-foreground: var(--text-h);
-  --primary: var(--accent);
-  --primary-foreground: #ffffff;
-  --secondary: var(--code-bg);
+  --primary: var(--hawk-red);
+  --primary-foreground: var(--hawk-white);
+  --secondary: var(--surface);
   --secondary-foreground: var(--text-h);
-  --muted: var(--code-bg);
+  --muted: var(--surface);
   --muted-foreground: var(--text);
-  --ui-accent: var(--code-bg);
-  --ui-accent-foreground: var(--text-h);
+  --ui-accent: var(--surface);
+  --ui-accent-foreground: var(--ink);
   --destructive: var(--err);
-  --input: var(--border);
-  --ring: var(--accent);
+  --input: var(--border-strong);
+  --ring: var(--hawk-red);
 
-  --sidebar: var(--bg);
-  --sidebar-foreground: var(--text);
-  --sidebar-primary: var(--accent);
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: var(--accent-bg);
-  --sidebar-accent-foreground: var(--accent);
+  /* Sidebar uses Light Grey panel in light mode for crisp separation from white page */
+  --sidebar: var(--surface);
+  --sidebar-foreground: var(--text-h);
+  --sidebar-primary: var(--hawk-red);
+  --sidebar-primary-foreground: var(--hawk-white);
+  --sidebar-accent: var(--hawk-white);
+  --sidebar-accent-foreground: var(--ink);
   --sidebar-border: var(--border);
-  --sidebar-ring: var(--accent);
+  --sidebar-ring: var(--hawk-red);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #a3a19e;
-    --text-h: #f5f4f3;
-    --bg: #141414;
-    --border: #333333;
-    --code-bg: #1e1e1e;
-    --accent: #e0475f;
-    --accent-bg: rgba(224, 71, 95, 0.15);
-    --accent-border: rgba(224, 71, 95, 0.5);
-    --ok: #3fb950;
-    --err: #f16a6a;
+    --bg: var(--hawk-dark-background);
+    --surface: var(--hawk-dark-card);
+    --card-surface: var(--hawk-dark-card);
+    --ink: var(--hawk-white);
+    --text-h: var(--hawk-light-grey);
+    --text: var(--hawk-grey);
+    --border: var(--hawk-charcoal);
+    --border-strong: #4a4a4a;
+    --code-bg: var(--hawk-dark-card);
 
-    --sidebar: #171717;
+    /* True Red stays the fill; text accents shift to Light Teal / red tint */
+    --accent: var(--hawk-red);
+    --accent-text: var(--hawk-emphasis-dark);
+    --accent-bg: rgba(186, 12, 47, 0.2);
+    --accent-border: rgba(242, 92, 116, 0.55);
+    --link: var(--hawk-teal);
+    --emphasis: var(--hawk-emphasis-dark);
+    --teal-bg: rgba(95, 199, 186, 0.16);
+
+    --ok: #3fb950;
+    --ok-bg: rgba(63, 185, 80, 0.16);
+    --err: var(--hawk-emphasis-dark);
+    --err-bg: rgba(242, 92, 116, 0.16);
+    --warn: #facc15;
+    --warn-bg: rgba(250, 204, 21, 0.14);
+    --info: #60a5fa;
+
+    --secondary: var(--hawk-dark-muted);
+    --muted: var(--hawk-dark-muted);
+    --ui-accent: var(--hawk-dark-muted);
+    --ui-accent-foreground: var(--hawk-white);
+    --input: #4a4a4a;
+    --ring: var(--hawk-teal);
+
+    --sidebar: var(--hawk-dark-card);
+    --sidebar-foreground: var(--hawk-light-grey);
+    --sidebar-accent: var(--hawk-dark-muted);
+    --sidebar-accent-foreground: var(--hawk-white);
+    --sidebar-border: var(--hawk-charcoal);
+    --sidebar-ring: var(--hawk-teal);
   }
 }
 
@@ -80,8 +127,10 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  --font-sans: var(--sans);
-  --font-mono: var(--mono);
+  --font-sans: var(--hawk-body-font);
+  --font-heading: var(--hawk-heading-font);
+  --font-display: var(--hawk-display-font);
+  --font-mono: var(--hawk-figure-font);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -102,6 +151,9 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-link: var(--link);
+  --color-emphasis: var(--emphasis);
+  --color-teal: var(--teal);
 
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
@@ -120,14 +172,16 @@
 
   html {
     color-scheme: light dark;
+    font-family: var(--font-sans);
   }
 
   body {
     margin: 0;
     background: var(--color-background);
     color: var(--color-foreground);
-    font: 18px / 145% var(--font-sans);
-    letter-spacing: 0.18px;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.6;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -137,9 +191,99 @@
     min-height: 100svh;
   }
 
-  @media (max-width: 1024px) {
-    body {
-      font-size: 16px;
-    }
+  a:focus-visible,
+  button:focus-visible,
+  select:focus-visible,
+  input:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
+
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+/* Lesson prose typography refinements aligned to FRC 2713 branding */
+.lesson-prose {
+  --tw-prose-body: var(--foreground);
+  --tw-prose-headings: var(--ink);
+  --tw-prose-bold: var(--ink);
+  --tw-prose-links: var(--link);
+  --tw-prose-bullets: var(--border-strong);
+  --tw-prose-counters: var(--muted-foreground);
+  --tw-prose-hr: var(--border);
+  --tw-prose-quotes: var(--foreground);
+  --tw-prose-quote-borders: var(--teal);
+  --tw-prose-th-borders: var(--border-strong);
+  --tw-prose-td-borders: var(--border);
+}
+
+.lesson-prose h1 {
+  font-family: var(--hawk-heading-font);
+  font-weight: 700;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: 0.015em;
+  color: var(--ink);
+  font-size: 1.875rem;
+  line-height: 1.15;
+  margin-bottom: 1rem;
+}
+
+.lesson-prose h2 {
+  font-family: var(--hawk-heading-font);
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 1.35rem;
+  line-height: 1.25;
+  margin-top: 1.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.lesson-prose h3,
+.lesson-prose h4,
+.lesson-prose th {
+  font-family: var(--hawk-heading-font);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.lesson-prose a {
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, var(--link) 45%, transparent);
+  transition: text-decoration-color 150ms ease;
+}
+
+.lesson-prose a:hover {
+  text-decoration-color: var(--link);
+}
+
+.lesson-prose blockquote {
+  font-style: normal;
+  background: var(--surface);
+  border-left: 4px solid var(--teal);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 12px 14px;
+}
+
+.lesson-prose blockquote p:first-of-type::before,
+.lesson-prose blockquote p:last-of-type::after {
+  content: none;
+}
+
+.lesson-prose table {
+  border-collapse: collapse;
+}
+
+.lesson-prose thead th {
+  background: var(--surface);
+  padding: 0.5rem 0.75rem;
+}
+
+.lesson-prose tbody td {
+  padding: 0.5rem 0.75rem;
 }

@@ -22,7 +22,7 @@
 
 .sm-toolbar button:hover {
   border-color: var(--accent-border);
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .sm-event-pick {
@@ -37,7 +37,7 @@
   padding: 5px 8px;
   border: 1px solid var(--border);
   border-radius: 6px;
-  background: var(--bg);
+  background: var(--card-surface);
   color: var(--text-h);
   font: inherit;
 }
@@ -59,20 +59,22 @@
 .sm-event {
   border: 1px solid var(--accent-border);
   background: var(--accent-bg);
-  color: var(--accent);
+  color: var(--accent-text);
   border-radius: 6px;
   padding: 8px 16px;
   font-weight: 600;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .sm-event:hover {
-  background: var(--accent);
-  color: var(--bg);
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
 }
 
 .sm-reset {
   border: 1px solid var(--border);
-  background: none;
+  background: var(--card-surface);
   color: var(--text-h);
   border-radius: 6px;
   padding: 8px 16px;
@@ -117,36 +119,36 @@
   box-shadow: 0 0 0 3px var(--accent-bg);
 }
 
-/* Fixed colors for states that represent a literal light, e.g. the traffic
-   light demo — independent of which state is currently active. */
+/* Semantic colors for states that represent a literal light, e.g. the traffic
+   light demo — accessible contrast in both light and dark themes. */
 .sm-tone-red {
-  border-color: #ef4444;
-  background: rgba(239, 68, 68, 0.12);
-  color: #ef4444;
+  border-color: var(--err);
+  background: var(--err-bg);
+  color: var(--err);
 }
 
 .sm-tone-green {
-  border-color: #22c55e;
-  background: rgba(34, 197, 94, 0.12);
-  color: #22c55e;
+  border-color: var(--ok);
+  background: var(--ok-bg);
+  color: var(--ok);
 }
 
 .sm-tone-yellow {
-  border-color: #eab308;
-  background: rgba(234, 179, 8, 0.12);
-  color: #eab308;
+  border-color: var(--warn);
+  background: var(--warn-bg);
+  color: var(--warn);
 }
 
 .sm-tone-red.sm-active {
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 0 0 3px var(--err-bg);
 }
 
 .sm-tone-green.sm-active {
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.3);
+  box-shadow: 0 0 0 3px var(--ok-bg);
 }
 
 .sm-tone-yellow.sm-active {
-  box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.3);
+  box-shadow: 0 0 0 3px var(--warn-bg);
 }
 
 .sm-node-label {
@@ -173,9 +175,9 @@
   transform: translateX(-50%);
   padding: 1px 8px;
   border-radius: 999px;
-  background: var(--accent);
-  color: var(--bg);
-  font-family: var(--sans);
+  background: var(--primary);
+  color: #ffffff;
+  font-family: var(--hawk-heading-font);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.05em;

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Play, RotateCcw, Terminal } from 'lucide-react'
 import CodeMirror, { EditorView } from '@uiw/react-codemirror'
 import { python } from '@codemirror/lang-python'
 import { oneDark } from '@codemirror/theme-one-dark'
@@ -44,14 +45,24 @@ export function JavaRunner({
   }
 
   return (
-    <>
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-base font-semibold text-primary">▶ Playground</h2>
-        <Button type="button" size="sm" variant="outline" onClick={handleReset} disabled={running}>
-          Reset code
+    <div className="overflow-hidden rounded-lg border border-border bg-card transition-shadow focus-within:ring-2 focus-within:ring-ring/50">
+      <div className="flex items-center justify-between gap-3 border-b border-border bg-muted px-3.5 py-2.5">
+        <div className="flex items-center gap-2">
+          <Terminal className="size-4 text-[var(--emphasis)]" aria-hidden="true" />
+          <h2 className="brand-subheading text-sm uppercase tracking-wider text-[var(--ink)]">
+            Playground
+          </h2>
+          <span className="rounded border border-border bg-card px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+            Python
+          </span>
+        </div>
+        <Button type="button" size="xs" variant="ghost" onClick={handleReset} disabled={running}>
+          <RotateCcw className="size-3.5" aria-hidden="true" />
+          Reset
         </Button>
       </div>
-      <div className="my-4 overflow-hidden rounded-lg border bg-muted">
+
+      <div className="bg-card">
         <CodeMirror
           value={code}
           onChange={handleChange}
@@ -64,31 +75,37 @@ export function JavaRunner({
             highlightActiveLineGutter: true,
             autocompletion: false,
           }}
-          className="text-[15px]"
         />
-        <div className="flex justify-end border-t px-2.5 py-2">
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={handleRun}
-            disabled={running}
-            className="border-primary/40 bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary"
+      </div>
+
+      <div className="flex items-center justify-between gap-3 border-t border-border bg-muted px-3.5 py-2">
+        <span className="text-xs text-muted-foreground">Edit the code, then press Run.</span>
+        <Button type="button" size="sm" variant="default" onClick={handleRun} disabled={running}>
+          <Play className="size-3.5 fill-current" aria-hidden="true" />
+          {running ? 'Running…' : 'Run'}
+        </Button>
+      </div>
+
+      {output !== null && (
+        <div className="border-t border-border bg-background px-3.5 py-3">
+          <div
+            className={cn(
+              'brand-subheading mb-1 text-[11px] uppercase tracking-wider',
+              ok ? 'text-muted-foreground' : 'text-[var(--err)]',
+            )}
           >
-            {running ? 'Running…' : '▶ Run'}
-          </Button>
-        </div>
-        {output !== null && (
+            {ok ? 'Output' : 'Error'}
+          </div>
           <pre
             className={cn(
-              'm-0 whitespace-pre-wrap break-words border-t bg-background px-3.5 py-3 font-mono text-sm text-foreground',
-              !ok && 'text-destructive',
+              'm-0 whitespace-pre-wrap break-words font-mono text-sm leading-relaxed text-foreground',
+              !ok && 'text-[var(--err)]',
             )}
           >
             {output}
           </pre>
-        )}
-      </div>
-    </>
+        </div>
+      )}
+    </div>
   )
 }

@@ -10,6 +10,7 @@ import { editorTheme, usePrefersDark } from '@/lib/editorTheme'
 export function CodeBlock({ code, language }: { code: string; language?: string }) {
   const dark = usePrefersDark()
   const isPython = language === 'python'
+  const label = isPython ? 'Python example' : language ? `${language} example` : 'Output'
 
   const extensions = useMemo(() => {
     const ext = [editorTheme, EditorView.lineWrapping]
@@ -18,7 +19,12 @@ export function CodeBlock({ code, language }: { code: string; language?: string 
   }, [isPython])
 
   return (
-    <div className="my-4 overflow-hidden rounded-lg border bg-muted">
+    <div className="not-prose my-4 overflow-hidden rounded-lg border border-border bg-[var(--code-bg)]">
+      <div className="border-b border-border bg-muted px-3 py-1.5">
+        <span className="brand-subheading text-[11px] uppercase tracking-wider text-muted-foreground">
+          {label}
+        </span>
+      </div>
       <CodeMirror
         value={code}
         editable={false}
