@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Check, Circle } from 'lucide-react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import type { Components } from 'react-markdown'
@@ -13,6 +14,7 @@ import {
   nextLesson,
   stripBlocksFence,
 } from '@/lib/lessons'
+import { useProgress } from '@/lib/progress'
 import { JavaRunner } from '@/components/JavaRunner'
 import { CodeBlock } from '@/components/CodeBlock'
 import { BlockPlayground } from '@/components/BlockPlayground'
@@ -20,6 +22,7 @@ import { MazePlayground } from '@/components/MazePlayground'
 import { StatePlayground } from '@/components/StatePlayground'
 import { isStatePreset } from '@/lib/statePresets'
 import { PageNav } from '@/components/PageNav'
+import { Button } from '@/components/ui/button'
 
 // Fenced code blocks in the prose render read-only through CodeMirror (same
 // syntax highlighting + line numbers as the playground); the runnable copy of
@@ -79,9 +82,16 @@ const PROSE_CLASSES = [
 export function LessonView() {
   const { slug, page } = useParams()
   const navigate = useNavigate()
+  const { isCompleted, setCompleted, savingSlug, user } = useProgress()
   const lesson = getLesson(slug ?? '')
 
   if (!lesson) return <Navigate to="/" replace />
+
+  const completed = isCompleted(lesson.slug)
+  const saving = savingSlug === lesson.slug
+  const toggleCompleted = () => {
+    void setCompleted(lesson.slug, !completed)
+  }
 
   const pageCount = lesson.pages.length
   const requested = page ? Number(page) - 1 : 0
@@ -104,9 +114,37 @@ export function LessonView() {
   return (
     <div className="mx-auto w-full max-w-[1240px] px-5 pt-8 pb-20">
       <div className="mb-6">
-        <Link className="mb-5 inline-block text-sm text-primary no-underline hover:underline" to="/">
-          ← All lessons
-        </Link>
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <Link className="inline-block text-sm text-primary no-underline hover:underline" to="/">
+            ← All lessons
+          </Link>
+          {user && (
+            <Button
+              type="button"
+              size="sm"
+              variant={completed ? 'default' : 'outline'}
+              disabled={saving}
+              onClick={toggleCompleted}
+              className={
+                completed
+                  ? 'bg-[var(--ok)] text-white hover:bg-[var(--ok)]/90'
+                  : undefined
+              }
+            >
+              {completed ? (
+                <>
+                  <Check className="size-4" />
+                  Completed
+                </>
+              ) : (
+                <>
+                  <Circle className="size-4" />
+                  Mark lesson complete
+                </>
+              )}
+            </Button>
+          )}
+        </div>
         <p className="rounded-lg bg-primary/10 px-4 py-3 text-[15px] text-foreground">
           <strong>Goal:</strong> {lesson.goal}
         </p>
@@ -156,6 +194,20 @@ export function LessonView() {
         onNext={() => goTo(pageIndex + 1)}
         onJump={goTo}
       />
+      {onLastPage && user && !completed && (
+        <div className="mt-6 flex items-center justify-between gap-4 rounded-xl border bg-muted/40 px-5 py-4">
+          <div className="text-sm text-foreground">Finished this lesson?</div>
+          <Button
+            type="button"
+            size="sm"
+            disabled={saving}
+            onClick={() => void setCompleted(lesson.slug, true)}
+          >
+            <Check className="size-4" />
+            Mark lesson complete
+          </Button>
+        </div>
+      )}
       {onLastPage &&
         (next ? (
           <Link

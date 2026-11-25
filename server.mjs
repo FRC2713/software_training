@@ -2,15 +2,23 @@ import { createReadStream, statSync } from 'node:fs'
 import http from 'node:http'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { openProgressDb } from './server/progress-db.mjs'
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url))
 const distDir = path.resolve(process.env.DIST_DIR || path.join(rootDir, 'site', 'dist'))
+const dataDir = path.resolve(
+  process.env.DATA_DIR || (process.env.NODE_ENV === 'production' ? '/data' : path.join(rootDir, '.data')),
+)
 const host = process.env.HOST || '0.0.0.0'
 const port = Number(process.env.PORT || 3000)
 const revision = process.env.APP_REVISION || 'development'
 const runnerUrl = (process.env.RUNNER_URL || '').replace(/\/+$/, '')
 const trustProxy = process.env.HAWK_SUITE_TRUST_PROXY === 'true'
 const expectedTeamId = process.env.HAWK_SUITE_TEAM_ID || ''
+
+const progressDb = openProgressDb(path.join(dataDir, 'progress.db'))
+
+const LESSON_SLUG_RE = /^[a-z0-9][a-z0-9-]{0,99}$/
 
 const MAX_BODY_BYTES = 64 * 1024
 const RATE_LIMIT_BURST = 5
@@ -125,13 +133,87 @@ function readJsonBody(req) {
   })
 }
 
+function resolveUser(req) {
+  if (!trustProxy) {
+    return {
+      userKey: 'local-dev',
+      slackUserId: 'local-dev',
+      slackTeamId: 'local',
+      slackName: 'Local Developer',
+    }
+  }
+  const slackUserId = String(req.headers['x-hawk-slack-user'] || '').trim()
+  const slackTeamId = String(req.headers['x-hawk-slack-team'] || '').trim()
+  if (!slackUserId) return null
+  if (expectedTeamId && slackTeamId !== expectedTeamId) return null
+  const slackName =
+    String(
+      req.headers['x-hawk-slack-name'] ||
+        req.headers['x-hawk-user-name'] ||
+        req.headers['x-hawk-slack-display-name'] ||
+        '',
+    ).trim() || slackUserId
+  return {
+    userKey: `${slackTeamId}:${slackUserId}`,
+    slackUserId,
+    slackTeamId,
+    slackName,
+  }
+}
+
 function resolveUserKey(req) {
-  if (!trustProxy) return 'local-dev'
-  const user = String(req.headers['x-hawk-slack-user'] || '').trim()
-  const team = String(req.headers['x-hawk-slack-team'] || '').trim()
-  if (!user) return null
-  if (expectedTeamId && team !== expectedTeamId) return null
-  return `${team}:${user}`
+  return resolveUser(req)?.userKey ?? null
+}
+
+async function handleProgressApi(req, res, method) {
+  const user = resolveUser(req)
+  if (!user) {
+    sendJson(res, 401, { error: 'Sign in with Hawk Suite to track progress.' })
+    return
+  }
+
+  if (method === 'GET') {
+    progressDb.upsertUser(user)
+    const completed = progressDb.getCompletedLessons(user.userKey)
+    sendJson(res, 200, {
+      user: { id: user.slackUserId, name: user.slackName },
+      completed,
+    })
+    return
+  }
+
+  if (method === 'POST') {
+    let body
+    try {
+      body = await readJsonBody(req)
+    } catch (err) {
+      sendJson(res, err.status || 400, { error: err.message || 'Bad request' })
+      return
+    }
+
+    if (
+      !body ||
+      typeof body !== 'object' ||
+      typeof body.lessonSlug !== 'string' ||
+      !LESSON_SLUG_RE.test(body.lessonSlug) ||
+      typeof body.completed !== 'boolean'
+    ) {
+      sendJson(res, 400, {
+        error: 'Fields `lessonSlug` (valid slug) and `completed` (boolean) are required.',
+      })
+      return
+    }
+
+    const completed = progressDb.setLessonCompleted(user, body.lessonSlug, body.completed)
+    sendJson(res, 200, {
+      user: { id: user.slackUserId, name: user.slackName },
+      completed,
+    })
+    return
+  }
+
+  res.writeHead(405, { Allow: 'GET, POST', 'Content-Type': 'text/plain; charset=utf-8' })
+  res.end('Method Not Allowed')
 }
 
 async function handleRunApi(req, res, isMaze) {
@@ -243,6 +325,11 @@ const server = http.createServer((req, res) => {
     return
   }
 
+  if (pathname === '/api/progress') {
+    void handleProgressApi(req, res, method)
+    return
+  }
+
   if (pathname === '/api/run' || pathname === '/api/run/maze') {
     if (method !== 'POST') {
       res.writeHead(405, { Allow: 'POST', 'Content-Type': 'text/plain; charset=utf-8' })
@@ -314,6 +401,9 @@ server.listen(port, host, () => {
 
 for (const signal of ['SIGINT', 'SIGTERM']) {
   process.on(signal, () => {
-    server.close(() => process.exit(0))
+    server.close(() => {
+      progressDb.close()
+      process.exit(0)
+    })
   })
 }

@@ -35,6 +35,9 @@ if (process.argv.includes("--contract")) {
       const port = Number(process.env.PORT);
       if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error();
     }
+    if (process.env.DATA_DIR !== undefined && !process.env.DATA_DIR.trim()) {
+      throw new Error();
+    }
     console.log(JSON.stringify({ status: "ok", contract: contract.schema }));
   } catch {
     // Parse errors can contain credentials. Report names, never values.
