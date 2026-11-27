@@ -7,7 +7,10 @@ section: "Algorithms"
 
 # A maze is a robot's world
 
-On the right is a maze. It is fun to solve by hand, and for us it is also a tiny, simplified version of the problem every FRC robot faces: **"I'm here, I need to get there, and there are things in my way."**
+Your robot now has variables, loops, and mechanisms. Time to put it on a practice
+field. On the right is a maze. It is fun to solve by hand, and for us it is also
+a tiny, simplified version of the problem every FRC robot faces in autonomous:
+**"I'm here, I need to get there, and there are things in my way."**
 
 Strip a competition field down to its essentials and you get this: a space divided into a **grid** of cells, some paths open, some blocked by **walls**, a place you **start**, and a place you are trying to **reach**.
 

@@ -11,19 +11,19 @@ You've already been building programs as flowcharts of blocks. Everything you di
 
 A **program** is a list of instructions, written in a language a computer can follow step by step, in order.
 
-That's it. Not magic, just a recipe: "Crack two eggs. Whisk them. Pour into a hot pan." A computer program is the same idea, except the kitchen is the computer's memory and screen, and the chef is the computer itself, which follows your instructions *exactly* as written, including your mistakes.
+That's it. Not magic, just a pre-match checklist: "Zero the gyro. Spin up the flywheel. Drive forward two meters." A robot program is the same idea, except the robot controller follows your instructions *exactly* as written, including your mistakes.
 
 Everything you learn here builds the foundation you'll use for FRC robot software, simulations, and team tools.
 
 # Your first program
 
-Here is a complete, one-line Python program:
+When a robot boots up on the workbench, the first thing you want to know is that it is alive and talking to the driver station. Here is a complete, one-line Python program that prints its first message:
 
 ```python
 print("Hello, world!")
 ```
 
-`print` is a function that means "show this on the screen." The text in quotes is exactly what gets shown. Computers don't know that `Hello, world!` is a greeting; they just do what they're told with the data they're given. Each instruction sits on its own line, with no semicolon needed at the end.
+`print` is a function that means "show this on the console." The text in quotes is exactly what gets shown. The robot doesn't know that `Hello, world!` is a greeting; it just does what it's told with the data it's given. Each instruction sits on its own line, with no semicolon needed at the end.
 
 Two things to know about the playground before you press Run:
 
@@ -36,10 +36,10 @@ Now break it on purpose. Try changing the text between the quotes, removing a qu
 
 # Your turn
 
-Edit the code below so it prints a greeting with **your own name** in it, instead of `world`. Run it to check.
+Edit the code below so the robot announces itself to the driver station with **your robot's name or team number** instead of `world`. Run it to check.
 
 ```python
 print("Hello, world!")
 ```
 
-Once that works, add a second line that prints something else about yourself, like your favorite subject or a hobby. Each `print(...)` line runs in order, top to bottom, and produces its own line of output.
+Once that works, add a second line that prints a startup status, like `"Battery checked"` or `"Autonomous armed"`. Each `print(...)` line runs in order, top to bottom, and produces its own line of output.

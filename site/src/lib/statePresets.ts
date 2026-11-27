@@ -50,25 +50,25 @@ const trans = (from: string, to: string, on: string, label: string, back = false
   markerEnd: { type: MarkerType.ArrowClosed },
 })
 
-// ---- Demo: a traffic light (watch it cycle) --------------------------------
+// ---- Demo: FRC match modes (watch it cycle) --------------------------------
 
 // One event drives the whole thing, so the student's only job is to press it and
-// watch the current-state token move: red → green → yellow → red.
+// watch the current-state token move: disabled -> auto -> teleop -> disabled.
 const smDemo: StatePreset = {
   kind: 'state',
   draggable: false,
   buildable: false,
-  start: 'red',
+  start: 'disabled',
   events: [{ id: 'timer', label: 'timer done' }],
   nodes: [
-    state('red', 'RED', 60, 0, 'red'),
-    state('green', 'GREEN', 60, 150, 'green'),
-    state('yellow', 'YELLOW', 60, 300, 'yellow'),
+    state('disabled', 'DISABLED', 60, 0, 'red'),
+    state('auto', 'AUTO', 60, 150, 'yellow'),
+    state('teleop', 'TELEOP', 60, 300, 'green'),
   ],
   edges: [
-    trans('red', 'green', 'timer', 'timer done'),
-    trans('green', 'yellow', 'timer', 'timer done'),
-    trans('yellow', 'red', 'timer', 'timer done', true),
+    trans('disabled', 'auto', 'timer', 'timer done'),
+    trans('auto', 'teleop', 'timer', 'timer done'),
+    trans('teleop', 'disabled', 'timer', 'timer done', true),
   ],
 }
 

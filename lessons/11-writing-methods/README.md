@@ -7,28 +7,28 @@ section: "Python Fundamentals"
 
 # Packaging steps with def
 
-Since [lesson {n}](#/lesson/06-hello-world), every script you wrote ran straight from top to bottom. Now you're ready to build reusable blocks of your own, just like the custom blocks in [lesson {n}](#/lesson/04-functions). In Python, a reusable block of code is called a **function**, and you create one with **`def`**:
+Since [lesson {n}](#/lesson/06-hello-world), every script you wrote ran straight from top to bottom. Now your robot is ready to package repeatable routines into reusable blocks, just like the custom blocks in [lesson {n}](#/lesson/04-functions). In Python, a reusable block of code is called a **function**, and you create one with **`def`**:
 
 ```python
-def say_hello():
-    print("Hello from inside a function!")
+def check_systems():
+    print("Motors and sensors ready!")
 
-say_hello()
-say_hello()
+check_systems()
+check_systems()
 ```
 
 Two parts to spot:
 
-- **`def say_hello():`** defines a function named `say_hello`. The indented lines underneath are the steps inside it.
-- **`say_hello()`** calls the function, telling Python to run those indented steps.
+- **`def check_systems():`** defines a function named `check_systems`. The indented lines underneath are the steps inside it.
+- **`check_systems()`** calls the function, telling Python to run those indented steps.
 
-Defining a function doesn't run it; it just teaches Python the block exists. It only does its work when you *call* it, and you can call it as many times as you need. Later, in [lesson {n}](#/lesson/17-classes-and-objects), you'll also put functions inside classes, where they're called methods.
+Defining a function doesn't run it; it just teaches the robot the routine exists. It only does its work when you *call* it, and you can call it as many times as you need. Later, in [lesson {n}](#/lesson/17-classes-and-objects), you'll also put functions inside classes, where they're called methods.
 
-Run it and notice the message prints twice from one function definition.
+Run it and notice the status check prints twice from one function definition.
 
 # Define a block of your own
 
-[Lesson {n}](#/lesson/04-functions) gave you a **double** block with a little flowchart hidden inside that you could drop in wherever you needed it. Here is that same block in Python:
+[Lesson {n}](#/lesson/04-functions) gave you a **double** block to boost a robot's speed or double a match score. Here is that same block in Python:
 
 ```python
 def double_it(n):
@@ -45,34 +45,34 @@ Read the function piece by piece:
 
 Run this, then change `5` and run again: same block, different input, just like [lesson {n}](#/lesson/04-functions).
 
-The `n` is called a **parameter**, a placeholder that gets filled in with whatever value you pass when you call the function. A function can take more than one:
+The `n` is called a **parameter**, a placeholder that gets filled in with whatever value you pass when you call the function. A function can take more than one, like adding auto points and teleop points together:
 
 ```python
-def add(a, b):
-    return a + b
+def add(auto_pts, teleop_pts):
+    return auto_pts + teleop_pts
 
-print(add(2, 3))
+print(add(15, 32))
 ```
 
-Add `add` next to `double_it` in the editor above and call `add(2, 3)` inside `print(...)`.
+Add `add` next to `double_it` in the editor above and call `add(15, 32)` inside `print(...)`.
 
 # Order matters (again)
 
-[Lesson {n}](#/lesson/04-functions) ended with the big idea that **order matters**: `add 1` then `double` gave a different answer than `double` then `add 1`. Let's prove it in code with two functions of your own:
+[Lesson {n}](#/lesson/04-functions) ended with the match scoring pipeline showing that **order matters**: adding the leave bonus then doubling gave a different score than doubling then adding the leave bonus. Let's prove it in code with two functions of your own:
 
 ```python
-def add_one(n):
-    return n + 1
+def add_leave_bonus(score):
+    return score + 1
 
-def double_it(n):
-    return n * 2
+def double_it(score):
+    return score * 2
 
-print(double_it(add_one(4)))
-print(add_one(double_it(4)))
+print(double_it(add_leave_bonus(4)))
+print(add_leave_bonus(double_it(4)))
 ```
 
-Trace the first print line from the inside out: `add_one(4)` is `5`, then `double_it(5)` is `10`. The second line: `double_it(4)` is `8`, then `add_one(8)` is `9`. Same two blocks, same starting number, **different order, different answer**, matching the [lesson-4](#/lesson/04-functions) result.
+Trace the first print line from the inside out: `add_leave_bonus(4)` is `5`, then `double_it(5)` is `10`. The second line: `double_it(4)` is `8`, then `add_leave_bonus(8)` is `9`. Same two blocks, same starting score, **different order, different answer**, matching the [lesson {n}](#/lesson/04-functions) result.
 
 Run it and confirm you get `10` then `9`.
 
-Your challenge: write a function `square(n)` that returns `n * n`, then use it together with `add_one` to compute **`(4 + 1)` squared**. Predict the answer before you run, and watch your call order, because `square(add_one(4))` and `add_one(square(4))` are *not* the same.
+Your challenge: write a function `square(n)` that returns `n * n` (the same math FRC drive code uses to square joystick inputs for smoother control), then combine it with `add_leave_bonus` to compute **`(4 + 1)` squared**. Predict the answer before you run, and watch your call order, because `square(add_leave_bonus(4))` and `add_leave_bonus(square(4))` are *not* the same.

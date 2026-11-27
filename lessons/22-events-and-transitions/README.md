@@ -7,7 +7,7 @@ section: "State Machines"
 
 # Transitions depend on an event
 
-The traffic light moved on its own. One event, `timer done`, always advanced
+The match-mode machine moved on its own. One event, `timer done`, always advanced
 it. Real mechanisms wait for **specific events**: a button press, a sensor
 tripping, a shot finishing. So a transition depends on **two things**: which
 state you're in, *and* which event just happened.
