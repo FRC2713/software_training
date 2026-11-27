@@ -7,6 +7,10 @@ section: "Advanced Python"
 
 # match: one question, many answers
 
+Your robot's mechanisms work in practice now. This section upgrades that code for
+competition: cleaner dispatch, smarter enums, hardware interfaces for simulation,
+and fluent motor configs.
+
 [Lesson {n}](#/lesson/22-events-and-transitions) dispatched on an event string with `if`/`elif`. That works, but when every branch tests the *same* variable against different exact values, Python 3.10+ has a cleaner shape built for it: **`match`** and **`case`**.
 
 ```python

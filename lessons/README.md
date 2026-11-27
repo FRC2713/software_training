@@ -66,7 +66,7 @@ it's the exact content the [training site](../site) renders, page by page.
   [`site/src/lib/statePresets.ts`](../site/src/lib/statePresets.ts) route to
   `StatePlayground` (a drivable state diagram with event buttons) rather than
   the dataflow block editor. They follow the same demo, edit, build arc:
-  `sm-demo` (traffic light, lesson 20), `sm-edit` (game-piece handler), and
+  `sm-demo` (match modes, lesson 20), `sm-edit` (game-piece handler), and
   `sm-build` (wire up a climber yourself).
 - **` ```maze ` fences render the maze playground.** The fence body names a
   starter solver (such as `solver: python-wallfollower` or

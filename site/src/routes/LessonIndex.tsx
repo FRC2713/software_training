@@ -17,8 +17,8 @@ export function LessonIndex() {
         </h1>
         <div className="mt-3 h-[3px] w-14 bg-primary" aria-hidden="true" />
         <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
-          Learn programming fundamentals one short lesson at a time. Every lesson is hands-on, so
-          you build and run code right in the browser.
+          Follow an FRC robot from its first boot on the workbench to running full mechanisms and
+          autonomous paths in a match. Every lesson is short and hands-on, right in the browser.
         </p>
         {user && (
           <div className="mt-5 flex flex-wrap items-center gap-3 rounded-lg border bg-[var(--surface)] px-4 py-3">

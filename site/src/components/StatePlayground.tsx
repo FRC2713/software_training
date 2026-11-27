@@ -34,7 +34,7 @@ interface StateData {
   active: boolean // is this the current state?
   isStart: boolean
   editable: boolean // rename via inline input (build mode)
-  tone?: 'red' | 'green' | 'yellow' // optional fixed color, e.g. the traffic light
+  tone?: 'red' | 'green' | 'yellow' // optional fixed color, e.g. match mode states
   [key: string]: unknown
 }
 

@@ -7,10 +7,11 @@ section: "Data Structures"
 
 # One name, many values
 
-Every variable so far has held a *single* value: one number, one string. Real
-programs deal in **groups**, like the six sensor readings on a robot, the names
-of everyone on the drive team, or the points scored in each match. Python holds
-a group in a **list**: values inside square brackets, separated by commas.
+Every variable your robot has used so far held a *single* value: one score, one
+voltage, one name. In a real match, a robot deals in **groups**, like the five
+sensor readings on its chassis, the names of everyone on the drive team, or the
+points scored in each match. Python holds a group in a **list**: values inside
+square brackets, separated by commas.
 
 ```python
 readings = [12, 47, 3, 88, 21]

@@ -14,8 +14,8 @@ ends, backs out, hugs walls that lead nowhere, and only reaches the goal
 because it refuses to give up. It finds *a* path. It does not find the
 *shortest* one.
 
-For a robot on a field with a shot clock, the difference matters. "Reaches the
-goal" and "reaches the goal in the fewest moves" are two different problems,
+For a robot on an FRC field with a 15-second autonomous clock, the difference matters. "Reaches the
+scoring zone" and "reaches the scoring zone in the fewest moves" are two different problems,
 and the second one needs a smarter idea.
 
 That idea is **A\*** (say "A-star"), one of the most widely used pathfinding

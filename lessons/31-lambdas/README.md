@@ -123,4 +123,4 @@ Run it. The first call is ready, so `action()` runs and prints `fire!`. The seco
 
 One rule of thumb: reach for `lambda` when the body is a single short expression. The moment it needs two steps, an `if` statement, or a descriptive name, write a regular `def` function and pass its name (without parentheses) as the callback instead.
 
-Your turn: write a function `describe(check: Callable[[], bool]) -> None` that prints `"ready"` or `"not ready"` depending on `check()`. Call it three times with three different lambdas: one always `True`, one always `False`, and one that computes its answer from a comparison you make up (like `7 > 3`).
+Your turn: write a function `describe(check: Callable[[], bool]) -> None` that prints `"ready"` or `"not ready"` depending on `check()`. Call it three times with three different lambdas: one always `True`, one always `False`, and one that checks a robot condition you make up (like `12.2 > 11.5` for battery voltage).

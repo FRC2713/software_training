@@ -15,23 +15,24 @@ then in code.
 
 A state machine is simple to say: the machine is **always in exactly one
 state**, and it **moves to another state when an event happens**. That's it.
-Here's the classic example, a traffic light. Each rounded box is a **state**,
-and each arrow is a **transition**, labelled with the **event** that triggers it.
+Here is an **FRC match mode** cycle. Each rounded box is a **state**, and each
+arrow is a **transition**, labelled with the **event** that triggers it.
 
 ```blocks
 preset: sm-demo
 ```
 
-The light is glowing on its current state. There's one event here, the timer
-finishing, so press **timer done** and watch the machine move: `RED → GREEN →
-YELLOW → RED`, forever. Notice what you *can't* do: the light can't be red and
-green at once, and it can't jump from red straight to yellow. One state at a
-time, and it only moves the way an arrow allows. That restriction is the whole
-point. It's what makes the behavior predictable.
+The robot is glowing on its current mode. There's one event here, the timer
+finishing, so press **timer done** and watch the match move: `DISABLED → AUTO →
+TELEOP → DISABLED`, match after match. Notice what the robot *can't* do: it
+can't be in `DISABLED` and `TELEOP` at once, and it can't jump straight from
+`DISABLED` to `TELEOP` without running `AUTO`. One state at a time, and it only
+moves the way an arrow allows. That restriction is the whole point. It's what
+makes robot behavior predictable on the field.
 
 # Events, and what gets ignored
 
-A traffic light only had one event. A real mechanism has several, and here's the
+The match-mode cycle only had one event. A real mechanism has several, and here's the
 key idea: **a state only reacts to the events it has an arrow for. Everything
 else, it ignores.**
 

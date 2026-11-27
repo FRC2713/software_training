@@ -7,21 +7,15 @@ section: "Programming with Blocks"
 
 # One step at a time
 
-Before we write a single line of Python, let's get the big idea out of the way:
-**a program is a list of instructions, and the computer runs them one at a time,
-in order.** It never skips ahead, and it never runs two steps at once by
-accident. It finishes one box, updates its memory, and follows the arrow to the
-next box.
+Your robot is powering on for the first time, and it knows nothing about FRC yet. Before we write a single line of Python, let's get the big idea out of the way: **a program is a list of instructions, and the robot runs them one at a time, in order.** It never skips ahead, and it never runs two steps at once by accident. It finishes one box, updates its memory, and follows the arrow to the next box.
 
 A **flowchart** shows that exact journey from **START** to **END**:
 
-- Each **box** is one instruction — like storing a number or doing math.
+- Each **box** is one instruction, like storing a number or doing math.
 - Each **arrow** shows which step runs next.
-- **Robot Memory** at the bottom shows the named values the robot is remembering
-  right now.
+- **Robot Memory** at the bottom shows the named values the robot is remembering right now.
 
-The flowchart here calculates an FRC robot's **autonomous score**: `3` coral at
-`4` points each, plus a `3`-point bonus for leaving the starting zone.
+The flowchart here teaches the robot how an FRC **autonomous score** works: `3` coral at `4` points each, plus a `3`-point bonus for leaving the starting zone.
 
 Press **▶ Run** (or click **⏭ Step** to advance one instruction at a time) and
 watch **Robot Memory** update as each box lights up. You can also click

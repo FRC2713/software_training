@@ -14,25 +14,27 @@ answer "what is at position `i`?" Dictionaries
 **set** throws out positions and keys and answers just one question: **"is this
 value in the group, or not?"**
 
-Python's `set` acts like a collection that refuses duplicates:
+Python's `set` acts like a collection that refuses duplicates. Here the robot
+tracks which zones of the FRC field it has visited during a match:
 
 ```python
 visited = set()
-visited.add("red")
-visited.add("blue")
-visited.add("red")
+visited.add("loading_zone")
+visited.add("scoring_zone")
+visited.add("loading_zone")
 print(visited)
 print(len(visited))
 ```
 
-Run it. Even though `"red"` was added twice, it only appears **once**. The
-second `.add("red")` does nothing because `"red"` is already there, and
-`len(visited)` prints `2`, not `3`. That is the point of a set: it enforces "no
-duplicates" for you so you never have to check yourself before adding.
+Run it. Even though `"loading_zone"` was added twice, it only appears **once**.
+The second `.add("loading_zone")` does nothing because `"loading_zone"` is
+already there, and `len(visited)` prints `2`, not `3`. That is the point of a
+set: it enforces "no duplicates" for you so you never have to check yourself
+before adding.
 
 You can also create a non-empty set with curly braces, like
-`visited = {"red", "blue"}`. Notice that `{}` on its own makes an empty
-dictionary, so always write `set()` when you want an empty set.
+`visited = {"loading_zone", "scoring_zone"}`. Notice that `{}` on its own makes
+an empty dictionary, so always write `set()` when you want an empty set.
 
 # Checking membership
 
@@ -42,20 +44,20 @@ main reason the type exists, and Python can answer them fast even when the set
 holds thousands of items:
 
 ```python
-visited = {"red", "blue"}
-print("red" in visited)
-print("green" in visited)
+visited = {"loading_zone", "scoring_zone"}
+print("loading_zone" in visited)
+print("climb_zone" in visited)
 ```
 
-`True`, then `False`. Think of a set as a robot's memory of places it has
-already visited or alliance colors it has faced. You do not care about the
-order, and you do not want the same one counted twice. Add with `.add(...)`,
-check with `in`, and delete with `.remove(...)`:
+`True`, then `False`. Think of a set as a robot's memory of field zones it has
+already reached or AprilTags it has spotted. You do not care about the order,
+and you do not want the same one counted twice. Add with `.add(...)`, check with
+`in`, and delete with `.remove(...)`:
 
 ```python
-visited = {"red", "blue"}
-visited.remove("red")
-print("red" in visited)
+visited = {"loading_zone", "scoring_zone"}
+visited.remove("loading_zone")
+print("loading_zone" in visited)
 ```
 
 If you want to remove an item without risking an error when it is already gone,
@@ -66,16 +68,16 @@ use `.discard(...)` instead of `.remove(...)`.
 A `for` loop walks a set just like a list or dictionary:
 
 ```python
-alliances = {"red", "blue", "green"}
-for alliance in alliances:
-    print(f"Faced: {alliance}")
+zones = {"loading_zone", "scoring_zone", "climb_zone"}
+for zone in zones:
+    print(f"Visited: {zone}")
 ```
 
 All three lines always appear, but not necessarily in the order you wrote them.
 Unlike lists and dictionaries ([lesson {n}](#/lesson/14-maps)), a `set` does not
 preserve insertion order. It organizes values for fast `in` lookups, not for
 tidy printing. If you need them in alphabetical or numeric order, loop over
-`sorted(alliances)` instead.
+`sorted(zones)` instead.
 
 Your turn: start with this list of scouted robot numbers,
 `seen = [254, 1114, 254, 118, 1114, 33]`. Loop over `seen` and add each one to
